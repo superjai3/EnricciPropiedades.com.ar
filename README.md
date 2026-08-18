@@ -22,8 +22,10 @@ Models/
   Propiedad.cs          Modelo de publicación (operación, tipo, superficies, precio…)
   SitioInfo.cs          Datos de contacto de la inmobiliaria en un único lugar
   ArteFachada.cs        Portada SVG generada para publicaciones sin fotografía
+  OpcionesCorreo.cs     Configuración del envío de correo
 Services/
   PropiedadesService.cs Catálogo en memoria + búsqueda y filtros
+  CorreoService.cs      Envío por SMTP de las consultas de los formularios
 Pages/
   Index                 Portada: hero, buscador, destacadas, servicios, barrios
   Propiedades           Listado con filtros por operación, tipo, barrio, ambientes y precio
@@ -36,6 +38,7 @@ Pages/
   Mision / Vision       Páginas institucionales
   Contacto              Formulario de consulta
   Error                 404 y errores generales
+  Sitemap               Mapa del sitio en /sitemap.xml
   Shared/
     _Layout             Encabezado, navegación, pie y botón flotante de WhatsApp
     _Iconos             Sprite SVG de íconos
@@ -62,14 +65,48 @@ imagen rota.
 Cuando exista base de datos, alcanza con reemplazar la implementación de
 `PropiedadesService` manteniendo la misma superficie pública.
 
-## Formularios
+## Formularios y envío de correo
 
-Los formularios de **Contacto** y **Tasación** validan del lado del servidor y
-registran la consulta en el log de la aplicación. Como todavía no hay servicio
-de correo configurado, al enviarlos se ofrece un enlace con el mensaje ya
-armado para WhatsApp y para correo electrónico, de modo que la consulta llegue
-igual. Para envío automático de correo hay que sumar un servicio SMTP
-(por ejemplo `MailKit`) en el `OnPost` de cada página.
+Los formularios de **Contacto** y **Tasación** validan del lado del servidor,
+tienen un campo trampa contra robots y registran la consulta en el log.
+
+Además intentan enviarla por correo a la inmobiliaria. El envío se configura en
+la sección `Correo` de `appsettings.json`:
+
+```json
+"Correo": {
+  "Habilitado": true,
+  "Servidor": "smtp.gmail.com",
+  "Puerto": 587,
+  "UsarSsl": true,
+  "Usuario": "casilla@gmail.com",
+  "Clave": "",
+  "Remitente": "casilla@gmail.com",
+  "Destinatario": "horacioenricci@gmail.com"
+}
+```
+
+**La contraseña no se guarda en el repositorio.** En desarrollo conviene usar
+user-secrets y en el servidor, una variable de entorno:
+
+```bash
+dotnet user-secrets set "Correo:Clave" "la-contraseña-de-aplicación"
+# o bien, en el servidor:
+export Correo__Clave="la-contraseña-de-aplicación"
+```
+
+Con Gmail hay que generar una *contraseña de aplicación* (no sirve la del
+correo) y tener la verificación en dos pasos activada.
+
+Si el envío está apagado o el servidor de correo falla, el formulario **no se
+rompe**: la consulta queda en el log y la pantalla de confirmación le ofrece al
+visitante mandar el mismo mensaje por WhatsApp o por correo con un clic.
+
+## Buscadores
+
+`/sitemap.xml` se genera solo a partir de las páginas fijas y de cada propiedad
+publicada. `wwwroot/robots.txt` lo declara: si el dominio final no es
+`www.enriccipropiedades.com.ar`, hay que actualizar esa línea.
 
 ## Datos de contacto
 

@@ -4,6 +4,8 @@
         paginaActual.Equals(ruta, StringComparison.OrdinalIgnoreCase) ? "page" : null;
 
     var titulo = ViewData["Title"] as string;
+    var urlBase = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var urlCanonica = urlBase + Context.Request.Path;
     var descripcion = ViewData["Descripcion"] as string
         ?? "Inmobiliaria en la Ciudad de Buenos Aires desde 1932. Venta y alquiler de propiedades, tasaciones, administración de cobranzas y asesoría legal en Monserrat, Constitución, San Cristóbal y alrededores.";
 }
@@ -22,6 +24,11 @@
     <meta property="og:title" content="@(titulo ?? SitioInfo.Nombre)" />
     <meta property="og:description" content="@descripcion" />
     <meta property="og:locale" content="es_AR" />
+    <meta property="og:url" content="@urlCanonica" />
+    <meta property="og:image" content="@(urlBase + "/imagenes/isologo.png")" />
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="canonical" href="@urlCanonica" />
 
     <link rel="icon" href="~/favicon.ico" />
     <link rel="apple-touch-icon" href="~/imagenes/isologo.png" />

@@ -64,11 +64,22 @@
                         <svg aria-hidden="true"><use href="#i-check" /></svg>
                         <div>
                             <h2 style="font-size:var(--t-xl);margin-bottom:.5rem">Pedido registrado</h2>
-                            <p class="mb-0">
-                                Recibimos los datos de la propiedad. Te vamos a contactar para coordinar
-                                la visita, normalmente dentro del mismo día hábil. Si querés acelerarlo,
-                                mandanos el resumen por WhatsApp:
-                            </p>
+                            @if (Model.CorreoEnviado)
+                            {
+                                <p class="mb-0">
+                                    Recibimos los datos de la propiedad y ya llegaron a la oficina.
+                                    Te vamos a contactar para coordinar la visita, normalmente dentro
+                                    del mismo día hábil. Si querés acelerarlo, escribinos por WhatsApp:
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">
+                                    Recibimos los datos de la propiedad. Te vamos a contactar para coordinar
+                                    la visita, normalmente dentro del mismo día hábil. Si querés acelerarlo,
+                                    mandanos el resumen por WhatsApp:
+                                </p>
+                            }
                             <div class="acciones mt-5">
                                 <a class="btn btn--wsp" href="@Model.MensajeWhatsapp" target="_blank" rel="noopener">
                                     <svg aria-hidden="true"><use href="#i-wsp" /></svg>

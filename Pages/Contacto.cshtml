@@ -29,11 +29,22 @@
                         <svg aria-hidden="true"><use href="#i-check" /></svg>
                         <div>
                             <h2 style="font-size:var(--t-xl);margin-bottom:.5rem">Recibimos tu consulta</h2>
-                            <p class="mb-0">
-                                Gracias por escribirnos. Te vamos a responder a la brevedad.
-                                Si querés adelantar la conversación, mandanos el mismo mensaje
-                                por WhatsApp o correo con un clic:
-                            </p>
+                            @if (Model.CorreoEnviado)
+                            {
+                                <p class="mb-0">
+                                    Gracias por escribirnos: tu consulta ya llegó a la oficina y
+                                    te vamos a responder a la brevedad. Si preferís una respuesta
+                                    más rápida, escribinos también por WhatsApp:
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">
+                                    Gracias por escribirnos. Te vamos a responder a la brevedad.
+                                    Si querés adelantar la conversación, mandanos el mismo mensaje
+                                    por WhatsApp o correo con un clic:
+                                </p>
+                            }
                             <div class="acciones mt-5">
                                 <a class="btn btn--wsp" href="@Model.MensajeWhatsapp" target="_blank" rel="noopener">
                                     <svg aria-hidden="true"><use href="#i-wsp" /></svg>

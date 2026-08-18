@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Unicode;
 using Microsoft.Extensions.WebEncoders;
+using Enricci_Propiedades.Models;
 using Enricci_Propiedades.Services;
 
 // El sitio se publica en español de Argentina: fija formatos de número y fecha.
@@ -13,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Servicios del contenedor.
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<PropiedadesService>();
+
+// Envío de correo de los formularios (ver sección "Correo" de appsettings.json).
+builder.Services.Configure<OpcionesCorreo>(builder.Configuration.GetSection(OpcionesCorreo.Seccion));
+builder.Services.AddSingleton<CorreoService>();
 
 // Permite que las tildes y la eñe se emitan tal cual (evita &#xF3; dentro de <script>).
 builder.Services.Configure<WebEncoderOptions>(opciones =>

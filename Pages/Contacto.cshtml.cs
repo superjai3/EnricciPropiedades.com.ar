@@ -9,11 +9,13 @@ namespace Enricci_Propiedades.Pages;
 public class ContactoModel : PageModel
 {
     private readonly PropiedadesService _propiedades;
+    private readonly CorreoService _correo;
     private readonly ILogger<ContactoModel> _log;
 
-    public ContactoModel(PropiedadesService propiedades, ILogger<ContactoModel> log)
+    public ContactoModel(PropiedadesService propiedades, CorreoService correo, ILogger<ContactoModel> log)
     {
         _propiedades = propiedades;
+        _correo = correo;
         _log = log;
     }
 
@@ -52,6 +54,9 @@ public class ContactoModel : PageModel
     public int? Propiedad { get; set; }
 
     public bool Enviado { get; private set; }
+
+    /// <summary>True si la consulta además llegó por correo a la inmobiliaria.</summary>
+    public bool CorreoEnviado { get; private set; }
     public string MensajeWhatsapp { get; private set; } = SitioInfo.WhatsappGeneral;
     public string MensajeMail { get; private set; } = SitioInfo.MailA("Consulta desde la web");
 
@@ -85,7 +90,7 @@ public class ContactoModel : PageModel
                         $"publicación {ficha.Slug}. Quisiera coordinar una visita.";
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         // Trampa anti spam: los robots completan todos los campos del formulario.
         if (!string.IsNullOrWhiteSpace(Datos.Sitio))
@@ -112,6 +117,8 @@ public class ContactoModel : PageModel
 
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
         MensajeMail = $"{SitioInfo.MailA($"Consulta web: {Datos.Motivo}")}&body={Uri.EscapeDataString(resumen)}";
+        CorreoEnviado = await _correo.EnviarAsync(
+            $"Consulta web: {Datos.Motivo} — {Datos.Nombre}", resumen, Datos.Email);
         Enviado = true;
 
         return Page();

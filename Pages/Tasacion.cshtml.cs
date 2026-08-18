@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Enricci_Propiedades.Models;
+using Enricci_Propiedades.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -7,9 +8,14 @@ namespace Enricci_Propiedades.Pages;
 
 public class TasacionModel : PageModel
 {
+    private readonly CorreoService _correo;
     private readonly ILogger<TasacionModel> _log;
 
-    public TasacionModel(ILogger<TasacionModel> log) => _log = log;
+    public TasacionModel(CorreoService correo, ILogger<TasacionModel> log)
+    {
+        _correo = correo;
+        _log = log;
+    }
 
     public class Pedido
     {
@@ -63,6 +69,9 @@ public class TasacionModel : PageModel
     public Pedido Datos { get; set; } = new();
 
     public bool Enviado { get; private set; }
+
+    /// <summary>True si el pedido además llegó por correo a la inmobiliaria.</summary>
+    public bool CorreoEnviado { get; private set; }
     public string MensajeWhatsapp { get; private set; } = SitioInfo.Whatsapp("Hola, quisiera pedir una tasación.");
 
     public static readonly string[] Barrios =
@@ -82,7 +91,7 @@ public class TasacionModel : PageModel
         "Divorcio o división de bienes", "Solo quiero saber cuánto vale"
     };
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!string.IsNullOrWhiteSpace(Datos.Sitio))
         {
@@ -112,6 +121,8 @@ public class TasacionModel : PageModel
             $"Comentarios: {Datos.Comentario ?? "-"}";
 
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
+        CorreoEnviado = await _correo.EnviarAsync(
+            $"Pedido de tasación: {Datos.Direccion}, {Datos.Barrio}", resumen, Datos.Email);
         Enviado = true;
 
         return Page();

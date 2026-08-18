@@ -1,7 +1,183 @@
-﻿@page
+@page
+@model QuienesSomosModel
 @{
-    ViewData["Title"] = "Quienes Somos";
+    ViewData["Title"] = "Quiénes somos";
+    ViewData["Descripcion"] = "R. H. Enricci Propiedades nació en 1932 en Monserrat. Tres generaciones dedicadas a la intermediación inmobiliaria en el sur de la Ciudad de Buenos Aires.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>R. H. Enricci Propiedades nace en 1.932 en el barrio de Monserrat..... Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis quidem explicabo harum ab iusto nesciunt sint veritatis enim quos adipisci voluptatum unde ducimus, sit, quasi similique, eum odit deleniti delectus.</p>
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <span>La empresa</span> <span aria-hidden="true">/</span> <span>Quiénes somos</span>
+        </nav>
+        <p class="eyebrow">Desde @SitioInfo.AnioFundacion</p>
+        <h1>Una oficina de barrio<br />que sigue abriendo todos los días</h1>
+        <p class="plomo">
+            R. H. Enricci Propiedades nació en 1932 en Monserrat y nunca se mudó de zona.
+            Cambió la ciudad, cambiaron los contratos y cambió la forma de publicar,
+            pero el modo de trabajar es el mismo: conocer la propiedad, conocer al cliente
+            y dar la cara.
+        </p>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="collage revelar" style="max-width:960px;margin-inline:auto">
+            <div class="collage__pieza collage__pieza--a">
+                <img src="~/imagenes/Solis 700/Frente.jpg" alt="Fachada de un edificio en Solís al 700, Constitución" loading="lazy" width="640" height="480" />
+                <span class="collage__etiqueta">Solís 700, Constitución</span>
+            </div>
+            <div class="collage__pieza collage__pieza--b">
+                <img src="~/imagenes/Av Entre Rios 500/Frente.jpg" alt="Esquina de Av. Entre Ríos, Monserrat" loading="lazy" width="480" height="360" />
+            </div>
+            <div class="collage__pieza collage__pieza--d">
+                <span class="n">1932</span>
+                <span class="l">Primera oficina</span>
+            </div>
+            <div class="collage__pieza collage__pieza--c">
+                <img src="~/imagenes/Cochabamba 1700/Frente.jpg" alt="Edificio en Cochabamba al 1700" loading="lazy" width="480" height="640" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="prosa revelar">
+                <h2>El oficio, antes que el negocio</h2>
+                <p>
+                    Empezamos alquilando piezas y departamentos en las casonas de Monserrat,
+                    cuando el sur de la ciudad todavía se estaba llenando de gente que llegaba
+                    a trabajar al centro. Con los años sumamos la compraventa, la administración
+                    de alquileres y, más tarde, el acompañamiento legal de las operaciones.
+                </p>
+                <p>
+                    Hoy atiende <strong>Horacio Enricci</strong>, corredor inmobiliario matriculado,
+                    en la misma oficina de @SitioInfo.Direccion. Es él quien tasa, quien muestra
+                    la propiedad y quien está sentado a la mesa el día de la firma. En una operación
+                    donde se juega el ahorro de toda una vida, eso no es un detalle.
+                </p>
+
+                <div class="destacado">
+                    No vendemos metros cuadrados: acompañamos decisiones que una familia
+                    toma dos o tres veces en la vida.
+                </div>
+
+                <h2>Cómo trabajamos</h2>
+                <p>
+                    Tomamos pocas operaciones a la vez, porque cada una lleva tiempo real:
+                    revisar los papeles, entender la situación familiar, ordenar la sucesión
+                    si hace falta, poner el precio correcto y sostenerlo. Preferimos decir
+                    que no antes que aceptar una propiedad con un valor que sabemos que no
+                    se va a concretar.
+                </p>
+                <p>
+                    Conocemos la zona cuadra por cuadra: qué edificios tienen expensas altas,
+                    cuáles tienen problemas de humedad conocidos, dónde conviene comprar para
+                    alquilar y dónde el metro cuadrado todavía está por debajo del promedio.
+                    Esa información no está en ningún portal.
+                </p>
+            </div>
+
+            <aside class="pegajoso revelar revelar-2">
+                <div class="ficha__panel" style="position:static">
+                    <div class="icono-caja"><svg aria-hidden="true"><use href="#i-equipo" /></svg></div>
+                    <h2 style="font-size:var(--t-lg);margin-bottom:0">Horacio Enricci</h2>
+                    <p class="texto-suave mb-0" style="font-size:.92rem">
+                        Corredor inmobiliario. Tercera generación de la familia al frente
+                        de la oficina de @SitioInfo.Direccion.
+                    </p>
+                    <ul class="lista-chequeo" style="font-size:.9rem">
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Tasaciones y compraventa</li>
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Administración de alquileres</li>
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Fondos de comercio y locales</li>
+                    </ul>
+                    <a class="btn btn--bloque" asp-page="/Contacto">
+                        Hablar con Horacio
+                        <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--tono">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Línea de tiempo</p>
+                <h2 class="titulo-seccion">Noventa años en <em>el mismo barrio</em></h2>
+            </div>
+        </div>
+        <div class="linea-tiempo revelar">
+            <article class="hito">
+                <p class="hito__anio">1932</p>
+                <div>
+                    <h3>Se abre la primera oficina</h3>
+                    <p>La familia Enricci comienza intermediando alquileres en Monserrat y alrededores.</p>
+                </div>
+            </article>
+            <article class="hito">
+                <p class="hito__anio">1958</p>
+                <div>
+                    <h3>Llega la compraventa</h3>
+                    <p>Con el crecimiento de la propiedad horizontal, la oficina suma la venta de departamentos.</p>
+                </div>
+            </article>
+            <article class="hito">
+                <p class="hito__anio">1984</p>
+                <div>
+                    <h3>Segunda generación</h3>
+                    <p>Se incorpora la administración de alquileres y la cobranza para propietarios.</p>
+                </div>
+            </article>
+            <article class="hito">
+                <p class="hito__anio">2006</p>
+                <div>
+                    <h3>Locales y fondos de comercio</h3>
+                    <p>La zona comercial de San Cristóbal y Constitución se vuelve parte central del trabajo.</p>
+                </div>
+            </article>
+            <article class="hito">
+                <p class="hito__anio">Hoy</p>
+                <div>
+                    <h3>La misma esquina, otras herramientas</h3>
+                    <p>Publicación digital, firma coordinada con escribanía y atención por WhatsApp, sin perder el trato personal.</p>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="seccion">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Nuestros valores</p>
+                <h2 class="titulo-seccion">Tres cosas que no <em>negociamos</em></h2>
+            </div>
+        </div>
+        <div class="pasos revelar">
+            <div class="paso">
+                <h3>Decir la verdad del precio</h3>
+                <p>Aunque sea incómoda y aunque signifique perder la autorización de venta.</p>
+            </div>
+            <div class="paso">
+                <h3>Revisar los papeles primero</h3>
+                <p>Nunca publicamos una propiedad cuya documentación no conocemos.</p>
+            </div>
+            <div class="paso">
+                <h3>Estar cuando aparece el problema</h3>
+                <p>El teléfono se atiende igual el mes que todo sale bien y el mes que no.</p>
+            </div>
+        </div>
+        <div class="acciones mt-7">
+            <a class="btn" asp-page="/Mision">Nuestra misión</a>
+            <a class="btn btn--fantasma" asp-page="/Vision">Nuestra visión</a>
+        </div>
+    </div>
+</section>

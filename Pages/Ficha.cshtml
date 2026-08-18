@@ -1,0 +1,196 @@
+@page "/propiedad/{id:int}"
+@model FichaModel
+@{
+    var p = Model.Ficha;
+    ViewData["Title"] = $"{p.Titulo} · {p.Barrio}";
+    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}. {p.Ambientes} ambientes, {p.SuperficieTotal} m². {p.PrecioTexto}.";
+    var mensajeWsp = $"Hola, me interesa la propiedad de {p.Direccion} ({p.Barrio}) publicada en la web. ¿Podemos coordinar una visita?";
+}
+
+<section class="encabezado-pagina" style="padding-bottom:1.5rem">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Propiedades">Propiedades</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Propiedades" asp-route-barrio="@p.Barrio">@p.Barrio</a> <span aria-hidden="true">/</span>
+            <span>@p.Direccion</span>
+        </nav>
+        <div class="chips mt-4" style="margin-bottom:1rem">
+            <span class="chip activo">@p.OperacionTexto</span>
+            <span class="chip">@p.TipoTexto</span>
+            @if (p.AptoCredito)
+            {
+                <span class="chip">Apto crédito</span>
+            }
+            @if (p.Estado == EstadoPublicacion.Reservada)
+            {
+                <span class="chip">Reservada</span>
+            }
+        </div>
+        <h1 style="font-size:var(--t-3xl)">@p.Titulo</h1>
+        <p class="plomo mb-0">
+            <svg aria-hidden="true" style="width:18px;height:18px;vertical-align:-3px"><use href="#i-pin" /></svg>
+            @p.Direccion · @p.Barrio, Ciudad Autónoma de Buenos Aires
+        </p>
+    </div>
+</section>
+
+<section class="seccion--compacta" style="padding-top:0">
+    <div class="contenedor">
+        <div class="galeria revelar">
+            <div class="galeria__principal" data-galeria-principal>
+                @if (p.Fotos.Count > 0)
+                {
+                    <img src="@p.Fotos[0]" alt="Fachada de @p.Direccion" width="960" height="600" />
+                }
+                else
+                {
+                    @ArteFachada.Dibujar(p)
+                }
+            </div>
+            <div class="galeria__lado">
+                <div>@ArteFachada.Dibujar(p, "", 1)</div>
+                <div>@ArteFachada.Dibujar(p, "", 2)</div>
+            </div>
+        </div>
+        <p class="texto-suave mt-4" style="font-size:.82rem">
+            Las imágenes ilustrativas se reemplazan por el reportaje fotográfico completo al momento de la publicación.
+            Escribinos y te enviamos todas las fotos y el plano por WhatsApp.
+        </p>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="ficha">
+            <div>
+                <div class="datos revelar">
+                    <div class="dato">
+                        <dt>Superficie total</dt>
+                        <dd>@p.SuperficieTotal m²</dd>
+                    </div>
+                    <div class="dato">
+                        <dt>Cubierta</dt>
+                        <dd>@p.SuperficieCubierta m²</dd>
+                    </div>
+                    @if (p.Ambientes > 0)
+                    {
+                        <div class="dato">
+                            <dt>Ambientes</dt>
+                            <dd>@p.Ambientes</dd>
+                        </div>
+                    }
+                    @if (p.Dormitorios > 0)
+                    {
+                        <div class="dato">
+                            <dt>Dormitorios</dt>
+                            <dd>@p.Dormitorios</dd>
+                        </div>
+                    }
+                    @if (p.Banios > 0)
+                    {
+                        <div class="dato">
+                            <dt>Baños</dt>
+                            <dd>@p.Banios</dd>
+                        </div>
+                    }
+                    <div class="dato">
+                        <dt>Antigüedad</dt>
+                        <dd>@p.Antiguedad años</dd>
+                    </div>
+                </div>
+
+                <div class="prosa mt-7 revelar">
+                    <h2>Sobre la propiedad</h2>
+                    <p>@p.Descripcion</p>
+
+                    @if (p.Comodidades.Count > 0)
+                    {
+                        <h3>Comodidades</h3>
+                        <ul class="lista-chequeo" style="padding-left:0">
+                            @foreach (var comodidad in p.Comodidades)
+                            {
+                                <li>
+                                    <svg aria-hidden="true"><use href="#i-check" /></svg>
+                                    @comodidad
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <h3>Ubicación</h3>
+                    <p>
+                        La propiedad está en @p.Direccion, barrio de @p.Barrio. Es una zona con
+                        transporte público a pocas cuadras, comercios de cercanía y acceso rápido
+                        al centro. Coordinamos la visita en el horario que te quede cómodo,
+                        incluidos sábados por la mañana.
+                    </p>
+                </div>
+            </div>
+
+            <aside class="ficha__panel">
+                <div>
+                    <p class="prop__precio" style="font-size:2rem">@p.PrecioTexto</p>
+                    @if (!string.IsNullOrEmpty(p.PrecioSufijo))
+                    {
+                        <p class="texto-suave mb-0" style="font-size:.85rem">@p.PrecioSufijo</p>
+                    }
+                    @if (p.Expensas > 0)
+                    {
+                        <p class="texto-suave mb-0" style="font-size:.85rem">
+                            Expensas aproximadas: $ @p.Expensas.ToString("N0")
+                        </p>
+                    }
+                </div>
+
+                <p class="texto-suave mb-0" style="font-size:.88rem">
+                    Publicación @p.Slug · Atiende Horacio Enricci, corredor inmobiliario.
+                </p>
+
+                <a class="btn btn--wsp btn--bloque" href="@SitioInfo.Whatsapp(mensajeWsp)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    Consultar por WhatsApp
+                </a>
+                <a class="btn btn--bloque" asp-page="/Contacto" asp-route-propiedad="@p.Id">
+                    Coordinar una visita
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+                <a class="btn btn--fantasma btn--bloque" href="@SitioInfo.TelefonoLink">
+                    <svg aria-hidden="true"><use href="#i-telefono" /></svg>
+                    @SitioInfo.Telefono
+                </a>
+
+                <p class="texto-suave mb-0" style="font-size:.8rem;border-top:1px solid var(--linea);padding-top:1rem">
+                    Los valores son orientativos y pueden variar sin previo aviso.
+                    Consultá la disponibilidad antes de coordinar la visita.
+                </p>
+            </aside>
+        </div>
+    </div>
+</section>
+
+@if (Model.Similares.Count > 0)
+{
+    <section class="seccion seccion--tono">
+        <div class="contenedor">
+            <div class="cabecera-seccion revelar">
+                <div>
+                    <p class="eyebrow">También te puede interesar</p>
+                    <h2 class="titulo-seccion">Propiedades <em>similares</em></h2>
+                </div>
+                <a class="btn btn--fantasma" asp-page="/Propiedades" asp-route-barrio="@p.Barrio">
+                    Ver todo en @p.Barrio
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+            <div class="grilla-props">
+                @foreach (var similar in Model.Similares)
+                {
+                    <div class="revelar">
+                        <partial name="_TarjetaPropiedad" model="similar" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}

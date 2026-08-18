@@ -1,8 +1,242 @@
-﻿@page
+@page
+@model ServiciosModel
 @{
     ViewData["Title"] = "Servicios";
+    ViewData["Descripcion"] = "Venta, alquiler, tasación, administración de alquileres, cobranza y asesoría legal inmobiliaria en la Ciudad de Buenos Aires.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti, enim illum rerum impedit officia porro magnam fuga est culpa dignissimos atque. Molestias voluptates vero necessitatibus! Culpa deserunt consequuntur magni hic. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Suscipit, ab. Reiciendis ipsa ullam beatae tempore, praesentium necessitatibus voluptate a possimus ea modi repudiandae quidem dolorem consequuntur quam id non exercitationem?Lorem ipsum dolor, sit amet consectetur adipisicing elit. Totam sequi odio soluta veritatis tenetur, unde ratione doloribus doloremque veniam sunt, possimus, est velit. Non temporibus perferendis est eos distinctio. Vitae</p>
 
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span> <span>Servicios</span>
+        </nav>
+        <p class="eyebrow">Qué hacemos</p>
+        <h1>Una inmobiliaria completa,<br />sin tercerizar lo importante</h1>
+        <p class="plomo">
+            Acompañamos la operación de punta a punta: desde saber cuánto vale la propiedad
+            hasta la entrega de llaves y la administración del alquiler mes a mes.
+        </p>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="bento">
+            <div class="bento__celda bento__celda--destacada revelar">
+                <span class="bento__num">01</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-calculadora" /></svg></div>
+                <h3>Tasación</h3>
+                <p class="texto-suave">
+                    Informe escrito de valor de mercado en 48 horas hábiles, basado en operaciones
+                    reales cerradas en la zona. Sin cargo y sin obligación de exclusividad.
+                </p>
+                <a class="enlace-flecha" asp-page="/Tasacion">
+                    Pedir tasación
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda bento__celda--ancha revelar revelar-1">
+                <span class="bento__num">02</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-llave" /></svg></div>
+                <h3>Venta de propiedades</h3>
+                <p class="texto-suave">
+                    Publicación con fotos profesionales y plano, difusión en portales y en la
+                    cartera propia, filtro de interesados, visitas acompañadas, negociación,
+                    reserva, boleto y acompañamiento hasta la escritura.
+                </p>
+                <a class="enlace-flecha" asp-page="/Propiedades" asp-route-operacion="Venta">
+                    Ver propiedades en venta
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda revelar revelar-2">
+                <span class="bento__num">03</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-edificio" /></svg></div>
+                <h3>Alquileres</h3>
+                <p class="texto-suave">
+                    Búsqueda de inquilino con verificación de ingresos y garantías, contrato
+                    ajustado a la normativa vigente, inventario del estado de la unidad y
+                    acta de entrega firmada por ambas partes.
+                </p>
+                <a class="enlace-flecha" asp-page="/Propiedades" asp-route-operacion="Alquiler">
+                    Ver propiedades en alquiler
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda revelar revelar-3">
+                <span class="bento__num">04</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-documento" /></svg></div>
+                <h3>Administración y cobranza</h3>
+                <p class="texto-suave">
+                    Cobramos el alquiler, controlamos expensas e impuestos, aplicamos las
+                    actualizaciones y rendimos al propietario todos los meses.
+                </p>
+                <a class="enlace-flecha" asp-page="/Cobranza">
+                    Cómo funciona
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda revelar revelar-4">
+                <span class="bento__num">05</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-balanza" /></svg></div>
+                <h3>Asesoría legal</h3>
+                <p class="texto-suave">
+                    Contratos, boletos, sucesiones, regularización de títulos y desalojos,
+                    con estudio jurídico y escribanía de confianza.
+                </p>
+                <a class="enlace-flecha" asp-page="/Asesoria_Legal">
+                    Consultar
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda bento__celda--full revelar revelar-5">
+                <span class="bento__num">06</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-escudo" /></svg></div>
+                <h3>Garantías, seguros y fondos de comercio</h3>
+                <p class="texto-suave">
+                    Gestionamos seguros de caución para inquilinos sin garantía propietaria,
+                    seguros de incendio obligatorios y transferencias de fondos de comercio
+                    con la documentación en regla.
+                </p>
+                <a class="enlace-flecha" asp-page="/Contacto">
+                    Hablar con nosotros
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--inversa">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="revelar">
+                <p class="eyebrow">Nuestro compromiso</p>
+                <h2 class="titulo-seccion">Lo que sí y lo que <em>no</em> hacemos</h2>
+                <p class="texto-suave">
+                    Preferimos perder una operación antes que empujar un precio irreal o un
+                    contrato que sabemos que va a terminar mal. Trabajamos para que vuelvas,
+                    no para cerrar una vez.
+                </p>
+            </div>
+            <div class="revelar revelar-2">
+                <ul class="lista-chequeo">
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Te decimos el precio real de mercado, aunque no sea el que esperabas.</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Mostramos la propiedad nosotros, no mandamos a un tercero.</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Revisamos los papeles antes de publicar, no después de la reserva.</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Explicamos cada gasto de la operación por escrito y antes de firmar.</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>No cobramos comisiones ocultas ni "gastos administrativos" sorpresa.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion">
+    <div class="contenedor-angosto">
+        <p class="eyebrow">Preguntas frecuentes</p>
+        <h2 class="titulo-seccion">Dudas que nos traen <em>todos los días</em></h2>
+
+        <div class="faq mt-6">
+            <div class="faq__item">
+                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
+                    ¿Cuánto cobran de comisión?
+                    <span class="faq__mas" aria-hidden="true"></span>
+                </button>
+                <div class="faq__panel">
+                    <div>
+                        <p>
+                            Depende de la operación y del tipo de propiedad. Los honorarios se
+                            informan por escrito antes de firmar cualquier autorización, junto con
+                            el detalle de sellos, gastos de escrituración y certificaciones.
+                            Nunca vas a encontrarte con un costo que no te hayamos anticipado.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq__item">
+                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
+                    ¿La tasación tiene costo?
+                    <span class="faq__mas" aria-hidden="true"></span>
+                </button>
+                <div class="faq__panel">
+                    <div>
+                        <p>
+                            No. La visita y el informe de valor son sin cargo y no te obligan a
+                            darnos la venta ni a firmar exclusividad. Si necesitás una tasación
+                            formal para una sucesión o un juicio, te avisamos porque ese trámite
+                            sí tiene un arancel específico.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq__item">
+                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
+                    ¿Qué garantías aceptan para alquilar?
+                    <span class="faq__mas" aria-hidden="true"></span>
+                </button>
+                <div class="faq__panel">
+                    <div>
+                        <p>
+                            Garantía propietaria en CABA o GBA, recibo de sueldo con antigüedad
+                            comprobable, o seguro de caución de compañías habilitadas. Si no
+                            tenés garantía, escribinos igual: en la mayoría de los casos hay
+                            solución.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq__item">
+                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
+                    ¿Trabajan con propiedades fuera de esos barrios?
+                    <span class="faq__mas" aria-hidden="true"></span>
+                </button>
+                <div class="faq__panel">
+                    <div>
+                        <p>
+                            Nuestra zona de trabajo diaria es el sur porteño, donde conocemos el
+                            valor cuadra por cuadra. Fuera de ese radio evaluamos caso por caso,
+                            y si no somos los indicados te lo decimos de entrada.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq__item">
+                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
+                    ¿Cuánto tarda una venta?
+                    <span class="faq__mas" aria-hidden="true"></span>
+                </button>
+                <div class="faq__panel">
+                    <div>
+                        <p>
+                            Con el precio bien puesto y los papeles en orden, la mayoría de las
+                            operaciones de la zona se cierran entre 60 y 120 días. El informe de
+                            tasación incluye una estimación realista para tu caso puntual.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="franja-cta revelar">
+            <p class="eyebrow">Primer paso</p>
+            <h2>Contanos tu caso y te decimos por dónde empezar</h2>
+            <div class="acciones mt-5">
+                <a class="btn btn--claro btn--lg" asp-page="/Contacto">Escribirnos</a>
+                <a class="btn btn--wsp btn--lg" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

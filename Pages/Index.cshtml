@@ -1,49 +1,403 @@
-﻿@page
-
+@page
+@model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = null;
+    ViewData["Descripcion"] = "R. H. Enricci Propiedades: inmobiliaria en Monserrat, CABA, desde 1932. Venta y alquiler de departamentos, casas, PH, locales y cocheras. Tasaciones sin cargo, administración de alquileres y asesoría legal.";
 }
-<br>
-<div id="carouselDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
-  <ol class="carousel-indicators">
-    <li data-bs-target="#carouselDark" data-bs-slide-to="0" class="active"></li>
-    <li data-bs-target="#carouselDark" data-bs-slide-to="1"></li>
-    <li data-bs-target="#carouselDark" data-bs-slide-to="2"></li>
-  </ol>
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="" class="d-block w-100" alt="Av Entre Rios 500">
-      <div class="carousel-caption d-none d-sm-block">
-        <h5>Av Entre Rios 500</h5>
-        <p>Hermoso departamento en el 10mo piso con vista al río de la plata....</p>
-      </div>
+
+<section class="hero">
+    <div class="hero__fondo" aria-hidden="true"></div>
+    <div class="contenedor">
+        <div class="hero__grid">
+            <div>
+                <p class="hero__sello">
+                    <b>@SitioInfo.AnioFundacion</b>
+                    Tres generaciones operando en el sur porteño
+                </p>
+                <h1 class="hero__titulo">
+                    <span class="linea"><span>La inmobiliaria</span></span>
+                    <span class="linea"><span>del <em>barrio</em>, con</span></span>
+                    <span class="linea"><span>oficio de siempre.</span></span>
+                </h1>
+                <p class="hero__plomo">
+                    Compramos, vendemos y alquilamos en Monserrat, Constitución, San Cristóbal,
+                    San Telmo, Balvanera y Boedo. Sin call center, sin intermediarios:
+                    atiende Horacio, y el que tasa es el que firma.
+                </p>
+                <div class="hero__acciones">
+                    <a class="btn btn--lg" asp-page="/Propiedades">
+                        Ver propiedades
+                        <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                    </a>
+                    <a class="btn btn--fantasma btn--lg" asp-page="/Tasacion">
+                        Quiero tasar la mía
+                    </a>
+                </div>
+            </div>
+
+            <div class="collage" aria-hidden="false">
+                <div class="collage__pieza collage__pieza--a">
+                    <img src="~/imagenes/Av Entre Rios 500/Frente.jpg" alt="Edificio en Av. Entre Ríos 500, Monserrat" width="640" height="480" />
+                    <span class="collage__etiqueta">Av. Entre Ríos 500 · Monserrat</span>
+                </div>
+                <div class="collage__pieza collage__pieza--b">
+                    <img src="~/imagenes/Cochabamba 1700/Frente.jpg" alt="Edificio en Cochabamba 1700, Constitución" width="480" height="360" loading="lazy" />
+                </div>
+                <div class="collage__pieza collage__pieza--d">
+                    <span class="n"><span data-contador="93" data-sufijo="">0</span> años</span>
+                    <span class="l">Operando en CABA</span>
+                </div>
+                <div class="collage__pieza collage__pieza--c">
+                    <img src="~/imagenes/Solis 700/Frente.jpg" alt="PH reciclado en Solís 700, Constitución" width="480" height="640" loading="lazy" />
+                    <span class="collage__etiqueta">Solís 700</span>
+                </div>
+            </div>
+        </div>
+
+        <form class="buscador revelar" method="get" asp-page="/Propiedades" role="search" aria-label="Buscar propiedades">
+            <div class="buscador__tabs">
+                <button class="buscador__tab activo" type="button" aria-pressed="true" data-valor="">Todas</button>
+                <button class="buscador__tab" type="button" aria-pressed="false" data-valor="Venta">Comprar</button>
+                <button class="buscador__tab" type="button" aria-pressed="false" data-valor="Alquiler">Alquilar</button>
+                <button class="buscador__tab" type="button" aria-pressed="false" data-valor="AlquilerTemporario">Temporario</button>
+            </div>
+
+            <input type="hidden" name="operacion" id="campo-operacion" value="" />
+
+            <div class="buscador__campos">
+                <div class="campo">
+                    <label for="b-tipo">Tipo de propiedad</label>
+                    <select class="control" id="b-tipo" name="tipo">
+                        <option value="">Cualquiera</option>
+                        <option value="Departamento">Departamento</option>
+                        <option value="Casa">Casa</option>
+                        <option value="PH">PH</option>
+                        <option value="LocalComercial">Local comercial</option>
+                        <option value="Oficina">Oficina</option>
+                        <option value="FondoDeComercio">Fondo de comercio</option>
+                        <option value="Cochera">Cochera</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="b-barrio">Barrio</label>
+                    <select class="control" id="b-barrio" name="barrio">
+                        <option value="">Todos los barrios</option>
+                        @foreach (var barrio in Model.Barrios)
+                        {
+                            <option value="@barrio">@barrio</option>
+                        }
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="b-ambientes">Ambientes</label>
+                    <select class="control" id="b-ambientes" name="ambientes">
+                        <option value="">Indistinto</option>
+                        <option value="1">1 o más</option>
+                        <option value="2">2 o más</option>
+                        <option value="3">3 o más</option>
+                        <option value="4">4 o más</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="b-precio">Precio máximo</label>
+                    <input class="control" id="b-precio" name="precio" type="number" min="0" step="1000" inputmode="numeric" placeholder="Sin tope" />
+                </div>
+                <button class="btn" type="submit">
+                    <svg aria-hidden="true"><use href="#i-lupa" /></svg>
+                    Buscar
+                </button>
+            </div>
+        </form>
     </div>
-    <div class="carousel-item">
-      <img src="wwwroot/imagenes/Cochabamba 1700/Frente.jpg" class="d-block w-100" alt="Cochabamba 1700">
-      <div class="carousel-caption d-none d-sm-block">
-        <h5>Cochabamba 1700</h5>
-        <p>Departamento 2 ambientes, espececial para una familia que recién arranca....</p>
-      </div>
+</section>
+
+<div class="marquesina" aria-hidden="true">
+    <div class="marquesina__pista">
+        <span>Monserrat</span><span>Constitución</span><span>San Cristóbal</span><span>San Telmo</span>
+        <span>Balvanera</span><span>Boedo</span><span>Almagro</span><span>Parque Patricios</span>
     </div>
-    <div class="carousel-item">
-      <img src="wwwroot/imagenes/Solis 700/Frente.jpg" class="d-block w-100" alt="Solis 700">
-      <div class="carousel-caption d-none d-sm-block">
-        <h5>Solis 700</h5>
-        <p>Vivienda restaurada a nueva....</p>
-      </div>
+    <div class="marquesina__pista">
+        <span>Monserrat</span><span>Constitución</span><span>San Cristóbal</span><span>San Telmo</span>
+        <span>Balvanera</span><span>Boedo</span><span>Almagro</span><span>Parque Patricios</span>
     </div>
-  </div>
-  <a class="carousel-control-prev" href="#carouselDark" role="button" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </a>
-  <a class="carousel-control-next" href="#carouselDark" role="button" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </a>
 </div>
-<br>
-<br>
-<h1>Bienvenidos</h1>
-<br>
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis assumenda corporis omnis soluta accusamus, a sint similique delectus? Delectus eaque quae maiores accusamus eius minima aperiam amet. Quod, quos tempore!Loremlore Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ducimus, temporibus ab? Explicabo tempora iusto tempore? Doloribus quas sed odit unde, in, veniam error nisi, rerum amet optio aspernatur mollitia <eius class="lore">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae voluptatum fugit laudantium minima aliquam culpa illo incidunt dicta error rem obcaecati voluptate repellendus, perspiciatis hic, assumenda quae quod voluptatibus officiis.</p>
+
+<section class="seccion">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Selección de la semana</p>
+                <h2 class="titulo-seccion">Propiedades <em>destacadas</em></h2>
+                <p class="plomo mb-0">
+                    Publicaciones con documentación revisada, precio conversado con el propietario
+                    y visitas coordinadas en el día.
+                </p>
+            </div>
+            <a class="btn btn--fantasma" asp-page="/Propiedades">
+                Ver las @Model.TotalPublicadas publicaciones
+                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+            </a>
+        </div>
+
+        <div class="grilla-props">
+            @{ var indice = 0; }
+            @foreach (var propiedad in Model.Destacadas)
+            {
+                indice++;
+                <div class="revelar revelar-@(indice % 4)">
+                    <partial name="_TarjetaPropiedad" model="propiedad" />
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--tono" id="servicios">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Qué hacemos</p>
+                <h2 class="titulo-seccion">Todo el ciclo de la operación, <em>bajo un mismo techo</em></h2>
+                <p class="plomo mb-0">
+                    Desde la tasación hasta la escritura, y después la administración del alquiler.
+                    Un solo interlocutor responsable de punta a punta.
+                </p>
+            </div>
+        </div>
+
+        <div class="bento">
+            <div class="bento__celda bento__celda--destacada revelar">
+                <span class="bento__num">01</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-calculadora" /></svg></div>
+                <h3>Tasación sin cargo</h3>
+                <p class="texto-suave">
+                    Visitamos la propiedad, la comparamos con operaciones reales cerradas en la zona
+                    y entregamos un informe escrito en 48 horas. Sin compromiso de exclusividad.
+                </p>
+                <a class="enlace-flecha" asp-page="/Tasacion">
+                    Pedir tasación
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda bento__celda--ancha revelar revelar-1">
+                <span class="bento__num">02</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-llave" /></svg></div>
+                <h3>Venta y alquiler</h3>
+                <p class="texto-suave">
+                    Publicación con fotos profesionales, filtro de interesados, visitas acompañadas
+                    y negociación cara a cara hasta la reserva.
+                </p>
+                <a class="enlace-flecha" asp-page="/Propiedades">
+                    Ver catálogo
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda revelar revelar-2">
+                <span class="bento__num">03</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-documento" /></svg></div>
+                <h3>Administración y cobranza</h3>
+                <p class="texto-suave">
+                    Cobramos, actualizamos por índice y rendimos el alquiler al propietario todos los meses.
+                </p>
+                <a class="enlace-flecha" asp-page="/Cobranza">
+                    Cómo funciona
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda revelar revelar-3">
+                <span class="bento__num">04</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-balanza" /></svg></div>
+                <h3>Asesoría legal</h3>
+                <p class="texto-suave">
+                    Contratos, boletos, sucesiones y regularización de títulos con escribanía de confianza.
+                </p>
+                <a class="enlace-flecha" asp-page="/Asesoria_Legal">
+                    Consultar
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+
+            <div class="bento__celda revelar revelar-4">
+                <span class="bento__num">05</span>
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-escudo" /></svg></div>
+                <h3>Garantías y seguros de caución</h3>
+                <p class="texto-suave">
+                    Te ayudamos a resolver la garantía del alquiler con compañías habilitadas,
+                    y al propietario a cubrirse ante la falta de pago.
+                </p>
+                <a class="enlace-flecha" asp-page="/Servicios">
+                    Ver todos los servicios
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--inversa">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="revelar">
+                <p class="eyebrow">Por qué Enricci</p>
+                <h2 class="titulo-seccion">Números que se construyen <em>de a una operación</em></h2>
+                <p class="texto-suave">
+                    No somos una franquicia ni una plataforma. Somos una oficina de barrio que atiende
+                    en Solís 581 desde 1932 y que sigue trabajando con el mismo criterio: decir el
+                    precio real aunque no sea el que el cliente quiere escuchar.
+                </p>
+                <div class="acciones mt-6">
+                    <a class="btn btn--claro" asp-page="/Quienes_Somos">Conocer la historia</a>
+                    <a class="btn btn--fantasma" asp-page="/Contacto">Hablar con Horacio</a>
+                </div>
+            </div>
+
+            <div class="metricas revelar revelar-2">
+                <div class="metrica">
+                    <p class="metrica__n"><span data-contador="93">0</span></p>
+                    <p class="metrica__l">años ininterrumpidos operando en la Ciudad de Buenos Aires</p>
+                </div>
+                <div class="metrica">
+                    <p class="metrica__n"><span data-contador="1400" data-sufijo="+">0</span></p>
+                    <p class="metrica__l">operaciones de compraventa y alquiler concretadas</p>
+                </div>
+                <div class="metrica">
+                    <p class="metrica__n"><span data-contador="8">0</span></p>
+                    <p class="metrica__l">barrios del sur porteño que conocemos calle por calle</p>
+                </div>
+                <div class="metrica">
+                    <p class="metrica__n"><span data-contador="48" data-sufijo=" h">0</span></p>
+                    <p class="metrica__l">para entregar el informe de tasación por escrito</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Cómo trabajamos</p>
+                <h2 class="titulo-seccion">De la primera visita <em>a la firma</em></h2>
+            </div>
+        </div>
+        <div class="pasos revelar">
+            <div class="paso">
+                <h3>Entendemos el caso</h3>
+                <p>Escuchamos qué necesitás, en qué plazo y con qué margen. Sin formularios eternos.</p>
+            </div>
+            <div class="paso">
+                <h3>Tasamos y publicamos</h3>
+                <p>Informe de valor por escrito, fotos, plano y publicación en los portales líderes.</p>
+            </div>
+            <div class="paso">
+                <h3>Filtramos y mostramos</h3>
+                <p>Visitas acompañadas solo con interesados reales, coordinadas según tu disponibilidad.</p>
+            </div>
+            <div class="paso">
+                <h3>Cerramos y escrituramos</h3>
+                <p>Reserva, boleto y escritura con escribanía de confianza. Te acompañamos hasta la llave.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--tono">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Zona de trabajo</p>
+                <h2 class="titulo-seccion">Los barrios que <em>caminamos</em></h2>
+                <p class="plomo mb-0">
+                    Conocer la cuadra cambia la tasación. Estos son los barrios donde operamos
+                    todas las semanas.
+                </p>
+            </div>
+        </div>
+        <div class="barrios revelar">
+            @foreach (var barrio in Model.Barrios)
+            {
+                <a class="barrio" asp-page="/Propiedades" asp-route-barrio="@barrio">
+                    <strong>@barrio</strong>
+                    <span>Ver propiedades disponibles</span>
+                </a>
+            }
+            <a class="barrio" asp-page="/Contacto">
+                <strong>¿Otro barrio?</strong>
+                <span>Consultanos igual, seguro podemos ayudarte</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="seccion">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Clientes</p>
+                <h2 class="titulo-seccion">Lo que dicen quienes ya <em>firmaron</em></h2>
+            </div>
+        </div>
+        <div class="testimonios revelar">
+            <figure class="testimonio">
+                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
+                <blockquote>
+                    “Vendimos el departamento de mi mamá después de la sucesión. Nos explicaron cada
+                    paso, consiguieron comprador en dos meses y no tuvimos que ocuparnos de nada.”
+                </blockquote>
+                <figcaption>
+                    <span class="avatar">MG</span>
+                    <span><strong>Marcela G.</strong><br /><span class="texto-suave">Venta en Monserrat</span></span>
+                </figcaption>
+            </figure>
+            <figure class="testimonio">
+                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
+                <blockquote>
+                    “Alquilo mi local por Enricci hace once años. Nunca tuve un mes sin cobrar
+                    y siempre me avisaron antes de cada actualización.”
+                </blockquote>
+                <figcaption>
+                    <span class="avatar">RD</span>
+                    <span><strong>Rubén D.</strong><br /><span class="texto-suave">Administración en San Cristóbal</span></span>
+                </figcaption>
+            </figure>
+            <figure class="testimonio">
+                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
+                <blockquote>
+                    “Era mi primera compra y estaba perdida. Me acompañaron hasta la escritura
+                    y me señalaron cosas del edificio que yo no había visto.”
+                </blockquote>
+                <figcaption>
+                    <span class="avatar">FL</span>
+                    <span><strong>Florencia L.</strong><br /><span class="texto-suave">Compra en Constitución</span></span>
+                </figcaption>
+            </figure>
+        </div>
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="franja-cta revelar">
+            <p class="eyebrow">Tasación sin cargo</p>
+            <h2>¿Cuánto vale hoy tu propiedad?</h2>
+            <p class="plomo" style="color:inherit;opacity:.8">
+                Te decimos el número real, con los comparables a la vista, aunque no nos des la venta.
+                Respondemos en 48 horas hábiles.
+            </p>
+            <div class="acciones mt-5">
+                <a class="btn btn--claro btn--lg" asp-page="/Tasacion">
+                    Pedir mi tasación
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+                <a class="btn btn--wsp btn--lg" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    Escribir por WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

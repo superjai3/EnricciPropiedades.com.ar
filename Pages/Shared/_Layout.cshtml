@@ -1,101 +1,288 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+@{
+    var paginaActual = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    string? Activo(string ruta) =>
+        paginaActual.Equals(ruta, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+
+    var titulo = ViewData["Title"] as string;
+    var descripcion = ViewData["Descripcion"] as string
+        ?? "Inmobiliaria en la Ciudad de Buenos Aires desde 1932. Venta y alquiler de propiedades, tasaciones, administración de cobranzas y asesoría legal en Monserrat, Constitución, San Cristóbal y alrededores.";
+}
+<!DOCTYPE html>
+<html lang="es-AR">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Enricci Propiedades</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>@(string.IsNullOrEmpty(titulo) ? SitioInfo.Nombre + " · Inmobiliaria en CABA" : titulo + " · " + SitioInfo.NombreCorto)</title>
+    <meta name="description" content="@descripcion" />
+    <meta name="theme-color" content="#F5333F" />
+    <meta name="author" content="@SitioInfo.Nombre" />
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="@SitioInfo.Nombre" />
+    <meta property="og:title" content="@(titulo ?? SitioInfo.Nombre)" />
+    <meta property="og:description" content="@descripcion" />
+    <meta property="og:locale" content="es_AR" />
 
-    <!-- Style -->
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="~/Enricci_Propiedades.styles.css" asp-append-version="true" />
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="apple-touch-icon" href="~/imagenes/isologo.png" />
+    <link rel="stylesheet" href="~/css/enricci.css" asp-append-version="true" />
 
-<!-- Código -->
+    <script>
+        // Aplica el tema guardado antes de pintar, para evitar el destello blanco.
+        (function () {
+            // Marca que hay JavaScript: sin esta clase el contenido animado se ve siempre.
+            document.documentElement.classList.add('js');
+            try {
+                var t = localStorage.getItem('enricci-tema');
+                if (t === 'oscuro' || t === 'claro') {
+                    document.documentElement.setAttribute('data-tema', t);
+                }
+            } catch (e) { }
+        })();
+    </script>
 
+    <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "RealEstateAgent",
+          "name": "@SitioInfo.Nombre",
+          "description": "@descripcion",
+          "email": "@SitioInfo.Email",
+          "telephone": "@SitioInfo.Telefono",
+          "foundingDate": "@SitioInfo.AnioFundacion",
+          "areaServed": "Ciudad Autónoma de Buenos Aires, Argentina",
+          "address": {
+            "@@type": "PostalAddress",
+            "streetAddress": "@SitioInfo.Direccion",
+            "addressLocality": "Ciudad Autónoma de Buenos Aires",
+            "addressCountry": "AR",
+            "postalCode": "@SitioInfo.CodigoPostal"
+          }
+        }
+    </script>
+
+    @await RenderSectionAsync("Head", required: false)
 </head>
-<body style="background-color:rgb(226, 222, 222);">
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <img src="wwwroot/imagenes/Logo Enricci Propiedades.png" class="rounded float-start img-thumbnail img-responsive" alt="Logo R.H. Enricci Propiedades" width="100" height="120" />
-            </div>
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index" >
-                    <h4 class="loader text-dark">Enricci Propiedades</h4>
-                    <div class="loader"></div>
+<body>
+    <a class="saltar-a-contenido" href="#contenido">Saltar al contenido</a>
+    <partial name="_Iconos" />
 
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+    <header class="barra">
+        <div class="contenedor">
+            <a class="marca" asp-page="/Index" aria-label="@SitioInfo.Nombre, inicio">
+                <img class="marca__logo" src="~/imagenes/isologo.png" alt="" width="40" height="40" />
+                <span class="marca__texto">
+                    <span class="marca__nombre">R. H. <em>Enricci</em> Propiedades</span>
+                    <span class="marca__bajada">Inmobiliaria</span>
+                </span>
+            </a>
+
+            <nav aria-label="Navegación principal">
+                <ul class="menu">
+                    <li class="menu__item">
+                        <a class="menu__enlace" asp-page="/Index" aria-current="@Activo("/Index")">Inicio</a>
+                    </li>
+                    <li class="menu__item">
+                        <a class="menu__enlace" asp-page="/Quienes_Somos" aria-current="@Activo("/Quienes_Somos")">
+                            La empresa
+                            <svg class="chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </a>
+                        <ul class="submenu">
+                            <li>
+                                <a asp-page="/Quienes_Somos">Quiénes somos<small>Tres generaciones en el barrio</small></a>
+                            </li>
+                            <li>
+                                <a asp-page="/Mision">Misión<small>Para qué trabajamos</small></a>
+                            </li>
+                            <li>
+                                <a asp-page="/Vision">Visión<small>Hacia dónde vamos</small></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu__item">
+                        <a class="menu__enlace" asp-page="/Servicios" aria-current="@Activo("/Servicios")">
+                            Servicios
+                            <svg class="chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </a>
+                        <ul class="submenu">
+                            <li><a asp-page="/Tasacion">Tasación<small>Valor real de mercado en 48 h</small></a></li>
+                            <li><a asp-page="/Cobranza">Administración y cobranza<small>Alquileres cobrados a término</small></a></li>
+                            <li><a asp-page="/Asesoria_Legal">Asesoría legal<small>Escrituras, contratos y sucesiones</small></a></li>
+                        </ul>
+                    </li>
+                    <li class="menu__item">
+                        <a class="menu__enlace" asp-page="/Propiedades" aria-current="@Activo("/Propiedades")">
+                            Propiedades
+                            <svg class="chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </a>
+                        <ul class="submenu">
+                            <li><a asp-page="/Propiedades" asp-route-operacion="Venta">Venta<small>Departamentos, casas y PH</small></a></li>
+                            <li><a asp-page="/Propiedades" asp-route-operacion="Alquiler">Alquiler<small>Vivienda y locales</small></a></li>
+                            <li><a asp-page="/Propiedades" asp-route-operacion="AlquilerTemporario">Alquiler temporario<small>Estadías desde un mes</small></a></li>
+                            <li><a asp-page="/Propiedades" asp-route-tipo="LocalComercial">Locales comerciales<small>A la calle y en galería</small></a></li>
+                            <li><a asp-page="/Propiedades" asp-route-tipo="FondoDeComercio">Fondos de comercio<small>Negocios en marcha</small></a></li>
+                            <li><a asp-page="/Propiedades" asp-route-tipo="Cochera">Cocheras<small>Fijas y cubiertas</small></a></li>
+                        </ul>
+                    </li>
+                    <li class="menu__item">
+                        <a class="menu__enlace" asp-page="/Contacto" aria-current="@Activo("/Contacto")">Contacto</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="barra__acciones">
+                <button class="tema-btn" type="button" data-accion="tema" aria-label="Cambiar entre tema claro y oscuro">
+                    <svg class="icono-sol" aria-hidden="true"><use href="#i-sol" /></svg>
+                    <svg class="icono-luna" aria-hidden="true"><use href="#i-luna" /></svg>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <div class="btn-group btn-group-lg">
-                            <li class="nav-item">
-                                <a class="nav-link text-dark btn" asp-area="" asp-page="/Index">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group">
-                                    <button type="button" class="nav-link text-dark btn dropdown" data-bs-toggle="dropdown" asp-area="" asp-page="/La_Empresa">La Empresa</button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="Quienes_Somos">Quienes Somos</a></li>
-                                            <li><a class="dropdown-item" href="Vision">Visión</a></li>
-                                            <li><a class="dropdown-item" href="Mision">Misión<nav></nav></a></li>
-                                        </ul>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group">
-                                    <button type="button" class="nav-link text-dark btn dropdown" data-bs-toggle="dropdown" asp-area="" asp-page="/Servicios">Servicios</button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="Tasacion">Tasación</a></li>
-                                            <li><a class="dropdown-item" href="Cobranza">Cobranza</a></li>
-                                            <li><a class="dropdown-item" href="Asesoria_Legal">Asesoría Legal</a></li>
-                                        </ul>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group">
-                                    <button type="button" class="nav-link text-dark btn dropdown" data-bs-toggle="dropdown" asp-area="" asp-page="/Propiedades">Propiedades</button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Venta</a></li>
-                                            <li><a class="dropdown-item" href="#">Alquiler</a></li>
-                                            <li><a class="dropdown-item" href="#">Alquiler Temporario</a></li>
-                                            <li><a class="dropdown-item" href="#">Local Comercial</a></li>
-                                            <li><a class="dropdown-item" href="#">Fondo de Comercio</a></li>
-                                            <li><a class="dropdown-item" href="#">Cochera</a></li>
-                                        </ul>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark btn" asp-area="" asp-page="/Contacto">Contacto</a>
-                            </li>
-                        </div> 
+                <a class="btn btn--sm" asp-page="/Tasacion">
+                    Tasar mi propiedad
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+                <button class="hamburguesa" type="button" aria-expanded="false" aria-controls="panel-movil" aria-label="Abrir menú">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="panel-movil" id="panel-movil">
+        <div class="contenedor">
+            <ul>
+                <li class="panel-movil__grupo">
+                    <a class="panel-movil__cabeza" asp-page="/Index">Inicio</a>
+                </li>
+                <li class="panel-movil__grupo">
+                    <button class="panel-movil__cabeza" type="button" data-desplegable aria-expanded="false">
+                        La empresa
+                        <svg class="chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                    </button>
+                    <div class="panel-movil__sub">
+                        <div>
+                            <a asp-page="/Quienes_Somos">Quiénes somos</a>
+                            <a asp-page="/Mision">Misión</a>
+                            <a asp-page="/Vision">Visión</a>
+                        </div>
+                    </div>
+                </li>
+                <li class="panel-movil__grupo">
+                    <button class="panel-movil__cabeza" type="button" data-desplegable aria-expanded="false">
+                        Servicios
+                        <svg class="chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                    </button>
+                    <div class="panel-movil__sub">
+                        <div>
+                            <a asp-page="/Servicios">Todos los servicios</a>
+                            <a asp-page="/Tasacion">Tasación</a>
+                            <a asp-page="/Cobranza">Administración y cobranza</a>
+                            <a asp-page="/Asesoria_Legal">Asesoría legal</a>
+                        </div>
+                    </div>
+                </li>
+                <li class="panel-movil__grupo">
+                    <button class="panel-movil__cabeza" type="button" data-desplegable aria-expanded="false">
+                        Propiedades
+                        <svg class="chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                    </button>
+                    <div class="panel-movil__sub">
+                        <div>
+                            <a asp-page="/Propiedades">Ver todas</a>
+                            <a asp-page="/Propiedades" asp-route-operacion="Venta">Venta</a>
+                            <a asp-page="/Propiedades" asp-route-operacion="Alquiler">Alquiler</a>
+                            <a asp-page="/Propiedades" asp-route-operacion="AlquilerTemporario">Alquiler temporario</a>
+                            <a asp-page="/Propiedades" asp-route-tipo="LocalComercial">Locales comerciales</a>
+                            <a asp-page="/Propiedades" asp-route-tipo="FondoDeComercio">Fondos de comercio</a>
+                            <a asp-page="/Propiedades" asp-route-tipo="Cochera">Cocheras</a>
+                        </div>
+                    </div>
+                </li>
+                <li class="panel-movil__grupo">
+                    <a class="panel-movil__cabeza" asp-page="/Contacto">Contacto</a>
+                </li>
+            </ul>
+            <div class="panel-movil__pie">
+                <a class="btn btn--bloque" asp-page="/Tasacion">Tasar mi propiedad</a>
+                <a class="btn btn--fantasma btn--bloque" href="@SitioInfo.TelefonoLink">Llamar al @SitioInfo.Telefono</a>
+            </div>
+        </div>
+    </div>
+
+    <main id="contenido">
+        @RenderBody()
+    </main>
+
+    <footer class="pie">
+        <div class="contenedor">
+            <div class="pie__grid">
+                <div>
+                    <p class="pie__marca">R. H.<br /><em>Enricci</em></p>
+                    <p class="texto-suave" style="max-width:34ch">
+                        Inmobiliaria de barrio con oficina propia en Monserrat desde @SitioInfo.AnioFundacion.
+                        Compra, venta, alquiler y administración de propiedades en la Ciudad de Buenos Aires.
+                    </p>
+                    <div class="redes">
+                        <a href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener" aria-label="Escribirnos por WhatsApp">
+                            <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                        </a>
+                        <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
+                            <svg aria-hidden="true"><use href="#i-instagram" /></svg>
+                        </a>
+                        <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
+                            <svg aria-hidden="true"><use href="#i-facebook" /></svg>
+                        </a>
+                        <a href="@SitioInfo.MailA("Consulta desde la web")" aria-label="Enviarnos un correo">
+                            <svg aria-hidden="true"><use href="#i-mail" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4>Propiedades</h4>
+                    <ul>
+                        <li><a asp-page="/Propiedades" asp-route-operacion="Venta">En venta</a></li>
+                        <li><a asp-page="/Propiedades" asp-route-operacion="Alquiler">En alquiler</a></li>
+                        <li><a asp-page="/Propiedades" asp-route-operacion="AlquilerTemporario">Temporario</a></li>
+                        <li><a asp-page="/Propiedades" asp-route-tipo="LocalComercial">Locales</a></li>
+                        <li><a asp-page="/Propiedades" asp-route-tipo="Cochera">Cocheras</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>Servicios</h4>
+                    <ul>
+                        <li><a asp-page="/Tasacion">Tasación</a></li>
+                        <li><a asp-page="/Cobranza">Administración y cobranza</a></li>
+                        <li><a asp-page="/Asesoria_Legal">Asesoría legal</a></li>
+                        <li><a asp-page="/Servicios">Todos los servicios</a></li>
+                        <li><a asp-page="/Quienes_Somos">Quiénes somos</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li><a href="@SitioInfo.TelefonoLink">@SitioInfo.Telefono</a></li>
+                        <li><a href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">WhatsApp @SitioInfo.Celular</a></li>
+                        <li><a href="@SitioInfo.MailA("Consulta desde la web")">@SitioInfo.Email</a></li>
+                        <li>@SitioInfo.Direccion, @SitioInfo.Localidad</li>
+                        <li>@SitioInfo.Horario</li>
                     </ul>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-    <div class="container-fluid">
-    </div>
-        </nav>
-            @RenderBody()
-        </main>
-    </div>
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2023 - Enricci Propiedades - Solis 581 CABA - Cel: 011-15-3298-6133 - horacioenricci@gmail.com
+
+            <div class="pie__legal">
+                <span>&copy; <span data-anio>2026</span> @SitioInfo.Nombre. Todos los derechos reservados.</span>
+                <span>@SitioInfo.Matricula</span>
+            </div>
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <a class="wsp-flotante" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+        <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+        <span>Escribinos</span>
+    </a>
 
+    <script src="~/js/enricci.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

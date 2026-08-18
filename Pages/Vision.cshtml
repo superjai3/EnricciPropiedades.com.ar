@@ -1,7 +1,64 @@
-﻿@page
+@page
+@model VisionModel
 @{
     ViewData["Title"] = "Visión";
+    ViewData["Descripcion"] = "La visión de R. H. Enricci Propiedades: seguir siendo la inmobiliaria de referencia del sur porteño, con oficio de barrio y herramientas de hoy.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>R. H. Enricci Propiedades nace en 1.932 en el barrio de Monserrat..... Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis quidem explicabo harum ab iusto nesciunt sint veritatis enim quos adipisci voluptatum unde ducimus, sit, quasi similique, eum odit deleniti delectus.</p>
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Quienes_Somos">La empresa</a> <span aria-hidden="true">/</span>
+            <span>Visión</span>
+        </nav>
+        <p class="eyebrow">Hacia dónde vamos</p>
+        <h1>Visión</h1>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="prosa revelar">
+                <p class="plomo" style="color:var(--texto)">
+                    Ser la inmobiliaria de referencia del sur porteño: la que se recomienda
+                    entre vecinos, la que la familia vuelve a llamar en la operación siguiente.
+                </p>
+                <p>
+                    Queremos crecer sin volvernos una fábrica de operaciones. Sumar herramientas
+                    —fotografía profesional, recorridos virtuales, publicación digital, firma
+                    coordinada con escribanía— sin perder lo que nos distingue: que atiende
+                    siempre la misma persona y que esa persona conoce la propiedad.
+                </p>
+
+                <div class="destacado">
+                    Modernizar las herramientas, nunca el trato.
+                </div>
+
+                <h2>Los próximos años</h2>
+                <ul class="lista-chequeo" style="padding-left:0">
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Catálogo propio en línea</strong>, con fichas completas, planos y fotos de cada unidad publicada.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Informes de valor por barrio</strong>, para que propietarios e inversores decidan con datos de la zona.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Administración con rendición digital</strong>, accesible en cualquier momento por el propietario.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Más presencia en la vereda</strong>, que sigue siendo donde se entera de todo una inmobiliaria de barrio.</span></li>
+                </ul>
+            </div>
+
+            <aside class="pegajoso revelar revelar-2">
+                <div class="ficha__panel" style="position:static">
+                    <h2 style="font-size:var(--t-lg);margin-bottom:0">Trabajemos juntos</h2>
+                    <p class="texto-suave mb-0" style="font-size:.92rem">
+                        Si tenés una propiedad en el sur de la ciudad, conversemos.
+                        La primera charla no cuesta nada.
+                    </p>
+                    <a class="btn btn--bloque" asp-page="/Tasacion">
+                        Pedir una tasación
+                        <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                    </a>
+                    <a class="btn btn--fantasma btn--bloque" asp-page="/Mision">Leer nuestra misión</a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>

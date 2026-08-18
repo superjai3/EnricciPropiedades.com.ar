@@ -1,11 +1,146 @@
-﻿@page
+@page
+@model PropiedadesModel
 @{
-    ViewData["Title"] = "Propiedades";
+    ViewData["Title"] = Model.Encabezado;
+    ViewData["Descripcion"] = "Catálogo de propiedades en venta y alquiler en la Ciudad de Buenos Aires: departamentos, casas, PH, locales comerciales, oficinas, fondos de comercio y cocheras.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<a href=""></a>
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti, enim illum rerum impedit officia porro magnam fuga est culpa dignissimos atque. Molestias voluptates vero necessitatibus! Culpa deserunt consequuntur magni hic. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Suscipit, ab. Reiciendis ipsa ullam beatae tempore, praesentium necessitatibus voluptate a possimus ea modi repudiandae quidem dolorem consequuntur quam id non exercitationem?Lorem ipsum dolor, sit amet consectetur adipisicing elit. Totam sequi odio soluta veritatis tenetur, unde ratione doloribus doloremque veniam sunt, possimus, est velit. Non temporibus perferendis est eos distinctio. Vitae</p>
-<br>
 
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span> <span>Propiedades</span>
+        </nav>
+        <p class="eyebrow">Catálogo</p>
+        <h1>@Model.Encabezado</h1>
+        <p class="plomo">
+            @Model.Resultados.Count
+            @(Model.Resultados.Count == 1 ? "publicación disponible" : "publicaciones disponibles")
+            en Monserrat, Constitución, San Cristóbal, San Telmo, Balvanera y Boedo.
+        </p>
+    </div>
+</section>
 
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <form class="filtros" method="get" asp-page="/Propiedades">
+            <div class="campo">
+                <label for="f-operacion">Operación</label>
+                <select class="control" id="f-operacion" asp-for="Operacion">
+                    <option value="">Todas</option>
+                    <option value="Venta">Venta</option>
+                    <option value="Alquiler">Alquiler</option>
+                    <option value="AlquilerTemporario">Alquiler temporario</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="f-tipo">Tipo</label>
+                <select class="control" id="f-tipo" asp-for="Tipo">
+                    <option value="">Todos</option>
+                    <option value="Departamento">Departamento</option>
+                    <option value="Casa">Casa</option>
+                    <option value="PH">PH</option>
+                    <option value="LocalComercial">Local comercial</option>
+                    <option value="Oficina">Oficina</option>
+                    <option value="FondoDeComercio">Fondo de comercio</option>
+                    <option value="Cochera">Cochera</option>
+                    <option value="Terreno">Terreno</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="f-barrio">Barrio</label>
+                <select class="control" id="f-barrio" asp-for="Barrio">
+                    <option value="">Todos</option>
+                    @foreach (var barrio in Model.Barrios)
+                    {
+                        <option value="@barrio">@barrio</option>
+                    }
+                </select>
+            </div>
+            <div class="campo">
+                <label for="f-ambientes">Ambientes</label>
+                <select class="control" id="f-ambientes" asp-for="Ambientes">
+                    <option value="">Indistinto</option>
+                    <option value="1">1 o más</option>
+                    <option value="2">2 o más</option>
+                    <option value="3">3 o más</option>
+                    <option value="4">4 o más</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="f-precio">Precio máximo</label>
+                <input class="control" id="f-precio" type="number" min="0" step="1000" inputmode="numeric" placeholder="Sin tope" asp-for="Precio" />
+            </div>
+            <div class="campo">
+                <label for="f-orden">Ordenar por</label>
+                <select class="control" id="f-orden" asp-for="Orden">
+                    <option value="">Destacadas primero</option>
+                    <option value="precio-asc">Menor precio</option>
+                    <option value="precio-desc">Mayor precio</option>
+                    <option value="superficie">Mayor superficie</option>
+                </select>
+            </div>
+            <div class="filtros__acciones">
+                <button class="btn" type="submit">
+                    <svg aria-hidden="true"><use href="#i-filtro" /></svg>
+                    Aplicar
+                </button>
+                @if (Model.HayFiltros)
+                {
+                    <a class="btn btn--fantasma" asp-page="/Propiedades">Limpiar</a>
+                }
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor">
+        @if (Model.Resultados.Count == 0)
+        {
+            <div class="sin-resultados">
+                <h2 class="titulo-seccion">No encontramos propiedades con esos filtros</h2>
+                <p class="plomo" style="margin-inline:auto">
+                    Probá ampliando la búsqueda, o contanos qué estás buscando: tenemos operaciones
+                    que todavía no publicamos.
+                </p>
+                <div class="acciones mt-5" style="justify-content:center">
+                    <a class="btn" asp-page="/Contacto">Contarnos qué busco</a>
+                    <a class="btn btn--fantasma" asp-page="/Propiedades">Ver todas</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="grilla-props">
+                @{ var i = 0; }
+                @foreach (var propiedad in Model.Resultados)
+                {
+                    i++;
+                    <div class="revelar revelar-@(i % 4)">
+                        <partial name="_TarjetaPropiedad" model="propiedad" />
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="franja-cta revelar">
+            <p class="eyebrow">Búsqueda a medida</p>
+            <h2>¿No encontrás lo que buscás?</h2>
+            <p class="plomo" style="color:inherit;opacity:.8">
+                Contanos zona, presupuesto y plazo. Trabajamos con propietarios que todavía
+                no publicaron y te avisamos antes de que salga al mercado.
+            </p>
+            <div class="acciones mt-5">
+                <a class="btn btn--claro btn--lg" asp-page="/Contacto">Dejar mi búsqueda</a>
+                <a class="btn btn--wsp btn--lg" href="@SitioInfo.Whatsapp("Hola, estoy buscando una propiedad y no la encontré en la web.")" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

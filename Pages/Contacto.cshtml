@@ -1,24 +1,151 @@
-﻿@page
+@page
+@model ContactoModel
 @{
     ViewData["Title"] = "Contacto";
+    ViewData["Descripcion"] = "Escribinos o visitanos en Solís 581, Monserrat, CABA. Respondemos consultas de compra, venta, alquiler, tasaciones y administración de propiedades.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<h5>Nombre y Apellido</h5>
-<input type="text" class="form-control" placeholder="Escribe aquí tu Nombre y Apellido">
-<br>
-<label for="formControlInput" class="form-label">
-    <h5>Email</h5>
-</label>
-<input type="email" class="form-control" id="formControlInput" placeholder="Escribe aquí tu email">
-<br>
-<h5>Teléfono</h5>
-<input type="text" class="form-control" placeholder="Escribe aquí tu teléfono de contacto">
-<br>
-<h5>Consulta:</h5>
-<div class="form-floating">
-  <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"></textarea>
-  <label for="floatingTextarea">Escribe aquí tu consulta...</label>
-</div>
 
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span> <span>Contacto</span>
+        </nav>
+        <p class="eyebrow">Hablemos</p>
+        <h1>Contanos qué <em style="font-family:var(--f-serif);font-style:italic;font-weight:400;color:var(--rojo)">necesitás</em></h1>
+        <p class="plomo">
+            Respondemos todas las consultas dentro de las 24 horas hábiles. Si es urgente,
+            escribinos directamente por WhatsApp: es la vía más rápida.
+        </p>
+    </div>
+</section>
 
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor">
+        <div class="ficha">
+            <div>
+                @if (Model.Enviado)
+                {
+                    <div class="aviso aviso--ok revelar visible">
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        <div>
+                            <h2 style="font-size:var(--t-xl);margin-bottom:.5rem">Recibimos tu consulta</h2>
+                            <p class="mb-0">
+                                Gracias por escribirnos. Te vamos a responder a la brevedad.
+                                Si querés adelantar la conversación, mandanos el mismo mensaje
+                                por WhatsApp o correo con un clic:
+                            </p>
+                            <div class="acciones mt-5">
+                                <a class="btn btn--wsp" href="@Model.MensajeWhatsapp" target="_blank" rel="noopener">
+                                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                    Enviar por WhatsApp
+                                </a>
+                                <a class="btn btn--fantasma" href="@Model.MensajeMail">
+                                    <svg aria-hidden="true"><use href="#i-mail" /></svg>
+                                    Enviar por correo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acciones mt-6">
+                        <a class="btn btn--fantasma" asp-page="/Propiedades">Seguir viendo propiedades</a>
+                        <a class="btn btn--fantasma" asp-page="/Contacto">Enviar otra consulta</a>
+                    </div>
+                }
+                else
+                {
+                    <form method="post" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                        <div class="dos-columnas" style="gap:1rem 1.5rem">
+                            <div class="campo">
+                                <label asp-for="Datos.Nombre"></label>
+                                <input class="control" asp-for="Datos.Nombre" autocomplete="name" placeholder="Ej.: María González" required />
+                                <span class="error-campo" asp-validation-for="Datos.Nombre"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Email"></label>
+                                <input class="control" asp-for="Datos.Email" type="email" autocomplete="email" placeholder="nombre@@ejemplo.com" required />
+                                <span class="error-campo" asp-validation-for="Datos.Email"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Telefono"></label>
+                                <input class="control" asp-for="Datos.Telefono" type="tel" autocomplete="tel" placeholder="11 5555-5555" />
+                                <span class="error-campo" asp-validation-for="Datos.Telefono"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Motivo"></label>
+                                <select class="control" asp-for="Datos.Motivo">
+                                    @foreach (var motivo in ContactoModel.Motivos)
+                                    {
+                                        <option value="@motivo">@motivo</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="campo mt-5">
+                            <label asp-for="Datos.Mensaje"></label>
+                            <textarea class="control" asp-for="Datos.Mensaje" rows="6" placeholder="Contanos zona, presupuesto, plazos o cualquier dato que nos ayude a orientarte mejor." required></textarea>
+                            <span class="error-campo" asp-validation-for="Datos.Mensaje"></span>
+                        </div>
+
+                        @* Campo trampa: invisible para personas, tentador para robots. *@
+                        <div class="solo-lectores" aria-hidden="true">
+                            <label asp-for="Datos.Sitio">No completar</label>
+                            <input asp-for="Datos.Sitio" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        <div class="acciones mt-5">
+                            <button class="btn btn--lg" type="submit">
+                                Enviar consulta
+                                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                            </button>
+                            <a class="btn btn--wsp btn--lg" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                                <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                Prefiero WhatsApp
+                            </a>
+                        </div>
+
+                        <p class="texto-suave mt-5" style="font-size:.82rem">
+                            Usamos tus datos únicamente para responder esta consulta. No los compartimos con terceros.
+                        </p>
+                    </form>
+                }
+            </div>
+
+            <aside class="ficha__panel">
+                <h2 style="font-size:var(--t-lg);margin-bottom:0">Oficina</h2>
+                <p class="texto-suave mb-0" style="font-size:.92rem">
+                    @SitioInfo.Direccion<br />
+                    @SitioInfo.Localidad<br />
+                    @SitioInfo.CodigoPostal
+                </p>
+
+                <ul class="lista-chequeo" style="font-size:.92rem">
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-telefono" /></svg>
+                        <a href="@SitioInfo.TelefonoLink">@SitioInfo.Telefono</a>
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                        <a href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">@SitioInfo.Celular</a>
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-mail" /></svg>
+                        <a href="@SitioInfo.MailA("Consulta desde la web")">@SitioInfo.Email</a>
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-reloj" /></svg>
+                        @SitioInfo.Horario
+                    </li>
+                </ul>
+
+                <a class="btn btn--fantasma btn--bloque" href="https://www.google.com/maps/search/?api=1&query=Sol%C3%ADs+581+CABA" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-pin" /></svg>
+                    Cómo llegar
+                </a>
+            </aside>
+        </div>
+    </div>
+</section>

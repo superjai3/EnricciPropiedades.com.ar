@@ -31,6 +31,14 @@ appsettings.*.local.json
 secrets.json
 *.env
 
+# Base de datos SQLite: los datos son del sitio en producción, no del repositorio
+*.db
+*.db-shm
+*.db-wal
+
+# Fotos cargadas desde el panel (viven en el servidor, se respaldan aparte)
+wwwroot/imagenes/propiedades/
+
 # Sistema operativo
 Thumbs.db
 ehthumbs.db

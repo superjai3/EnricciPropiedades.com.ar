@@ -1,0 +1,72 @@
+@{
+    var titulo = ViewData["Title"] as string ?? "Panel";
+    var identificado = User.Identity?.IsAuthenticated == true;
+    var nombre = User.Identity?.Name ?? "";
+    var paginaActual = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    string? Activo(string ruta) =>
+        paginaActual.Equals(ruta, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+}
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@titulo · Panel · @SitioInfo.NombreCorto</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/enricci.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/panel.css" asp-append-version="true" />
+    <script>
+        (function () {
+            document.documentElement.classList.add('js');
+            try {
+                var t = localStorage.getItem('enricci-tema');
+                if (t === 'oscuro' || t === 'claro') { document.documentElement.setAttribute('data-tema', t); }
+            } catch (e) { }
+        })();
+    </script>
+</head>
+<body class="panel-body">
+    <partial name="/Pages/Shared/_Iconos.cshtml" />
+
+    @if (identificado)
+    {
+        <header class="panel-barra">
+            <div class="panel-barra__interior">
+                <a class="panel-marca" asp-page="/Admin/Index">
+                    <img src="~/imagenes/isologo.png" alt="" width="32" height="32" />
+                    <span>
+                        <strong>Enricci</strong>
+                        <small>Panel de administración</small>
+                    </span>
+                </a>
+
+                <nav class="panel-nav" aria-label="Secciones del panel">
+                    <a asp-page="/Admin/Index" aria-current="@Activo("/Admin/Index")">Propiedades</a>
+                    <a asp-page="/Admin/Editar" aria-current="@Activo("/Admin/Editar")">Nueva</a>
+                    <a asp-page="/Admin/Cuenta" aria-current="@Activo("/Admin/Cuenta")">Mi cuenta</a>
+                </nav>
+
+                <div class="panel-barra__acciones">
+                    <button class="tema-btn" type="button" data-accion="tema" aria-label="Cambiar entre tema claro y oscuro">
+                        <svg class="icono-sol" aria-hidden="true"><use href="#i-sol" /></svg>
+                        <svg class="icono-luna" aria-hidden="true"><use href="#i-luna" /></svg>
+                    </button>
+                    <a class="panel-vervsitio" asp-page="/Index" target="_blank" rel="noopener">Ver el sitio</a>
+                    <form method="post" asp-page="/Admin/Salir" class="panel-salir">
+                        <span class="panel-usuario" title="@nombre">@nombre</span>
+                        <button class="btn btn--sm btn--fantasma" type="submit">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+    }
+
+    <main class="panel-main">
+        @RenderBody()
+    </main>
+
+    <script src="~/js/enricci.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

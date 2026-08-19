@@ -1,0 +1,129 @@
+@page
+@model Enricci_Propiedades.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Propiedades";
+}
+
+<div class="panel-cabecera">
+    <div>
+        <h1>Propiedades</h1>
+        <p>Alta, edición y baja de las publicaciones que se ven en el sitio.</p>
+    </div>
+    <a class="btn" asp-page="/Admin/Editar">
+        Publicar una propiedad
+        <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+    </a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="panel-aviso panel-aviso--ok" role="status">@Model.Mensaje</div>
+}
+
+<div class="panel-metricas">
+    <div class="panel-metrica">
+        <strong>@Model.TotalPublicadas</strong>
+        <span>Publicadas</span>
+    </div>
+    <div class="panel-metrica">
+        <strong>@Model.TotalDestacadas</strong>
+        <span>En portada</span>
+    </div>
+    <div class="panel-metrica">
+        <strong>@Model.TotalDadasDeBaja</strong>
+        <span>Dadas de baja</span>
+    </div>
+</div>
+
+<div class="panel-tarjeta">
+    <form class="panel-buscador" method="get">
+        <input class="control" asp-for="Buscar" type="search" placeholder="Buscar por título, dirección o barrio…" />
+        <button class="btn btn--sm btn--fantasma" type="submit">Buscar</button>
+        @if (!string.IsNullOrWhiteSpace(Model.Buscar))
+        {
+            <a class="btn btn--sm btn--fantasma" asp-page="/Admin/Index">Limpiar</a>
+        }
+    </form>
+
+    @if (Model.Publicaciones.Count == 0)
+    {
+        <div class="panel-vacio">
+            @if (!string.IsNullOrWhiteSpace(Model.Buscar))
+            {
+                <p>No hay publicaciones que coincidan con «@Model.Buscar».</p>
+                <a class="btn btn--fantasma" asp-page="/Admin/Index">Ver todas</a>
+            }
+            else
+            {
+                <p>Todavía no hay ninguna propiedad cargada.</p>
+                <a class="btn" asp-page="/Admin/Editar">Publicar la primera</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="panel-scroll">
+            <table class="panel-tabla">
+                <thead>
+                    <tr>
+                        <th scope="col">Publicación</th>
+                        <th scope="col">Operación</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Portada</th>
+                        <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Publicaciones)
+                    {
+                        <tr>
+                            <td>
+                                <div class="panel-celda-titulo">
+                                    <div class="panel-miniatura">
+                                        @if (p.Fotos.Count > 0)
+                                        {
+                                            <img src="@p.Fotos[0]" alt="" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            @ArteFachada.Dibujar(p)
+                                        }
+                                    </div>
+                                    <div>
+                                        <strong>@p.Titulo</strong>
+                                        <small>@p.Direccion · @p.Barrio · @p.TipoTexto</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@p.OperacionTexto</td>
+                            <td>@p.PrecioTexto</td>
+                            <td>
+                                <span class="panel-estado panel-estado--@p.Estado.ToString().ToLower()">@p.EstadoTexto</span>
+                            </td>
+                            <td>
+                                <form method="post" asp-page-handler="Destacar" asp-route-id="@p.Id">
+                                    <input type="hidden" name="Buscar" value="@Model.Buscar" />
+                                    <button class="panel-btn-icono" type="submit"
+                                            title="@(p.Destacada ? "Quitar de la portada" : "Mostrar en la portada")">
+                                        @(p.Destacada ? "★ Sí" : "☆ No")
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <div class="panel-acciones">
+                                    <a class="panel-btn-icono" asp-page="/Ficha" asp-route-id="@p.Id" target="_blank" rel="noopener">Ver</a>
+                                    <a class="panel-btn-icono" asp-page="/Admin/Editar" asp-route-id="@p.Id">Editar</a>
+                                    <form method="post" asp-page-handler="Eliminar" asp-route-id="@p.Id"
+                                          onsubmit="return confirm('¿Eliminar «@p.Titulo»? Se borran también sus fotos y no se puede deshacer.');">
+                                        <button class="panel-btn-icono panel-btn-icono--peligro" type="submit">Eliminar</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

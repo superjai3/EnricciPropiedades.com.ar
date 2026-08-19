@@ -24,6 +24,8 @@ public static class SitioInfo
     public const string Horario = "Lunes a viernes de 10 a 18 h · Sábados de 10 a 13 h";
     public const string Matricula = "Matrícula CUCICBA · Corredor Inmobiliario";
 
+    public const string Instagram = "https://www.instagram.com/enricci_propiedades/";
+
     public static string Whatsapp(string mensaje) =>
         $"https://wa.me/{WhatsappNumero}?text={Uri.EscapeDataString(mensaje)}";
 

@@ -231,7 +231,7 @@
                         <a href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener" aria-label="Escribirnos por WhatsApp">
                             <svg aria-hidden="true"><use href="#i-wsp" /></svg>
                         </a>
-                        <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
+                        <a href="@SitioInfo.Instagram" target="_blank" rel="noopener" aria-label="Instagram">
                             <svg aria-hidden="true"><use href="#i-instagram" /></svg>
                         </a>
                         <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
@@ -279,7 +279,10 @@
 
             <div class="pie__legal">
                 <span>&copy; <span data-anio>2026</span> @SitioInfo.Nombre. Todos los derechos reservados.</span>
-                <span>@SitioInfo.Matricula</span>
+                <span>
+                    @SitioInfo.Matricula
+                    <a class="pie__panel" asp-page="/Admin/Index" rel="nofollow">Administrar</a>
+                </span>
             </div>
         </div>
     </footer>

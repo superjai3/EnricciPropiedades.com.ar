@@ -1052,6 +1052,12 @@ select.control {
     font-size: .78rem;
     opacity: .6;
 }
+/* Acceso al panel de administración: discreto, sólo para la inmobiliaria. */
+.pie__panel {
+    margin-inline-start: var(--sp-4);
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+}
 .pie__marca {
     font-family: var(--f-display);
     font-size: clamp(2rem, 7vw, 5rem);
@@ -1180,6 +1186,27 @@ select.control {
 .galeria__lado { display: grid; gap: var(--sp-3); }
 .galeria__lado > div { background: var(--hueso-2); border-radius: var(--r-md); overflow: hidden; min-height: 120px; }
 .galeria__lado img, .galeria__lado svg { width: 100%; height: 100%; object-fit: cover; }
+
+/* Fotos a partir de la cuarta: tira desplazable bajo la galería principal. */
+.galeria__tira {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(140px, 1fr);
+    gap: var(--sp-3);
+    margin-top: var(--sp-3);
+    overflow-x: auto;
+    padding-bottom: var(--sp-2);
+}
+.galeria__tira > div {
+    aspect-ratio: 4 / 3;
+    background: var(--hueso-2);
+    border-radius: var(--r-md);
+    overflow: hidden;
+}
+.galeria__tira img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+[data-galeria-mini] { cursor: pointer; }
+[data-galeria-mini]:focus-visible { outline: 2px solid var(--rojo); outline-offset: 2px; }
 
 .ficha { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .9fr); gap: clamp(1.5rem, 3vw, 3rem); align-items: start; }
 @media (max-width: 960px) { .ficha { grid-template-columns: 1fr; } }

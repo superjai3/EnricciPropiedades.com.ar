@@ -1,0 +1,61 @@
+@page
+@model Enricci_Propiedades.Pages.Admin.CuentaModel
+@{
+    ViewData["Title"] = "Mi cuenta";
+}
+
+<div class="panel-cabecera">
+    <div>
+        <h1>Mi cuenta</h1>
+        <p>@Model.Usuario?.Nombre · @Model.Usuario?.Email</p>
+    </div>
+</div>
+
+@if (Model.Primera || Model.Usuario?.DebeCambiarClave == true)
+{
+    <div class="panel-aviso panel-aviso--error" role="alert">
+        Estás usando la contraseña provisoria con la que se creó el usuario.
+        Cambiala ahora por una tuya: es la única forma de que nadie más pueda entrar al panel.
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="panel-aviso panel-aviso--error" role="alert">@Model.Error</div>
+}
+
+<div class="panel-tarjeta" style="max-width:560px">
+    <h2>Cambiar la contraseña</h2>
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="panel-aviso panel-aviso--error"></div>
+
+        <div class="campo">
+            <label asp-for="Datos.Actual">Contraseña actual</label>
+            <input class="control" asp-for="Datos.Actual" type="password" autocomplete="current-password" />
+            <span class="error-campo" asp-validation-for="Datos.Actual"></span>
+        </div>
+
+        <div class="campo" style="margin-top:1rem">
+            <label asp-for="Datos.Nueva">Contraseña nueva</label>
+            <input class="control" asp-for="Datos.Nueva" type="password" autocomplete="new-password" />
+            <p class="panel-ayuda">Al menos 10 caracteres. Cuanto más larga, mejor.</p>
+            <span class="error-campo" asp-validation-for="Datos.Nueva"></span>
+        </div>
+
+        <div class="campo" style="margin-top:1rem">
+            <label asp-for="Datos.Repetida">Repetir la contraseña nueva</label>
+            <input class="control" asp-for="Datos.Repetida" type="password" autocomplete="new-password" />
+            <span class="error-campo" asp-validation-for="Datos.Repetida"></span>
+        </div>
+
+        <div class="panel-pie-form">
+            <button class="btn" type="submit">Cambiar la contraseña</button>
+            <a class="btn btn--fantasma" asp-page="/Admin/Index">Volver</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}

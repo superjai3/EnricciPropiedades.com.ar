@@ -49,14 +49,50 @@
                 }
             </div>
             <div class="galeria__lado">
-                <div>@ArteFachada.Dibujar(p, "", 1)</div>
-                <div>@ArteFachada.Dibujar(p, "", 2)</div>
+                @* Los dos huecos laterales muestran las fotos siguientes; si no hay,
+                   se dibuja la portada generada para que la grilla no quede coja. *@
+                @for (var i = 1; i <= 2; i++)
+                {
+                    if (p.Fotos.Count > i)
+                    {
+                        <div data-galeria-mini role="button" tabindex="0"
+                             aria-label="Ver esta foto en grande">
+                            <img src="@p.Fotos[i]" alt="Foto @(i + 1) de @p.Direccion" loading="lazy" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div>@ArteFachada.Dibujar(p, "", i)</div>
+                    }
+                }
             </div>
         </div>
-        <p class="texto-suave mt-4" style="font-size:.82rem">
-            Las imágenes ilustrativas se reemplazan por el reportaje fotográfico completo al momento de la publicación.
-            Escribinos y te enviamos todas las fotos y el plano por WhatsApp.
-        </p>
+
+        @if (p.Fotos.Count > 3)
+        {
+            <div class="galeria__tira revelar">
+                @for (var i = 3; i < p.Fotos.Count; i++)
+                {
+                    <div data-galeria-mini role="button" tabindex="0" aria-label="Ver esta foto en grande">
+                        <img src="@p.Fotos[i]" alt="Foto @(i + 1) de @p.Direccion" loading="lazy" />
+                    </div>
+                }
+            </div>
+        }
+
+        @if (p.Fotos.Count == 0)
+        {
+            <p class="texto-suave mt-4" style="font-size:.82rem">
+                Las imágenes ilustrativas se reemplazan por el reportaje fotográfico completo al momento de la publicación.
+                Escribinos y te enviamos todas las fotos y el plano por WhatsApp.
+            </p>
+        }
+        else
+        {
+            <p class="texto-suave mt-4" style="font-size:.82rem">
+                Escribinos y te enviamos el reportaje fotográfico completo y el plano por WhatsApp.
+            </p>
+        }
     </div>
 </section>
 

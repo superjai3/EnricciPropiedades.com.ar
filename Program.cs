@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Unicode;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.Sqlite;
@@ -53,6 +54,28 @@ builder.Services.Configure<FormOptions>(opciones =>
 });
 
 var enProduccion = !builder.Environment.IsDevelopment();
+
+// Detrás de un proxy (ngrok, Cloudflare, IIS, un balanceador) el sitio recibe
+// los pedidos por HTTP aunque el visitante entre por HTTPS. Sin esto, las URL
+// canónicas y las de Open Graph saldrían con "http://", y el freno por IP de la
+// pantalla de ingreso agruparía a todo el mundo bajo la IP del proxy, con lo que
+// un solo visitante podría dejar afuera a los demás.
+var detrasDeProxy = builder.Configuration.GetValue("Hosting:DetrasDeProxy", false);
+
+if (detrasDeProxy)
+{
+    builder.Services.Configure<ForwardedHeadersOptions>(opciones =>
+    {
+        opciones.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                                  | ForwardedHeaders.XForwardedProto
+                                  | ForwardedHeaders.XForwardedHost;
+
+        // El proxy no tiene una IP fija conocida. Se activa a propósito y sólo
+        // cuando el sitio está efectivamente publicado detrás de uno.
+        opciones.KnownNetworks.Clear();
+        opciones.KnownProxies.Clear();
+    });
+}
 
 // En producción las cookies viajan sólo por HTTPS. En desarrollo se deja según
 // el pedido, para poder probar por http sin certificado.
@@ -125,6 +148,13 @@ builder.Services.Configure<WebEncoderOptions>(opciones =>
     opciones.TextEncoderSettings = new System.Text.Encodings.Web.TextEncoderSettings(UnicodeRanges.All));
 
 var app = builder.Build();
+
+// Lo primero de todo: el resto de la canalización tiene que ver el esquema y la
+// IP reales del visitante, no los del proxy.
+if (detrasDeProxy)
+{
+    app.UseForwardedHeaders();
+}
 
 // Canalización HTTP.
 if (!app.Environment.IsDevelopment())

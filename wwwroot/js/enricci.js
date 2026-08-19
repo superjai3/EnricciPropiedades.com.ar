@@ -152,6 +152,48 @@
         imagenMini.setAttribute('src', temp);
     });
 
+    /* ---------- Ver la contraseña que se está escribiendo ----------
+       El botón se inserta desde acá y no en la vista: sin JavaScript el campo
+       sigue andando igual, y no hay que tocar cada formulario que lo use. */
+    (function () {
+        var campos = document.querySelectorAll('input[type="password"]');
+        if (!campos.length) { return; }
+
+        Array.prototype.forEach.call(campos, function (campo) {
+            var envoltorio = document.createElement('div');
+            envoltorio.className = 'campo-clave';
+            campo.parentNode.insertBefore(envoltorio, campo);
+            envoltorio.appendChild(campo);
+
+            var boton = document.createElement('button');
+            boton.type = 'button';
+            boton.className = 'ver-clave';
+            boton.setAttribute('aria-pressed', 'false');
+            boton.setAttribute('aria-label', 'Mostrar la contraseña');
+            boton.title = 'Mostrar la contraseña';
+            boton.innerHTML =
+                '<svg class="icono-visible" aria-hidden="true"><use href="#i-ojo"></use></svg>' +
+                '<svg class="icono-oculto" aria-hidden="true"><use href="#i-ojo-tachado"></use></svg>';
+
+            boton.addEventListener('click', function () {
+                var visible = campo.getAttribute('type') === 'text';
+                campo.setAttribute('type', visible ? 'password' : 'text');
+                boton.setAttribute('aria-pressed', visible ? 'false' : 'true');
+
+                var texto = visible ? 'Mostrar la contraseña' : 'Ocultar la contraseña';
+                boton.setAttribute('aria-label', texto);
+                boton.title = texto;
+
+                // Devuelve el foco al campo, con el cursor al final.
+                campo.focus();
+                var largo = campo.value.length;
+                try { campo.setSelectionRange(largo, largo); } catch (e) { /* algunos navegadores */ }
+            });
+
+            envoltorio.appendChild(boton);
+        });
+    })();
+
     /* ---------- Confirmación antes de una acción destructiva ----------
        Va por atributo y no por onsubmit en el HTML: la política de contenido
        del sitio no permite manejadores de eventos escritos en la marca. */

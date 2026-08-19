@@ -720,6 +720,34 @@ select.control {
     padding-right: 2.2rem;
     cursor: pointer;
 }
+/* Mostrar/ocultar la contraseña. El botón lo inserta enricci.js, así que sin
+   JavaScript el campo sigue funcionando como siempre. */
+.campo-clave { position: relative; display: flex; align-items: center; }
+.campo-clave .control { padding-inline-end: 3rem; }
+
+.ver-clave {
+    position: absolute;
+    inset-inline-end: .35rem;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: var(--r-full);
+    background: transparent;
+    color: var(--texto-suave);
+    cursor: pointer;
+    transition: color .2s var(--ease), background .2s var(--ease);
+}
+.ver-clave:hover { color: var(--texto); background: color-mix(in srgb, var(--texto) 8%, transparent); }
+.ver-clave svg { width: 19px; height: 19px; }
+.ver-clave .icono-oculto { display: none; }
+.ver-clave[aria-pressed="true"] { color: var(--rojo); }
+.ver-clave[aria-pressed="true"] .icono-visible { display: none; }
+.ver-clave[aria-pressed="true"] .icono-oculto { display: block; }
+
+@media (pointer: coarse) { .ver-clave { width: 44px; height: 44px; } }
+
 .error-campo { color: var(--rojo); font-size: .78rem; font-weight: 600; }
 .validation-summary-errors ul { list-style: none; }
 .validation-summary-errors { color: var(--rojo); font-size: .85rem; font-weight: 600; }

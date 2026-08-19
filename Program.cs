@@ -47,7 +47,8 @@ builder.Services.AddSingleton<CorreoService>();
 // esto acota el pedido completo para que nadie llene el disco de una.
 builder.Services.Configure<FormOptions>(opciones =>
 {
-    opciones.MultipartBodyLengthLimit = 60 * 1024 * 1024;
+    // Tiene que entrar una tanda entera de fotos de teléfono de una sola vez.
+    opciones.MultipartBodyLengthLimit = 150 * 1024 * 1024;
     opciones.ValueCountLimit = 256;
 });
 

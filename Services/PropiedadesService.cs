@@ -24,8 +24,19 @@ public class PropiedadesService
 
     public Propiedad? PorId(int id) => Publicadas.FirstOrDefault(p => p.Id == id);
 
+    /// <summary>
+    /// Destacadas de la portada, las más recientes primero. El orden importa:
+    /// si se ordenara por Id, una propiedad recién destacada quedaría siempre
+    /// última, y en cuanto hubiera más de <paramref name="cantidad"/> no
+    /// llegaría a mostrarse nunca.
+    /// </summary>
     public IEnumerable<Propiedad> Destacadas(int cantidad = 6) =>
-        Publicadas.Where(p => p.Destacada).OrderBy(p => p.Id).Take(cantidad).ToList();
+        Publicadas
+            .Where(p => p.Destacada)
+            .OrderByDescending(p => p.FechaActualizacion)
+            .ThenByDescending(p => p.Id)
+            .Take(cantidad)
+            .ToList();
 
     public IEnumerable<string> Barrios =>
         Publicadas.Select(p => p.Barrio).Distinct().OrderBy(b => b).ToList();

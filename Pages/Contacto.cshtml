@@ -2,7 +2,7 @@
 @model ContactoModel
 @{
     ViewData["Title"] = "Contacto";
-    ViewData["Descripcion"] = "Escribinos o visitanos en Solís 581, Monserrat, CABA. Respondemos consultas de compra, venta, alquiler, tasaciones y administración de propiedades.";
+    ViewData["Descripcion"] = $"Escribinos o visitanos en {SitioInfo.Direccion}, Monserrat, CABA. Respondemos consultas de compra, venta, alquiler, tasaciones y administración de propiedades.";
 }
 
 <section class="encabezado-pagina">
@@ -128,7 +128,7 @@
             <aside class="ficha__panel">
                 <h2 style="font-size:var(--t-lg);margin-bottom:0">Oficina</h2>
                 <p class="texto-suave mb-0" style="font-size:.92rem">
-                    @SitioInfo.Direccion<br />
+                    @SitioInfo.DireccionCompleta<br />
                     @SitioInfo.Localidad<br />
                     @SitioInfo.CodigoPostal
                 </p>
@@ -152,7 +152,7 @@
                     </li>
                 </ul>
 
-                <a class="btn btn--fantasma btn--bloque" href="https://www.google.com/maps/search/?api=1&query=Sol%C3%ADs+581+CABA" target="_blank" rel="noopener">
+                <a class="btn btn--fantasma btn--bloque" href="@SitioInfo.MapaUrl" target="_blank" rel="noopener">
                     <svg aria-hidden="true"><use href="#i-pin" /></svg>
                     Cómo llegar
                 </a>

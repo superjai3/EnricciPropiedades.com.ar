@@ -26,9 +26,18 @@ public class IndexModel : PageModel
     [TempData]
     public string? Mensaje { get; set; }
 
+    [TempData]
+    public string? Advertencia { get; set; }
+
     public int TotalPublicadas { get; private set; }
     public int TotalDestacadas { get; private set; }
     public int TotalDadasDeBaja { get; private set; }
+
+    /// <summary>Cuántas destacadas entran en la portada. Debe coincidir con Index.cshtml.cs del sitio.</summary>
+    public const int CupoDePortada = 6;
+
+    /// <summary>True cuando hay más destacadas que lugares en la portada.</summary>
+    public bool SobranDestacadas => TotalDestacadas > CupoDePortada;
 
     public async Task OnGetAsync()
     {

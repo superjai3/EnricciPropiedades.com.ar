@@ -11,7 +11,8 @@ public static class SitioInfo
     public const string Bajada = "Inmobiliaria en CABA desde 1932";
     public const string AnioFundacion = "1932";
 
-    public const string Direccion = "Solís 581";
+    public const string Direccion = "Solís 642";
+    public const string Unidad = "Piso 1º D";
     public const string Localidad = "Monserrat, Ciudad Autónoma de Buenos Aires";
     public const string CodigoPostal = "C1078AAK";
 
@@ -21,8 +22,18 @@ public static class SitioInfo
     public const string WhatsappNumero = "5491132986133";
     public const string Email = "horacioenricci@gmail.com";
 
-    public const string Horario = "Lunes a viernes de 10 a 18 h · Sábados de 10 a 13 h";
-    public const string Matricula = "Matrícula CUCICBA · Corredor Inmobiliario";
+    public const string Horario = "Lunes a viernes de 11 a 18.30 h, con turno previo";
+
+    public const string Titular = "Raúl Horacio Enricci";
+    public const string MatriculaNumero = "2377";
+    public const string Matricula = $"{Titular} · Corredor inmobiliario · CUCICBA {MatriculaNumero}";
+
+    /// <summary>Dirección con la unidad, para la página de contacto y el pie.</summary>
+    public const string DireccionCompleta = $"{Direccion}, {Unidad}";
+
+    /// <summary>Búsqueda en el mapa: va sin la unidad, que no ayuda a ubicar el lugar.</summary>
+    public static string MapaUrl =>
+        $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString($"{Direccion}, CABA")}";
 
     public const string Instagram = "https://www.instagram.com/enricci_propiedades/";
 

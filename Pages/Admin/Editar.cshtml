@@ -28,6 +28,16 @@
 
     <div asp-validation-summary="ModelOnly" class="panel-aviso panel-aviso--error"></div>
 
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="panel-aviso panel-aviso--ok" role="status">@Model.Mensaje</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Advertencia))
+    {
+        <div class="panel-aviso panel-aviso--error" role="alert">@Model.Advertencia</div>
+    }
+
     @if (Model.ErroresDeFotos.Count > 0)
     {
         <div class="panel-aviso panel-aviso--error" role="alert">
@@ -177,7 +187,7 @@
             <label asp-for="ComodidadesTexto">Comodidades</label>
             <textarea class="control" asp-for="ComodidadesTexto" rows="6"
                       placeholder="Balcón corrido&#10;Piso alto&#10;Luminoso&#10;Portero"></textarea>
-            <p class="panel-ayuda">Una por línea. Se muestran como etiquetas en la ficha.</p>
+            <p class="panel-ayuda">Una por línea, o separadas por comas. Se muestran como etiquetas en la ficha.</p>
         </div>
     </div>
 
@@ -218,9 +228,14 @@
         <div id="fotos-a-quitar"></div>
 
         <div class="panel-soltar">
-            La primera foto es la que se usa como portada.<br />
+            <strong>La primera foto es la que se usa como portada.</strong><br />
             JPG, PNG o WEBP · hasta @FotosService.TamanioMaximoTexto cada una · máximo @FotosService.Maximo por propiedad.
             <input type="file" name="Archivos" accept="image/jpeg,image/png,image/webp" multiple />
+            <p class="panel-ayuda" style="margin-top:.8rem">
+                Si sacás las fotos con un iPhone, puede que salgan en formato HEIC, que los navegadores
+                no muestran. Se arregla en <em>Ajustes → Cámara → Formatos → Más compatible</em>, o
+                convirtiéndolas a JPG antes de subirlas.
+            </p>
         </div>
     </div>
 

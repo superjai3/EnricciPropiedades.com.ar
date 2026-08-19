@@ -1,7 +1,7 @@
 # EnricciPropiedades.com.ar
 
 Sitio web de **R. H. Enricci Propiedades**, inmobiliaria de la Ciudad Autónoma de
-Buenos Aires con oficina en Solís 581 (Monserrat) desde 1932.
+Buenos Aires con oficina en Solís 642, piso 1º D (Monserrat).
 
 Aplicación **ASP.NET Core Razor Pages** (net8.0) con base **SQLite**, sin
 dependencias de front-end: el diseño, los componentes y los comportamientos son
@@ -117,12 +117,31 @@ siguiente arranque se crea de nuevo con una clave nueva.
 
 ### Fotos
 
-Se suben desde el formulario de la publicación: JPG, PNG o WEBP, hasta 8 MB cada
-una y 12 por propiedad. Se guardan en `wwwroot/imagenes/propiedades/{id}/` con un
-nombre generado, nunca con el del archivo subido, y se valida la firma del
-archivo además de la extensión. **La primera foto es la portada.** Si una
-publicación no tiene ninguna, el sitio dibuja una portada vectorial generada a
-partir del `Id`, así nunca queda una imagen rota.
+Se suben desde el formulario de la publicación: JPG, JFIF, PNG o WEBP, hasta
+20 MB cada una y 12 por propiedad. Se guardan en
+`wwwroot/imagenes/propiedades/{id}/` con un nombre generado, nunca con el del
+archivo subido; `.jfif` y `.jpeg` se normalizan a `.jpg` para que el servidor
+las entregue como `image/jpeg`. Se valida la firma del archivo además de la
+extensión. **La primera foto es la portada.** Si una publicación no tiene
+ninguna, el sitio dibuja una portada vectorial generada a partir del `Id`, así
+nunca queda una imagen rota.
+
+**HEIC/HEIF no se aceptan**: es el formato con el que el iPhone saca fotos por
+omisión y los navegadores no lo muestran. El panel lo rechaza con la explicación
+de cómo resolverlo (*Ajustes → Cámara → Formatos → Más compatible*, o convertir
+a JPG). Lo mismo con AVIF, TIFF, BMP y GIF.
+
+Cada rechazo queda en el log con el nombre, el tipo y el tamaño del archivo, y
+se le muestra al usuario en rojo —nunca dentro del cartel verde de éxito—
+devolviéndolo a la pantalla de edición para que pueda resolverlo.
+
+### Qué aparece en la portada
+
+La portada muestra hasta **6** publicaciones marcadas como destacadas,
+**de la modificada más recientemente a la más antigua**. El orden importa: si se
+ordenara por `Id`, una propiedad recién destacada quedaría siempre última y, en
+cuanto hubiera más de seis, no llegaría a verse nunca. Cuando hay más de seis
+destacadas, el panel lo avisa.
 
 ## Seguridad
 

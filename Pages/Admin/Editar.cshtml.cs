@@ -40,6 +40,13 @@ public class EditarModel : PageModel
     [TempData]
     public string? Mensaje { get; set; }
 
+    /// <summary>
+    /// Lo que salió mal sin impedir el guardado (típicamente, fotos rechazadas).
+    /// Va aparte del mensaje de éxito para que no se anuncie en verde un problema.
+    /// </summary>
+    [TempData]
+    public string? Advertencia { get; set; }
+
     public bool EsAlta => Datos.Id == 0;
     public List<string> ErroresDeFotos { get; } = new();
     public List<string> BarriosSugeridos { get; private set; } = new();
@@ -113,10 +120,13 @@ public class EditarModel : PageModel
             return Page();
         }
 
+        // Una por línea es lo que dice la ayuda, pero separar con comas es el
+        // reflejo natural de cualquiera: se aceptan las dos formas.
         var comodidades = ComodidadesTexto
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Split(new[] { '\n', ',', ';' },
+                   StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(c => c.Length > 0)
-            .Distinct()
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
         if (EsAlta)
@@ -140,9 +150,14 @@ public class EditarModel : PageModel
             _log.LogInformation(
                 "Publicación {Id} creada por {Usuario}: {Titulo}", nueva.Id, User.Identity?.Name, nueva.Titulo);
 
-            Mensaje = ErroresDeFotos.Count > 0
-                ? $"Se publicó «{nueva.Titulo}», pero algunas fotos no se pudieron cargar: {string.Join(" ", ErroresDeFotos)}"
-                : $"Se publicó «{nueva.Titulo}».";
+            Mensaje = $"Se publicó «{nueva.Titulo}».";
+
+            if (ErroresDeFotos.Count > 0)
+            {
+                Advertencia = ResumirFotosRechazadas(nueva.Fotos.Count);
+                // Se vuelve a la edición y no al listado: las fotos hay que resolverlas ahí.
+                return RedirectToPage("/Admin/Editar", new { id = nueva.Id });
+            }
 
             return RedirectToPage("/Admin/Index");
         }
@@ -176,11 +191,25 @@ public class EditarModel : PageModel
         _log.LogInformation(
             "Publicación {Id} actualizada por {Usuario}.", existente.Id, User.Identity?.Name);
 
-        Mensaje = ErroresDeFotos.Count > 0
-            ? $"Se guardó «{existente.Titulo}», pero algunas fotos no se pudieron cargar: {string.Join(" ", ErroresDeFotos)}"
-            : $"Se guardaron los cambios de «{existente.Titulo}».";
+        Mensaje = $"Se guardaron los cambios de «{existente.Titulo}».";
+
+        if (ErroresDeFotos.Count > 0)
+        {
+            Advertencia = ResumirFotosRechazadas(existente.Fotos.Count);
+            return RedirectToPage("/Admin/Editar", new { id = existente.Id });
+        }
 
         return RedirectToPage("/Admin/Index");
+    }
+
+    /// <summary>Texto de la advertencia, según hayan entrado algunas fotos o ninguna.</summary>
+    private string ResumirFotosRechazadas(int cargadas)
+    {
+        var detalle = string.Join(" ", ErroresDeFotos);
+
+        return cargadas > 0
+            ? $"Quedaron {cargadas} foto{(cargadas == 1 ? "" : "s")} cargadas, pero otras no entraron. {detalle}"
+            : $"No se pudo cargar ninguna foto. {detalle}";
     }
 
     /// <summary>

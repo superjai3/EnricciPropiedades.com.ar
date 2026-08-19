@@ -6,10 +6,33 @@ namespace Enricci_Propiedades.Services;
 /// </summary>
 public class FotosService
 {
-    private const long TamanioMaximo = 8 * 1024 * 1024;
+    // Una foto de teléfono actual pasa los 8 MB sin ninguna dificultad, así que
+    // el tope tiene que dar lugar a lo que la gente sube de verdad.
+    private const long TamanioMaximo = 20 * 1024 * 1024;
     private const int MaximoPorPropiedad = 12;
 
-    private static readonly string[] ExtensionesValidas = { ".jpg", ".jpeg", ".png", ".webp" };
+    /// <summary>
+    /// Formatos que el navegador sabe mostrar. ".jfif" es un JPEG con otro
+    /// nombre: así los guarda Windows al bajarlos desde el navegador.
+    /// </summary>
+    private static readonly string[] ExtensionesValidas =
+        { ".jpg", ".jpeg", ".jfif", ".png", ".webp" };
+
+    /// <summary>
+    /// Formatos de foto que el teléfono genera pero que los navegadores no
+    /// muestran. Se rechazan con una explicación de qué hacer, en vez del
+    /// mensaje genérico que no le dice nada a nadie.
+    /// </summary>
+    private static readonly Dictionary<string, string> ExtensionesConocidasNoSoportadas = new()
+    {
+        [".heic"] = "las fotos del iPhone vienen en formato HEIC, que los navegadores no muestran",
+        [".heif"] = "las fotos del iPhone vienen en formato HEIF, que los navegadores no muestran",
+        [".avif"] = "AVIF todavía no lo muestran todos los navegadores",
+        [".tif"] = "TIFF no se puede publicar en una web",
+        [".tiff"] = "TIFF no se puede publicar en una web",
+        [".bmp"] = "BMP pesa muchísimo para una web",
+        [".gif"] = "GIF pierde calidad en una fotografía"
+    };
 
     private readonly IWebHostEnvironment _entorno;
     private readonly ILogger<FotosService> _log;
@@ -64,18 +87,36 @@ public class FotosService
 
             if (!ExtensionesValidas.Contains(extension))
             {
-                errores.Add($"«{archivo.FileName}»: sólo se aceptan JPG, PNG o WEBP.");
+                // Cada rechazo queda en el log con el detalle del archivo: sin esto
+                // no hay forma de averiguar después por qué una foto no entró.
+                _log.LogWarning(
+                    "Foto rechazada por formato: {Nombre} ({Tipo}, {Bytes} bytes).",
+                    archivo.FileName, archivo.ContentType, archivo.Length);
+
+                errores.Add(ExtensionesConocidasNoSoportadas.TryGetValue(extension, out var motivo)
+                    ? $"«{archivo.FileName}»: {motivo}. Convertila a JPG y volvé a subirla."
+                    : $"«{archivo.FileName}»: sólo se aceptan JPG, PNG o WEBP.");
                 continue;
             }
 
             if (archivo.Length > TamanioMaximo)
             {
-                errores.Add($"«{archivo.FileName}» pesa más de {TamanioMaximoTexto}.");
+                _log.LogWarning(
+                    "Foto rechazada por tamaño: {Nombre} ({Bytes} bytes).",
+                    archivo.FileName, archivo.Length);
+
+                errores.Add(
+                    $"«{archivo.FileName}» pesa {archivo.Length / 1024d / 1024d:N1} MB y el máximo " +
+                    $"es {TamanioMaximoTexto}. Reducile el tamaño y volvé a subirla.");
                 continue;
             }
 
             if (!await EsImagenDeVerdadAsync(archivo))
             {
+                _log.LogWarning(
+                    "Foto rechazada: el contenido de {Nombre} no coincide con una imagen ({Tipo}).",
+                    archivo.FileName, archivo.ContentType);
+
                 errores.Add($"«{archivo.FileName}» no parece ser una imagen válida.");
                 continue;
             }
@@ -83,8 +124,9 @@ public class FotosService
             Directory.CreateDirectory(carpetaFisica);
 
             // Nombre propio: nunca se usa el del archivo subido, que podría
-            // traer rutas o caracteres inesperados.
-            var nombre = $"{Guid.NewGuid():N}{extension}";
+            // traer rutas o caracteres inesperados. La extensión se normaliza
+            // para que el archivo se sirva con el tipo correcto.
+            var nombre = $"{Guid.NewGuid():N}{Normalizar(extension)}";
             var destino = Path.Combine(carpetaFisica, nombre);
 
             await using (var salida = File.Create(destino))
@@ -98,6 +140,17 @@ public class FotosService
 
         return guardadas;
     }
+
+    /// <summary>
+    /// ".jfif" y ".jpeg" son JPEG con otro nombre. Se guardan como ".jpg" para
+    /// que el servidor los entregue como image/jpeg y no como el heredado
+    /// image/pjpeg, que es lo que devuelve para .jfif.
+    /// </summary>
+    private static string Normalizar(string extension) => extension switch
+    {
+        ".jfif" or ".jpeg" => ".jpg",
+        _ => extension
+    };
 
     /// <summary>Borra el archivo físico de una foto. Ignora las que no existan.</summary>
     public void Borrar(string rutaPublica)
@@ -136,9 +189,12 @@ public class FotosService
     {
         var cabecera = new byte[12];
         await using var entrada = archivo.OpenReadStream();
-        var leidos = await entrada.ReadAsync(cabecera);
 
-        if (leidos < 12)
+        // ReadAsync puede devolver menos bytes de los pedidos aunque queden más:
+        // ReadAtLeastAsync insiste hasta completar la cabecera.
+        var leidos = await entrada.ReadAtLeastAsync(cabecera, cabecera.Length, throwOnEndOfStream: false);
+
+        if (leidos < cabecera.Length)
         {
             return false;
         }

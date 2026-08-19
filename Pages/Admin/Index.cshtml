@@ -20,6 +20,21 @@
     <div class="panel-aviso panel-aviso--ok" role="status">@Model.Mensaje</div>
 }
 
+@if (!string.IsNullOrEmpty(Model.Advertencia))
+{
+    <div class="panel-aviso panel-aviso--error" role="alert">@Model.Advertencia</div>
+}
+
+@if (Model.SobranDestacadas)
+{
+    <div class="panel-aviso panel-aviso--error" role="status">
+        Tenés @Model.TotalDestacadas propiedades marcadas para la portada y entran
+        @Enricci_Propiedades.Pages.Admin.IndexModel.CupoDePortada.
+        Se muestran las @Enricci_Propiedades.Pages.Admin.IndexModel.CupoDePortada modificadas más
+        recientemente; el resto no aparece hasta que saques alguna.
+    </div>
+}
+
 <div class="panel-metricas">
     <div class="panel-metrica">
         <strong>@Model.TotalPublicadas</strong>

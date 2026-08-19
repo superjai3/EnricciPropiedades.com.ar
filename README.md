@@ -124,6 +124,50 @@ archivo además de la extensión. **La primera foto es la portada.** Si una
 publicación no tiene ninguna, el sitio dibuja una portada vectorial generada a
 partir del `Id`, así nunca queda una imagen rota.
 
+## Seguridad
+
+- **Cabeceras en todas las respuestas** (`Services/CabecerasSeguridad.cs`): una
+  política de contenido (CSP) estricta, `nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy` y `Permissions-Policy`. Kestrel no anuncia el servidor.
+- **CSP con nonce.** Los pocos `<script>` en línea del sitio se autorizan con un
+  valor distinto en cada pedido; `script-src` **no** usa `unsafe-inline`, así que
+  un texto inyectado no se ejecuta aunque llegue a la página. Por eso **no puede
+  haber manejadores de eventos escritos en el HTML** (`onclick`, `onsubmit`…):
+  para confirmar una acción destructiva se usa el atributo `data-confirmar`, que
+  atiende `enricci.js`. Si agregás un script en línea, acordate del nonce:
+
+  ```cshtml
+  <script nonce="@Context.Nonce()"> … </script>
+  ```
+
+  Dentro de un `@section` el `Context` no está en alcance: tomá el valor arriba
+  de la página con `ViewContext.HttpContext.Nonce()`.
+- **Bloqueo de cuenta.** A los 5 intentos fallidos seguidos la cuenta queda
+  bloqueada 5 minutos, y el plazo se duplica con cada tanda hasta 2 horas. Se
+  reinicia con el primer ingreso correcto.
+- **Freno por dirección IP** en la pantalla de ingreso: 20 pedidos por minuto.
+  Uno corta la fuerza bruta contra una cuenta; el otro, contra muchas.
+- **Cookies** de sesión y de antiforgery con `HttpOnly` y, en producción,
+  `Secure`. El cierre de sesión es sólo por POST.
+- El mensaje de ingreso fallido es siempre el mismo, de modo que no se puede
+  averiguar qué correos existen.
+
+## Diseño y accesibilidad
+
+El sitio es responsive de 320 px para arriba, con el mismo sistema de diseño en
+el panel. Algunas decisiones que conviene no deshacer sin querer:
+
+- Las grillas usan `minmax(min(100%, Npx), 1fr)`: sin el `min()` desbordan en
+  pantallas angostas.
+- `body` lleva `overflow-x: clip` y no `hidden`, porque `hidden` crea un
+  contenedor de scroll que rompe el `position: sticky` de la ficha y del panel.
+- Los campos de formulario pasan a 16 px abajo de 860 px: con menos, Safari en
+  iPhone amplía la página al enfocarlos.
+- La tabla del panel se convierte en tarjetas abajo de 720 px; cada celda toma
+  su rótulo del atributo `data-rotulo`.
+- Los blancos táctiles llegan a 44 px bajo `@media (pointer: coarse)`.
+- Las alturas de pantalla completa usan `dvh` con `vh` de respaldo.
+
 ## Base de datos
 
 SQLite, en el archivo que indique `ConnectionStrings:Enricci` (por defecto

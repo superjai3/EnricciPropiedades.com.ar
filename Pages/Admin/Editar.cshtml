@@ -2,6 +2,8 @@
 @model Enricci_Propiedades.Pages.Admin.EditarModel
 @{
     ViewData["Title"] = Model.EsAlta ? "Publicar una propiedad" : "Editar publicación";
+    // Dentro de @@section el Context no está en alcance: se toma acá.
+    var nonce = ViewContext.HttpContext.Nonce();
 }
 
 <div class="panel-cabecera">
@@ -238,7 +240,7 @@
 
 @section Scripts {
     <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
-    <script>
+    <script nonce="@nonce">
         // Quitar una foto: se saca de la vista y se manda su ruta al guardar.
         document.addEventListener('click', function (ev) {
             var boton = ev.target.closest('[data-quitar-foto]');

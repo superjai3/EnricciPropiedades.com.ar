@@ -152,6 +152,35 @@
         imagenMini.setAttribute('src', temp);
     });
 
+    /* ---------- Confirmación antes de una acción destructiva ----------
+       Va por atributo y no por onsubmit en el HTML: la política de contenido
+       del sitio no permite manejadores de eventos escritos en la marca. */
+    document.addEventListener('submit', function (ev) {
+        var formulario = ev.target.closest('[data-confirmar]');
+        if (!formulario) { return; }
+        if (!window.confirm(formulario.getAttribute('data-confirmar'))) {
+            ev.preventDefault();
+        }
+    });
+
+    /* ---------- Evitar el doble envío ----------
+       Con conexión lenta es fácil apretar dos veces y duplicar una publicación
+       o una consulta. El botón queda deshabilitado y avisa que está trabajando. */
+    document.addEventListener('submit', function (ev) {
+        var formulario = ev.target;
+        if (ev.defaultPrevented || formulario.hasAttribute('data-sin-bloqueo')) { return; }
+
+        var boton = formulario.querySelector('button[type="submit"], button:not([type])');
+        if (!boton || boton.disabled) { return; }
+
+        // Se difiere para no cortar el envío del formulario en curso.
+        window.setTimeout(function () {
+            boton.disabled = true;
+            boton.setAttribute('aria-busy', 'true');
+            if (boton.dataset.textoEnvio) { boton.textContent = boton.dataset.textoEnvio; }
+        }, 0);
+    });
+
     /* ---------- Año dinámico en el pie ---------- */
     var anio = document.querySelector('[data-anio]');
     if (anio) { anio.textContent = String(new Date().getFullYear()); }

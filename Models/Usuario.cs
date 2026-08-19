@@ -37,4 +37,12 @@ public class Usuario
 
     public DateTime FechaAlta { get; set; } = DateTime.UtcNow;
     public DateTime? UltimoIngreso { get; set; }
+
+    /// <summary>Fallos seguidos desde el último ingreso correcto.</summary>
+    public int IntentosFallidos { get; set; }
+
+    /// <summary>Mientras tenga fecha futura, no se acepta el ingreso ni con la clave correcta.</summary>
+    public DateTime? BloqueadoHasta { get; set; }
+
+    public bool EstaBloqueado => BloqueadoHasta is { } hasta && hasta > DateTime.UtcNow;
 }

@@ -6,7 +6,9 @@
 
 .panel-body {
     background: var(--hueso-2);
+    /* dvh sigue la barra de direcciones del navegador movil; vh queda de respaldo. */
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* Texto sólo para lectores de pantalla (encabezados de columna sin rótulo visible). */
@@ -140,7 +142,7 @@
 /* --- Métricas ------------------------------------------------------------ */
 .panel-metricas {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
     gap: var(--sp-3);
     margin-bottom: var(--sp-5);
 }
@@ -245,7 +247,7 @@
 /* --- Formulario ---------------------------------------------------------- */
 .panel-grilla {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
     gap: var(--sp-4);
 }
 
@@ -291,7 +293,7 @@
 /* --- Fotos --------------------------------------------------------------- */
 .panel-fotos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
     gap: var(--sp-3);
 }
 
@@ -350,6 +352,7 @@
 /* --- Ingreso ------------------------------------------------------------- */
 .panel-ingreso {
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     place-items: center;
     padding: var(--sp-5);
@@ -429,4 +432,72 @@
     .panel-nav { order: 3; width: 100%; margin-inline-start: 0; }
     .panel-barra__acciones { margin-inline-start: auto; }
     .panel-usuario { display: none; }
+    .panel-buscador .control { max-width: none; flex: 1 1 100%; }
+    .panel-cabecera .btn { width: 100%; }
+}
+
+/* --- La tabla pasa a tarjetas en el teléfono ------------------------------
+   Una tabla de seis columnas obliga a desplazar de costado para hacer
+   cualquier cosa. Abajo de 720 px cada fila se apila y cada dato se rotula
+   con su encabezado, tomado del atributo data-rotulo. */
+@media (max-width: 720px) {
+    .panel-scroll { overflow-x: visible; }
+
+    .panel-tabla { min-width: 0; display: block; }
+    .panel-tabla thead { display: none; }
+    .panel-tabla tbody { display: grid; gap: var(--sp-3); }
+
+    .panel-tabla tr {
+        display: grid;
+        gap: .5rem;
+        padding: var(--sp-4);
+        border: 1px solid var(--linea);
+        border-radius: var(--r-md);
+        background: var(--bg);
+    }
+    .panel-tabla tbody tr:hover { background: var(--bg); }
+
+    .panel-tabla td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sp-4);
+        padding: 0;
+        border: 0;
+    }
+
+    /* El título ocupa toda la tarjeta y no lleva rótulo. */
+    .panel-tabla td:first-child { display: block; }
+
+    .panel-tabla td[data-rotulo]::before {
+        content: attr(data-rotulo);
+        font-size: .7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--texto-suave);
+        flex: 0 0 auto;
+    }
+
+    .panel-tabla td:last-child { padding-top: var(--sp-3); border-top: 1px solid var(--linea); }
+    .panel-acciones { width: 100%; justify-content: stretch; }
+    .panel-acciones > * { flex: 1 1 0; }
+    .panel-acciones form { display: flex; flex: 1 1 0; }
+    .panel-btn-icono { width: 100%; justify-content: center; padding-block: .6rem; }
+
+    .panel-celda-titulo { align-items: flex-start; }
+    .panel-miniatura { width: 76px; height: 58px; }
+}
+
+/* Blancos táctiles cómodos también en el panel. */
+@media (pointer: coarse) {
+    .panel-btn-icono { min-height: 44px; }
+    .panel-nav a { padding-block: .7rem; }
+    .panel-casilla { padding-block: .75rem; }
+    .panel-foto__quitar { width: 36px; height: 36px; }
+}
+
+/* Safari en iPhone amplía la página al enfocar campos de menos de 16 px. */
+@media (max-width: 860px) {
+    .panel-tabla { font-size: .95rem; }
 }

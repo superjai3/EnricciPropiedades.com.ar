@@ -1,6 +1,9 @@
 using System.Globalization;
 using System.Text.Unicode;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.WebEncoders;
@@ -14,6 +17,9 @@ CultureInfo.DefaultThreadCurrentCulture = culturaArgentina;
 CultureInfo.DefaultThreadCurrentUICulture = culturaArgentina;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// No anunciar el servidor: es información gratis para quien busca vulnerabilidades.
+builder.WebHost.ConfigureKestrel(opciones => opciones.AddServerHeader = false);
 
 // Base de datos: un archivo SQLite junto a la aplicación. La ruta se resuelve
 // contra la carpeta del sitio y no contra el directorio de trabajo, que cambia
@@ -37,6 +43,20 @@ builder.Services.AddSingleton<FotosService>();
 builder.Services.Configure<OpcionesCorreo>(builder.Configuration.GetSection(OpcionesCorreo.Seccion));
 builder.Services.AddSingleton<CorreoService>();
 
+// Tope al tamaño de lo que se sube: el máximo por foto lo controla FotosService,
+// esto acota el pedido completo para que nadie llene el disco de una.
+builder.Services.Configure<FormOptions>(opciones =>
+{
+    opciones.MultipartBodyLengthLimit = 60 * 1024 * 1024;
+    opciones.ValueCountLimit = 256;
+});
+
+var enProduccion = !builder.Environment.IsDevelopment();
+
+// En producción las cookies viajan sólo por HTTPS. En desarrollo se deja según
+// el pedido, para poder probar por http sin certificado.
+var politicaCookie = enProduccion ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
+
 // Ingreso al panel: cookie de sesión propia, sin dependencias externas.
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -50,10 +70,44 @@ builder.Services
         opciones.Cookie.Name = "enricci.panel";
         opciones.Cookie.HttpOnly = true;
         opciones.Cookie.SameSite = SameSiteMode.Lax;
-        opciones.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        opciones.Cookie.SecurePolicy = politicaCookie;
     });
 
+builder.Services.AddAntiforgery(opciones =>
+{
+    opciones.Cookie.HttpOnly = true;
+    opciones.Cookie.SameSite = SameSiteMode.Strict;
+    opciones.Cookie.SecurePolicy = politicaCookie;
+});
+
 builder.Services.AddAuthorization();
+
+// Freno por dirección IP en la pantalla de ingreso. Se suma al bloqueo de la
+// cuenta: uno corta la fuerza bruta contra una cuenta, el otro contra muchas.
+builder.Services.AddRateLimiter(opciones =>
+{
+    opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // 20 pedidos por minuto: alcanza de sobra para quien se equivoca de
+    // contraseña un par de veces, y corta en seco a quien prueba en serie.
+    opciones.AddPolicy("ingreso", contexto =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: contexto.Connection.RemoteIpAddress?.ToString() ?? "sin-ip",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
+    opciones.OnRejected = async (contexto, cancelacion) =>
+    {
+        contexto.HttpContext.Response.Headers.RetryAfter = "60";
+        contexto.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+        await contexto.HttpContext.Response.WriteAsync(
+            "Demasiados intentos seguidos. Esperá un minuto y volvé a probar.", cancelacion);
+    };
+});
 
 // Todo lo que cuelga de /Admin exige sesión iniciada, salvo la propia pantalla
 // de ingreso. Así una página nueva del panel nace protegida por omisión.
@@ -75,15 +129,19 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // Valor por defecto de HSTS: 30 días. Ver https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// Antes que nada, para que alcancen también a los archivos estáticos.
+app.UseCabecerasSeguridad();
 
 app.UseStatusCodePagesWithReExecute("/Error", "?codigo={0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

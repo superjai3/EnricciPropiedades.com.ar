@@ -96,16 +96,17 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>@p.OperacionTexto</td>
-                            <td>@p.PrecioTexto</td>
-                            <td>
+                            <td data-rotulo="Operación">@p.OperacionTexto</td>
+                            <td data-rotulo="Precio">@p.PrecioTexto</td>
+                            <td data-rotulo="Estado">
                                 <span class="panel-estado panel-estado--@p.Estado.ToString().ToLower()">@p.EstadoTexto</span>
                             </td>
-                            <td>
+                            <td data-rotulo="Portada">
                                 <form method="post" asp-page-handler="Destacar" asp-route-id="@p.Id">
                                     <input type="hidden" name="Buscar" value="@Model.Buscar" />
                                     <button class="panel-btn-icono" type="submit"
-                                            title="@(p.Destacada ? "Quitar de la portada" : "Mostrar en la portada")">
+                                            title="@(p.Destacada ? "Quitar de la portada" : "Mostrar en la portada")"
+                                            aria-label="@(p.Destacada ? $"Quitar «{p.Titulo}» de la portada" : $"Mostrar «{p.Titulo}» en la portada")">
                                         @(p.Destacada ? "★ Sí" : "☆ No")
                                     </button>
                                 </form>
@@ -114,8 +115,10 @@
                                 <div class="panel-acciones">
                                     <a class="panel-btn-icono" asp-page="/Ficha" asp-route-id="@p.Id" target="_blank" rel="noopener">Ver</a>
                                     <a class="panel-btn-icono" asp-page="/Admin/Editar" asp-route-id="@p.Id">Editar</a>
+                                    @* La confirmación va por atributo y no por onsubmit: la política de
+                                       contenido no admite manejadores de eventos escritos en el HTML. *@
                                     <form method="post" asp-page-handler="Eliminar" asp-route-id="@p.Id"
-                                          onsubmit="return confirm('¿Eliminar «@p.Titulo»? Se borran también sus fotos y no se puede deshacer.');">
+                                          data-confirmar="¿Eliminar «@p.Titulo»? Se borran también sus fotos y no se puede deshacer.">
                                         <button class="panel-btn-icono panel-btn-icono--peligro" type="submit">Eliminar</button>
                                     </form>
                                 </div>

@@ -26,6 +26,9 @@ public static class SitioInfo
 
     public const string Instagram = "https://www.instagram.com/enricci_propiedades/";
 
+    /// <summary>Vacío mientras no haya página: el ícono no se muestra si no hay adónde ir.</summary>
+    public const string Facebook = "";
+
     public static string Whatsapp(string mensaje) =>
         $"https://wa.me/{WhatsappNumero}?text={Uri.EscapeDataString(mensaje)}";
 

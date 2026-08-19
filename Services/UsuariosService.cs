@@ -24,10 +24,17 @@ public class UsuariosService
     public Task<Usuario?> PorIdAsync(int id) =>
         _bd.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
 
+    /// <summary>Fallos seguidos que hacen falta para bloquear la cuenta un rato.</summary>
+    private const int IntentosAntesDeBloquear = 5;
+
     /// <summary>
     /// Devuelve el usuario si el correo y la contraseña son correctos, o null.
     /// El motivo del rechazo no se le informa al visitante: un mensaje único
     /// evita que se pueda averiguar qué correos existen.
+    ///
+    /// A los <see cref="IntentosAntesDeBloquear"/> fallos seguidos la cuenta
+    /// queda bloqueada un rato que crece con cada tanda, así que probar
+    /// contraseñas al voleo deja de ser viable.
     /// </summary>
     public async Task<Usuario?> AutenticarAsync(string email, string clave)
     {
@@ -40,13 +47,43 @@ public class UsuariosService
             return null;
         }
 
+        if (usuario.EstaBloqueado)
+        {
+            _log.LogWarning(
+                "Ingreso rechazado: la cuenta {Email} está bloqueada hasta {Hasta:u}.",
+                usuario.Email, usuario.BloqueadoHasta);
+            return null;
+        }
+
         if (!ClaveHash.Verificar(clave ?? "", usuario.HashClave, usuario.Sal))
         {
-            _log.LogWarning("Intento de ingreso al panel con contraseña incorrecta para {Email}.", usuario.Email);
+            usuario.IntentosFallidos++;
+
+            if (usuario.IntentosFallidos >= IntentosAntesDeBloquear)
+            {
+                // 5 minutos la primera tanda, 10 la segunda, 20 la tercera… hasta 2 horas.
+                var tandas = usuario.IntentosFallidos / IntentosAntesDeBloquear;
+                var minutos = Math.Min(5 * Math.Pow(2, tandas - 1), 120);
+                usuario.BloqueadoHasta = DateTime.UtcNow.AddMinutes(minutos);
+
+                _log.LogWarning(
+                    "Cuenta {Email} bloqueada {Minutos} minutos tras {Intentos} intentos fallidos.",
+                    usuario.Email, minutos, usuario.IntentosFallidos);
+            }
+            else
+            {
+                _log.LogWarning(
+                    "Contraseña incorrecta para {Email} ({Intentos} de {Tope}).",
+                    usuario.Email, usuario.IntentosFallidos, IntentosAntesDeBloquear);
+            }
+
+            await _bd.SaveChangesAsync();
             return null;
         }
 
         usuario.UltimoIngreso = DateTime.UtcNow;
+        usuario.IntentosFallidos = 0;
+        usuario.BloqueadoHasta = null;
         await _bd.SaveChangesAsync();
 
         _log.LogInformation("Ingreso al panel de {Email}.", usuario.Email);

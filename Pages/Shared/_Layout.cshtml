@@ -34,7 +34,7 @@
     <link rel="apple-touch-icon" href="~/imagenes/isologo.png" />
     <link rel="stylesheet" href="~/css/enricci.css" asp-append-version="true" />
 
-    <script>
+    <script nonce="@Context.Nonce()">
         // Aplica el tema guardado antes de pintar, para evitar el destello blanco.
         (function () {
             // Marca que hay JavaScript: sin esta clase el contenido animado se ve siempre.
@@ -48,7 +48,7 @@
         })();
     </script>
 
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="@Context.Nonce()">
         {
           "@@context": "https://schema.org",
           "@@type": "RealEstateAgent",
@@ -142,6 +142,24 @@
                     <svg class="icono-sol" aria-hidden="true"><use href="#i-sol" /></svg>
                     <svg class="icono-luna" aria-hidden="true"><use href="#i-luna" /></svg>
                 </button>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="barra__admin barra__admin--activo" asp-page="/Admin/Index"
+                       title="Ir al panel de administración">
+                        <svg aria-hidden="true"><use href="#i-llave" /></svg>
+                        <span>Panel</span>
+                    </a>
+                }
+                else
+                {
+                    <a class="barra__admin" asp-page="/Admin/Ingresar" rel="nofollow"
+                       title="Acceso para la administración del sitio">
+                        <svg aria-hidden="true"><use href="#i-llave" /></svg>
+                        <span>Administrar</span>
+                    </a>
+                }
+
                 <a class="btn btn--sm" asp-page="/Tasacion">
                     Tasar mi propiedad
                     <svg aria-hidden="true"><use href="#i-flecha" /></svg>
@@ -210,6 +228,14 @@
             <div class="panel-movil__pie">
                 <a class="btn btn--bloque" asp-page="/Tasacion">Tasar mi propiedad</a>
                 <a class="btn btn--fantasma btn--bloque" href="@SitioInfo.TelefonoLink">Llamar al @SitioInfo.Telefono</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="btn btn--fantasma btn--bloque" asp-page="/Admin/Index">Panel de administración</a>
+                }
+                else
+                {
+                    <a class="btn btn--fantasma btn--bloque" asp-page="/Admin/Ingresar" rel="nofollow">Administrar el sitio</a>
+                }
             </div>
         </div>
     </div>
@@ -234,9 +260,12 @@
                         <a href="@SitioInfo.Instagram" target="_blank" rel="noopener" aria-label="Instagram">
                             <svg aria-hidden="true"><use href="#i-instagram" /></svg>
                         </a>
-                        <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
-                            <svg aria-hidden="true"><use href="#i-facebook" /></svg>
-                        </a>
+                        @if (!string.IsNullOrEmpty(SitioInfo.Facebook))
+                        {
+                            <a href="@SitioInfo.Facebook" target="_blank" rel="noopener" aria-label="Facebook">
+                                <svg aria-hidden="true"><use href="#i-facebook" /></svg>
+                            </a>
+                        }
                         <a href="@SitioInfo.MailA("Consulta desde la web")" aria-label="Enviarnos un correo">
                             <svg aria-hidden="true"><use href="#i-mail" /></svg>
                         </a>

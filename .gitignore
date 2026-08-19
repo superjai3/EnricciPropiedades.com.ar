@@ -1,0 +1,43 @@
+# Resultados de compilación
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.pdb
+*.exe
+
+# Visual Studio / Visual Studio Code
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# Publicación
+publish/
+*.publishsettings
+PublishScripts/
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Secretos y configuración local
+appsettings.*.local.json
+secrets.json
+*.env
+
+# Sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Registros y temporales
+*.log
+*.tmp
+*~

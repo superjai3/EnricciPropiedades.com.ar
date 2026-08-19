@@ -3,7 +3,7 @@
 Sitio web de **R. H. Enricci Propiedades**, inmobiliaria de la Ciudad Autónoma de
 Buenos Aires con oficina en Solís 581 (Monserrat) desde 1932.
 
-Aplicación **ASP.NET Core Razor Pages** (net7.0), sin dependencias de front-end:
+Aplicación **ASP.NET Core Razor Pages** (net8.0), sin dependencias de front-end:
 el diseño, los componentes y los comportamientos son propios.
 
 ## Cómo ejecutarlo

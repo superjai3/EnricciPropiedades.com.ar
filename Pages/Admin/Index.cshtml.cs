@@ -39,6 +39,12 @@ public class IndexModel : PageModel
     /// <summary>True cuando hay más destacadas que lugares en la portada.</summary>
     public bool SobranDestacadas => TotalDestacadas > CupoDePortada;
 
+    /// <summary>
+    /// True cuando no hay ninguna marcada: la portada muestra entonces las
+    /// últimas publicadas, y conviene avisarlo para que no parezca un error.
+    /// </summary>
+    public bool FaltanDestacadas => TotalDestacadas == 0 && TotalPublicadas > 0;
+
     public async Task OnGetAsync()
     {
         Publicaciones = await _propiedades.TodasParaPanelAsync(Buscar);

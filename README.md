@@ -16,8 +16,9 @@ dotnet run
 
 Luego abrir la URL que muestra la consola (por defecto `https://localhost:7227`).
 
-La base de datos se crea sola en el primer arranque: aplica las migraciones,
-carga un catálogo de ejemplo de 12 propiedades y da de alta el usuario del panel.
+La base de datos se crea sola en el primer arranque: aplica las migraciones
+—que traen el catálogo real de la inmobiliaria— y da de alta el usuario del
+panel.
 
 ## Estructura
 
@@ -140,8 +141,31 @@ devolviéndolo a la pantalla de edición para que pueda resolverlo.
 La portada muestra hasta **6** publicaciones marcadas como destacadas,
 **de la modificada más recientemente a la más antigua**. El orden importa: si se
 ordenara por `Id`, una propiedad recién destacada quedaría siempre última y, en
-cuanto hubiera más de seis, no llegaría a verse nunca. Cuando hay más de seis
-destacadas, el panel lo avisa.
+cuanto hubiera más de seis, no llegaría a verse nunca.
+
+Si no hay **ninguna** marcada, se muestran las seis últimas publicadas: la
+sección no puede quedar vacía por una cuestión de curaduría. El panel avisa en
+los dos casos —cuando faltan destacadas y cuando sobran—.
+
+## El catálogo
+
+Las publicaciones reales de la inmobiliaria entran por la migración
+`ImportaCatalogoReal`, tomadas de su perfil de Argenprop. Va como migración y no
+como sembrado para que corra **una sola vez por base**: si se da de baja alguna,
+no reaparece en el siguiente arranque.
+
+Sólo se volcaron los datos que la ficha de origen declaraba. Donde decía "no
+figura" quedó en 0 —que el sitio muestra como dato ausente— en lugar de inventar
+un valor, y los precios "a consultar" van en 0, que es como el modelo representa
+*Consultar*. **Conviene revisarlas desde el panel**: superficies, baños y
+antigüedades faltan en varias.
+
+Aparte existe un catálogo de 12 propiedades **ficticias** para probar el sitio
+con contenido. No se carga salvo que se pida:
+
+```json
+"Admin": { "CargarCatalogoDeEjemplo": true }
+```
 
 ## Seguridad
 

@@ -25,6 +25,15 @@
     <div class="panel-aviso panel-aviso--error" role="alert">@Model.Advertencia</div>
 }
 
+@if (Model.FaltanDestacadas)
+{
+    <div class="panel-aviso" role="status">
+        No hay ninguna propiedad marcada para la portada, así que se están mostrando
+        las @Enricci_Propiedades.Pages.Admin.IndexModel.CupoDePortada publicaciones más recientes.
+        Marcá con ★ las que quieras fijar ahí.
+    </div>
+}
+
 @if (Model.SobranDestacadas)
 {
     <div class="panel-aviso panel-aviso--error" role="status">

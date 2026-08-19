@@ -29,14 +29,33 @@ public class PropiedadesService
     /// si se ordenara por Id, una propiedad recién destacada quedaría siempre
     /// última, y en cuanto hubiera más de <paramref name="cantidad"/> no
     /// llegaría a mostrarse nunca.
+    ///
+    /// Si no hay ninguna marcada, se muestran las últimas publicadas: la portada
+    /// nunca puede quedar con la sección vacía por una cuestión de curaduría.
     /// </summary>
-    public IEnumerable<Propiedad> Destacadas(int cantidad = 6) =>
-        Publicadas
+    public IEnumerable<Propiedad> Destacadas(int cantidad = 6)
+    {
+        var marcadas = Publicadas
             .Where(p => p.Destacada)
             .OrderByDescending(p => p.FechaActualizacion)
             .ThenByDescending(p => p.Id)
             .Take(cantidad)
             .ToList();
+
+        if (marcadas.Count > 0)
+        {
+            return marcadas;
+        }
+
+        return Publicadas
+            .OrderByDescending(p => p.FechaActualizacion)
+            .ThenByDescending(p => p.Id)
+            .Take(cantidad)
+            .ToList();
+    }
+
+    /// <summary>True si la portada está mostrando el respaldo por falta de destacadas.</summary>
+    public bool HayDestacadas => Publicadas.Any(p => p.Destacada);
 
     public IEnumerable<string> Barrios =>
         Publicadas.Select(p => p.Barrio).Distinct().OrderBy(b => b).ToList();

@@ -12,6 +12,9 @@ namespace Enricci_Propiedades.Data;
 /// </summary>
 public static class SembradorInicial
 {
+    /// <summary>Título de la primera publicación de ejemplo, para saber si ya están cargadas.</summary>
+    private const string TituloTestigoDeEjemplo = "Piso alto con vista abierta sobre Av. Entre Ríos";
+
     public static async Task PrepararAsync(WebApplication app)
     {
         using var alcance = app.Services.CreateScope();
@@ -21,11 +24,21 @@ public static class SembradorInicial
 
         await bd.Database.MigrateAsync();
 
-        if (!await bd.Propiedades.AnyAsync())
+        // El catálogo real de la inmobiliaria entra por migración, así que una
+        // base recién creada ya viene con esas publicaciones. Las de ejemplo son
+        // ficticias y sólo sirven para probar el sitio con el catálogo poblado:
+        // se cargan únicamente si se piden.
+        var configuracion = servicios.GetRequiredService<IConfiguration>();
+        var quiereEjemplos = configuracion.GetValue("Admin:CargarCatalogoDeEjemplo", false);
+
+        // No alcanza con preguntar si la tabla está vacía: después de la
+        // migración nunca lo está. Se busca una de las publicaciones de ejemplo.
+        if (quiereEjemplos &&
+            !await bd.Propiedades.AnyAsync(p => p.Titulo == TituloTestigoDeEjemplo))
         {
             bd.Propiedades.AddRange(CatalogoDeEjemplo());
             await bd.SaveChangesAsync();
-            log.LogInformation("Catálogo inicial cargado con {Cantidad} propiedades de ejemplo.", 12);
+            log.LogInformation("Catálogo de ejemplo cargado con 12 propiedades ficticias.");
         }
 
         await CrearAdministradorAsync(servicios, bd, log);

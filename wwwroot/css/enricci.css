@@ -812,6 +812,24 @@ select.control {
 .etiqueta--rojo { background: var(--rojo); }
 .etiqueta--verde { background: #12A150; }
 .etiqueta--ambar { background: #B4700A; }
+/* Cuántas fotos tiene la publicación, abajo a la derecha de la portada. */
+.prop__fotos {
+    position: absolute;
+    inset-inline-end: .75rem;
+    bottom: .75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .28rem .6rem;
+    border-radius: var(--r-full);
+    background: rgba(12, 12, 15, .72);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    backdrop-filter: blur(6px);
+}
+.prop__fotos svg { width: 14px; height: 14px; }
+
 .prop__cuerpo { padding: var(--sp-5); display: flex; flex-direction: column; gap: .55rem; flex: 1; }
 .prop__precio { font-size: 1.45rem; font-weight: 800; letter-spacing: -.03em; }
 .prop__precio small { font-size: .78rem; font-weight: 600; color: var(--texto-suave); letter-spacing: 0; }
@@ -1204,7 +1222,210 @@ select.control {
 .faq__panel > div { overflow: hidden; }
 .faq__panel p { color: var(--texto-suave); padding-bottom: var(--sp-5); margin: 0; max-width: 72ch; }
 
-/* 5.19 Detalle de propiedad */
+/* 5.19 Visor de fotos de la propiedad ------------------------------------- */
+.visor { display: grid; gap: var(--sp-3); }
+
+.visor__escenario {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--hueso-2);
+    isolation: isolate;
+}
+.visor__escenario img,
+.visor__escenario svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* El cambio de foto se acompaña con un desvanecido corto. */
+.visor__foto { transition: opacity .28s var(--ease); }
+.visor__foto.cambiando { opacity: 0; }
+
+/* Degradado inferior: sostiene el contador sobre fotos claras. */
+.visor__escenario::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 38%;
+    background: linear-gradient(to top, rgba(12,12,15,.55), transparent);
+    pointer-events: none;
+    z-index: 1;
+}
+.visor--ilustrado .visor__escenario::after { display: none; }
+
+.visor__paso {
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    z-index: 2;
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    border: 0;
+    border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+    color: var(--texto);
+    cursor: pointer;
+    box-shadow: var(--sombra-md);
+    opacity: 0;
+    transition: opacity .25s var(--ease), background .25s var(--ease), transform .25s var(--ease);
+}
+.visor:hover .visor__paso,
+.visor__paso:focus-visible { opacity: 1; }
+.visor__paso:hover { background: var(--bg-elev); transform: translateY(-50%) scale(1.06); }
+.visor__paso svg { width: 20px; height: 20px; }
+.visor__paso--atras { inset-inline-start: var(--sp-4); }
+.visor__paso--atras svg { transform: rotate(90deg); }
+.visor__paso--adelante { inset-inline-end: var(--sp-4); }
+.visor__paso--adelante svg { transform: rotate(-90deg); }
+/* En pantallas táctiles no hay hover: las flechas quedan siempre visibles. */
+@media (pointer: coarse) { .visor__paso { opacity: 1; width: 44px; height: 44px; } }
+
+.visor__lupa {
+    position: absolute;
+    top: var(--sp-4);
+    inset-inline-end: var(--sp-4);
+    z-index: 2;
+    width: 42px; height: 42px;
+    display: grid; place-items: center;
+    border: 0;
+    border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+    color: var(--texto);
+    cursor: pointer;
+    box-shadow: var(--sombra-sm);
+    transition: background .25s var(--ease), transform .25s var(--ease);
+}
+.visor__lupa:hover { background: var(--bg-elev); transform: scale(1.06); }
+.visor__lupa svg { width: 19px; height: 19px; }
+
+.visor__contador {
+    position: absolute;
+    inset-inline-start: var(--sp-4);
+    bottom: var(--sp-4);
+    z-index: 2;
+    margin: 0;
+    padding: .3rem .8rem;
+    border-radius: var(--r-full);
+    background: rgba(12, 12, 15, .62);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    backdrop-filter: blur(6px);
+}
+
+.visor__aviso {
+    position: absolute;
+    inset-inline: var(--sp-4);
+    bottom: var(--sp-4);
+    z-index: 2;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .9rem;
+    border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+    color: var(--texto-suave);
+    font-size: .78rem;
+    width: fit-content;
+}
+.visor__aviso svg { width: 16px; height: 16px; flex: 0 0 auto; }
+
+/* Tira de miniaturas */
+.visor__tira {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(min(28vw, 112px), 1fr);
+    gap: var(--sp-3);
+    overflow-x: auto;
+    padding-bottom: var(--sp-2);
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+}
+.visor__tira::-webkit-scrollbar { height: 6px; }
+.visor__tira::-webkit-scrollbar-thumb { background: var(--linea-fuerte); border-radius: 99px; }
+
+.visor__mini {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--hueso-2);
+    cursor: pointer;
+    scroll-snap-align: start;
+    transition: border-color .25s var(--ease), opacity .25s var(--ease);
+    opacity: .62;
+}
+.visor__mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.visor__mini:hover { opacity: 1; }
+.visor__mini.activo { border-color: var(--rojo); opacity: 1; }
+
+/* Pantalla completa ------------------------------------------------------- */
+.faro {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    background: rgba(8, 8, 11, .96);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s var(--ease), visibility .25s;
+}
+.faro.abierto { opacity: 1; visibility: visible; }
+
+.faro__barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-4) clamp(1rem, 3vw, 2rem);
+    color: #fff;
+}
+.faro__contador { font-size: .85rem; font-weight: 700; letter-spacing: .06em; opacity: .8; }
+
+.faro__cerrar,
+.faro__paso {
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: var(--r-full);
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    transition: background .25s var(--ease), border-color .25s var(--ease);
+}
+.faro__cerrar:hover, .faro__paso:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .5); }
+.faro__cerrar svg, .faro__paso svg { width: 20px; height: 20px; }
+
+.faro__cuerpo {
+    display: grid;
+    place-items: center;
+    padding: 0 clamp(.5rem, 2vw, 1.5rem);
+    min-height: 0;
+}
+.faro__cuerpo img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--r-md);
+}
+
+.faro__pie {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-5);
+    padding: var(--sp-4) clamp(1rem, 3vw, 2rem) var(--sp-5);
+}
+.faro__paso--atras svg { transform: rotate(90deg); }
+.faro__paso--adelante svg { transform: rotate(-90deg); }
+
+/* 5.19b Galería anterior (se conserva por si alguna vista la usa) */
 .galeria {
     display: grid;
     grid-template-columns: 2fr 1fr;

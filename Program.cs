@@ -77,9 +77,15 @@ if (detrasDeProxy)
     });
 }
 
-// En producción las cookies viajan sólo por HTTPS. En desarrollo se deja según
-// el pedido, para poder probar por http sin certificado.
-var politicaCookie = enProduccion ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
+// Las cookies se marcan Secure cuando el pedido llega por HTTPS. Con las
+// cabeceras reenviadas activadas, detrás de un proxy eso es siempre, así que en
+// producción salen igual de protegidas que con "Always".
+//
+// No se usa Always: el sistema antiforgery lanza una excepción si está en
+// Always y llega un pedido por HTTP, de modo que cualquier acceso directo al
+// origen —una comprobación de estado, alguien entrando sin pasar por el proxy—
+// devolvería error 500 en todas las páginas con formulario.
+var politicaCookie = CookieSecurePolicy.SameAsRequest;
 
 // Ingreso al panel: cookie de sesión propia, sin dependencias externas.
 builder.Services

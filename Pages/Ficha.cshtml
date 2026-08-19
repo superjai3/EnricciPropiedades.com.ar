@@ -37,60 +37,71 @@
 
 <section class="seccion--compacta" style="padding-top:0">
     <div class="contenedor">
-        <div class="galeria revelar">
-            <div class="galeria__principal" data-galeria-principal>
-                @if (p.Fotos.Count > 0)
-                {
-                    <img src="@p.Fotos[0]" alt="Fachada de @p.Direccion" width="960" height="600" />
-                }
-                else
-                {
-                    @ArteFachada.Dibujar(p)
-                }
-            </div>
-            <div class="galeria__lado">
-                @* Los dos huecos laterales muestran las fotos siguientes; si no hay,
-                   se dibuja la portada generada para que la grilla no quede coja. *@
-                @for (var i = 1; i <= 2; i++)
-                {
-                    if (p.Fotos.Count > i)
-                    {
-                        <div data-galeria-mini role="button" tabindex="0"
-                             aria-label="Ver esta foto en grande">
-                            <img src="@p.Fotos[i]" alt="Foto @(i + 1) de @p.Direccion" loading="lazy" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div>@ArteFachada.Dibujar(p, "", i)</div>
-                    }
-                }
-            </div>
-        </div>
-
-        @if (p.Fotos.Count > 3)
+        @if (p.Fotos.Count > 0)
         {
-            <div class="galeria__tira revelar">
-                @for (var i = 3; i < p.Fotos.Count; i++)
+            @* Visor: una foto grande, flechas, contador y tira de miniaturas.
+               Sin JavaScript se ve la primera foto y las miniaturas quedan como
+               enlaces inertes, así que la página nunca depende del script. *@
+            <div class="visor revelar" data-visor>
+                <div class="visor__escenario">
+                    <img class="visor__foto" data-visor-foto
+                         src="@p.Fotos[0]" alt="Foto 1 de @p.Direccion, @p.Barrio"
+                         width="1024" height="768" decoding="async" />
+
+                    <button class="visor__lupa" type="button" data-visor-ampliar
+                            aria-label="Ver la foto en pantalla completa">
+                        <svg aria-hidden="true"><use href="#i-lupa" /></svg>
+                    </button>
+
+                    @if (p.Fotos.Count > 1)
+                    {
+                        <button class="visor__paso visor__paso--atras" type="button"
+                                data-visor-paso="-1" aria-label="Foto anterior">
+                            <svg aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </button>
+                        <button class="visor__paso visor__paso--adelante" type="button"
+                                data-visor-paso="1" aria-label="Foto siguiente">
+                            <svg aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </button>
+                        <p class="visor__contador" data-visor-contador aria-live="polite">
+                            1 / @p.Fotos.Count
+                        </p>
+                    }
+                </div>
+
+                @if (p.Fotos.Count > 1)
                 {
-                    <div data-galeria-mini role="button" tabindex="0" aria-label="Ver esta foto en grande">
-                        <img src="@p.Fotos[i]" alt="Foto @(i + 1) de @p.Direccion" loading="lazy" />
+                    <div class="visor__tira" role="group" aria-label="Miniaturas de la propiedad">
+                        @for (var i = 0; i < p.Fotos.Count; i++)
+                        {
+                            <button class="visor__mini @(i == 0 ? "activo" : "")" type="button"
+                                    data-visor-ir="@i" aria-label="Ver la foto @(i + 1) de @p.Fotos.Count">
+                                <img src="@p.Fotos[i]" alt="" loading="lazy" decoding="async" />
+                            </button>
+                        }
                     </div>
                 }
             </div>
-        }
 
-        @if (p.Fotos.Count == 0)
-        {
             <p class="texto-suave mt-4" style="font-size:.82rem">
-                Las imágenes ilustrativas se reemplazan por el reportaje fotográfico completo al momento de la publicación.
-                Escribinos y te enviamos todas las fotos y el plano por WhatsApp.
+                @p.Fotos.Count @(p.Fotos.Count == 1 ? "fotografía" : "fotografías") de la propiedad.
+                Escribinos y te enviamos el reportaje completo y el plano por WhatsApp.
             </p>
         }
         else
         {
+            <div class="visor visor--ilustrado revelar">
+                <div class="visor__escenario">
+                    @ArteFachada.Dibujar(p)
+                    <p class="visor__aviso">
+                        <svg aria-hidden="true"><use href="#i-camara" /></svg>
+                        Ilustración: esta publicación todavía no tiene fotografías cargadas
+                    </p>
+                </div>
+            </div>
+
             <p class="texto-suave mt-4" style="font-size:.82rem">
-                Escribinos y te enviamos el reportaje fotográfico completo y el plano por WhatsApp.
+                Escribinos y te enviamos las fotos y el plano por WhatsApp.
             </p>
         }
     </div>

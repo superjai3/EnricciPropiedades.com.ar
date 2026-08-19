@@ -21,6 +21,13 @@
                 <span class="etiqueta etiqueta--verde">Apto crédito</span>
             }
         </div>
+
+        @if (Model.Fotos.Count > 1)
+        {
+            <span class="prop__fotos" aria-label="@Model.Fotos.Count fotografías">
+                <svg aria-hidden="true"><use href="#i-camara" /></svg>@Model.Fotos.Count
+            </span>
+        }
     </a>
 
     <div class="prop__cuerpo">

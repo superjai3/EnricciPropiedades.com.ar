@@ -140,17 +140,144 @@
         });
     }
 
-    /* ---------- Galería del detalle de propiedad ---------- */
-    document.addEventListener('click', function (ev) {
-        var mini = ev.target.closest('[data-galeria-mini]');
-        if (!mini) { return; }
-        var principal = document.querySelector('[data-galeria-principal] img');
-        var imagenMini = mini.querySelector('img');
-        if (!principal || !imagenMini) { return; }
-        var temp = principal.getAttribute('src');
-        principal.setAttribute('src', imagenMini.getAttribute('src'));
-        imagenMini.setAttribute('src', temp);
-    });
+    /* ---------- Visor de fotos de la propiedad ----------
+       Foto grande + miniaturas + pantalla completa. Teclado, deslizamiento
+       táctil y foco controlado. Todo se engancha desde acá: la política de
+       contenido del sitio no permite manejadores escritos en el HTML. */
+    (function () {
+        var visor = document.querySelector('[data-visor]');
+        if (!visor) { return; }
+
+        var foto = visor.querySelector('[data-visor-foto]');
+        var contador = visor.querySelector('[data-visor-contador]');
+        var minis = Array.prototype.slice.call(visor.querySelectorAll('[data-visor-ir]'));
+        if (!foto) { return; }
+
+        var fuentes = minis.length
+            ? minis.map(function (m) { return m.querySelector('img').getAttribute('src'); })
+            : [foto.getAttribute('src')];
+
+        var actual = 0;
+        var reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function pintar(indice, conFundido) {
+            if (indice < 0) { indice = fuentes.length - 1; }
+            if (indice >= fuentes.length) { indice = 0; }
+            actual = indice;
+
+            var aplicar = function () {
+                foto.setAttribute('src', fuentes[actual]);
+                foto.setAttribute('alt', 'Foto ' + (actual + 1) + ' de la propiedad');
+                foto.classList.remove('cambiando');
+            };
+
+            if (conFundido && !reducido) {
+                foto.classList.add('cambiando');
+                window.setTimeout(aplicar, 140);
+            } else {
+                aplicar();
+            }
+
+            if (contador) { contador.textContent = (actual + 1) + ' / ' + fuentes.length; }
+
+            minis.forEach(function (m, i) {
+                m.classList.toggle('activo', i === actual);
+                if (i === actual && m.scrollIntoView) {
+                    m.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                }
+            });
+
+            if (faroImagen && faro.classList.contains('abierto')) {
+                faroImagen.setAttribute('src', fuentes[actual]);
+                faroImagen.setAttribute('alt', 'Foto ' + (actual + 1) + ' de la propiedad');
+                if (faroContador) { faroContador.textContent = (actual + 1) + ' / ' + fuentes.length; }
+            }
+        }
+
+        /* --- Pantalla completa: se arma una sola vez --- */
+        var faro = document.createElement('div');
+        faro.className = 'faro';
+        faro.setAttribute('role', 'dialog');
+        faro.setAttribute('aria-modal', 'true');
+        faro.setAttribute('aria-label', 'Fotos de la propiedad');
+        faro.innerHTML =
+            '<div class="faro__barra">' +
+              '<span class="faro__contador" data-faro-contador></span>' +
+              '<button class="faro__cerrar" type="button" data-faro-cerrar aria-label="Cerrar">' +
+                '<svg aria-hidden="true"><use href="#i-cerrar"></use></svg></button>' +
+            '</div>' +
+            '<div class="faro__cuerpo"><img data-faro-img src="" alt="" /></div>' +
+            '<div class="faro__pie">' +
+              '<button class="faro__paso faro__paso--atras" type="button" data-visor-paso="-1" aria-label="Foto anterior">' +
+                '<svg aria-hidden="true"><use href="#i-chevron"></use></svg></button>' +
+              '<button class="faro__paso faro__paso--adelante" type="button" data-visor-paso="1" aria-label="Foto siguiente">' +
+                '<svg aria-hidden="true"><use href="#i-chevron"></use></svg></button>' +
+            '</div>';
+        document.body.appendChild(faro);
+
+        var faroImagen = faro.querySelector('[data-faro-img]');
+        var faroContador = faro.querySelector('[data-faro-contador]');
+        var focoPrevio = null;
+
+        function abrirFaro() {
+            focoPrevio = document.activeElement;
+            faroImagen.setAttribute('src', fuentes[actual]);
+            faroImagen.setAttribute('alt', 'Foto ' + (actual + 1) + ' de la propiedad');
+            if (faroContador) { faroContador.textContent = (actual + 1) + ' / ' + fuentes.length; }
+            faro.classList.add('abierto');
+            document.body.classList.add('sin-scroll');
+            faro.querySelector('[data-faro-cerrar]').focus();
+        }
+
+        function cerrarFaro() {
+            faro.classList.remove('abierto');
+            document.body.classList.remove('sin-scroll');
+            if (focoPrevio && focoPrevio.focus) { focoPrevio.focus(); }
+        }
+
+        /* --- Interacción --- */
+        document.addEventListener('click', function (ev) {
+            var paso = ev.target.closest('[data-visor-paso]');
+            if (paso) { pintar(actual + parseInt(paso.getAttribute('data-visor-paso'), 10), true); return; }
+
+            var ir = ev.target.closest('[data-visor-ir]');
+            if (ir) { pintar(parseInt(ir.getAttribute('data-visor-ir'), 10), true); return; }
+
+            if (ev.target.closest('[data-visor-ampliar]')) { abrirFaro(); return; }
+            if (ev.target.closest('[data-faro-cerrar]')) { cerrarFaro(); return; }
+            // Un clic en el fondo del visor a pantalla completa también cierra.
+            if (ev.target === faro || ev.target.closest('.faro__cuerpo') === ev.target) { cerrarFaro(); }
+        });
+
+        document.addEventListener('keydown', function (ev) {
+            var enFaro = faro.classList.contains('abierto');
+            if (ev.key === 'Escape' && enFaro) { cerrarFaro(); return; }
+            // Fuera del visor a pantalla completa, las flechas sólo actúan si el
+            // foco está dentro del visor: no se le roba el teclado a la página.
+            if (!enFaro && !visor.contains(document.activeElement)) { return; }
+            if (ev.key === 'ArrowLeft') { ev.preventDefault(); pintar(actual - 1, true); }
+            if (ev.key === 'ArrowRight') { ev.preventDefault(); pintar(actual + 1, true); }
+        });
+
+        /* --- Deslizar con el dedo --- */
+        var xInicial = null;
+        function alTocar(elemento) {
+            elemento.addEventListener('touchstart', function (ev) {
+                xInicial = ev.changedTouches[0].clientX;
+            }, { passive: true });
+            elemento.addEventListener('touchend', function (ev) {
+                if (xInicial === null) { return; }
+                var recorrido = ev.changedTouches[0].clientX - xInicial;
+                xInicial = null;
+                if (Math.abs(recorrido) < 45) { return; }
+                pintar(actual + (recorrido < 0 ? 1 : -1), true);
+            }, { passive: true });
+        }
+        alTocar(visor.querySelector('.visor__escenario'));
+        alTocar(faro.querySelector('.faro__cuerpo'));
+
+        pintar(0, false);
+    })();
 
     /* ---------- Ver la contraseña que se está escribiendo ----------
        El botón se inserta desde acá y no en la vista: sin JavaScript el campo

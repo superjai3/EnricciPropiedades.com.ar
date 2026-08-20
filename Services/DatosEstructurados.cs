@@ -226,14 +226,11 @@ public static class DatosEstructurados
     public static string ListadoDeBarrio(
         string urlBase,
         string barrio,
-        string ciudad,
+        string region,
         string descripcion,
         IReadOnlyList<Propiedad> propiedades)
     {
-        // El barrio puede llamarse igual que su ciudad; ahí no se repite.
-        var lugar = string.Equals(barrio, ciudad, StringComparison.OrdinalIgnoreCase)
-            ? ciudad
-            : $"{barrio}, {ciudad}";
+        var lugar = $"{barrio}, {region}";
 
         var urlBarrio = $"{urlBase}/propiedades/{Slug.De(barrio)}";
 

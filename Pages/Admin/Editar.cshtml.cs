@@ -26,9 +26,17 @@ public class EditarModel : PageModel
     [BindProperty]
     public Propiedad Datos { get; set; } = new();
 
-    /// <summary>Las comodidades se escriben una por línea, que es lo más cómodo de editar.</summary>
+    /// <summary>
+    /// Las comodidades se escriben una por línea, que es lo más cómodo de editar.
+    ///
+    /// Va como string anulable a propósito. Con un string no anulable, ASP.NET
+    /// convierte el campo vacío del formulario en null y la validación implícita
+    /// de referencias no anulables lo da por obligatorio: publicar una propiedad
+    /// sin comodidades —que es lo más común— fallaba en silencio, porque además
+    /// la vista no tiene dónde mostrar ese error.
+    /// </summary>
     [BindProperty]
-    public string ComodidadesTexto { get; set; } = "";
+    public string? ComodidadesTexto { get; set; }
 
     [BindProperty]
     public List<IFormFile> Archivos { get; set; } = new();
@@ -51,8 +59,6 @@ public class EditarModel : PageModel
     public List<string> ErroresDeFotos { get; } = new();
     public List<string> BarriosSugeridos { get; private set; } = new();
 
-    /// <summary>Ciudades ya cargadas, para sugerirlas sin tener que escribirlas.</summary>
-    public List<string> CiudadesSugeridas { get; private set; } = new();
 
     public SelectList Operaciones => new(
         new[]
@@ -89,7 +95,6 @@ public class EditarModel : PageModel
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         BarriosSugeridos = await _propiedades.BarriosCargadosAsync();
-        CiudadesSugeridas = await _propiedades.CiudadesCargadasAsync();
 
         if (id is null or 0)
         {
@@ -114,7 +119,6 @@ public class EditarModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         BarriosSugeridos = await _propiedades.BarriosCargadosAsync();
-        CiudadesSugeridas = await _propiedades.CiudadesCargadasAsync();
 
         // Las listas no llegan del formulario tal cual: se rearman acá.
         ModelState.Remove("Datos.Comodidades");
@@ -127,7 +131,7 @@ public class EditarModel : PageModel
 
         // Una por línea es lo que dice la ayuda, pero separar con comas es el
         // reflejo natural de cualquiera: se aceptan las dos formas.
-        var comodidades = ComodidadesTexto
+        var comodidades = (ComodidadesTexto ?? "")
             .Split(new[] { '\n', ',', ';' },
                    StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(c => c.Length > 0)
@@ -227,8 +231,6 @@ public class EditarModel : PageModel
         destino.Titulo = origen.Titulo.Trim();
         destino.Direccion = origen.Direccion.Trim();
         destino.Barrio = origen.Barrio.Trim();
-        destino.Ciudad = origen.Ciudad.Trim();
-        destino.Pais = origen.Pais.Trim().ToUpperInvariant();
         destino.Operacion = origen.Operacion;
         destino.Tipo = origen.Tipo;
         destino.Estado = origen.Estado;

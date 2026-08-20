@@ -34,6 +34,8 @@ Models/
   SitioInfo.cs          Datos de la inmobiliaria: contacto, coordenadas, horario
                         y barrios; de acá salen también los datos estructurados
   Slug.cs               "Constitución" → "constitucion", para las URL de barrio
+  BarriosDeBuenosAires.cs  Lista cerrada de barrios de CABA y partidos del GBA
+  BarrioValidoAttribute.cs Valida que el barrio sea uno de esa lista
   Consulta.cs           Consulta recibida por los formularios; incluye la hora local
   OpcionesSitio.cs      Dominio del sitio, para las URL absolutas
   OpcionesRespaldo.cs   Configuración del respaldo automático
@@ -442,13 +444,33 @@ sin publicaciones devuelve 404: si no hay contenido, mejor decirlo.
 El texto de cada una sale del catálogo —cuántas hay, de qué tipo, desde qué
 precio—, así dice algo distinto en cada barrio y no queda desactualizado solo.
 
-### Dónde queda cada propiedad
+### Los barrios son una lista cerrada
 
-Cada publicación tiene **ciudad y país** propios, además del barrio. Parece de
-más para una inmobiliaria de CABA, pero el catálogo tiene al menos una propiedad
-en Copacabana, Río de Janeiro: sin esos campos el sitio le declaraba a los
-buscadores que quedaba en Buenos Aires. Los valores vienen rellenados con CABA y
-`AR`, y se cambian desde el formulario del panel.
+El barrio de una publicación se elige de una lista —`Models/BarriosDeBuenosAires.cs`—
+y no se escribe a mano. El campo era texto libre y así se coló un «Río de
+Janeiro», que en la Ciudad es una avenida y no un barrio; con él entró al
+catálogo una publicación que figuraba fuera del país.
+
+La lista tiene tres grupos:
+
+- **Ciudad de Buenos Aires** — los 48 barrios oficiales.
+- **Zonas de la Ciudad** — nombres que no son barrios oficiales pero que el
+  mercado usa todos los días, y que el propio catálogo ya usaba: Congreso,
+  Barrio Norte, Once, Abasto, Microcentro, Las Cañitas, Palermo Soho… Si se
+  prefiere obligar a usar sólo los 48 oficiales, se borra esa lista y listo.
+- **Gran Buenos Aires** — los 24 partidos.
+
+La validación es del lado del servidor (`BarrioValidoAttribute`), no sólo en el
+desplegable: el formulario se puede enviar sin pasar por el navegador, y un
+barrio inventado se traduce en una página por barrio que no le sirve a nadie.
+
+De la lista sale también **la provincia**, que no se guarda: los barrios de la
+Ciudad declaran «Ciudad Autónoma de Buenos Aires» y los partidos, «Provincia de
+Buenos Aires». El país es siempre `AR`. Un dato que se puede derivar y además se
+guarda termina, tarde o temprano, diciendo algo distinto del que lo origina.
+
+Las publicaciones importadas que tengan un barrio fuera de la lista aparecen
+avisadas arriba del listado del panel, con un enlace para corregirlas.
 
 ### GEO: los asistentes con IA
 

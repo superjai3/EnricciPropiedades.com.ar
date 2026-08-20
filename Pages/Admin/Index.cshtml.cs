@@ -36,6 +36,14 @@ public class IndexModel : PageModel
     /// <summary>Cuántas destacadas entran en la portada. Debe coincidir con Index.cshtml.cs del sitio.</summary>
     public const int CupoDePortada = 6;
 
+    /// <summary>
+    /// Publicaciones cuyo barrio no está en la lista de zonas válidas. Las trae
+    /// el catálogo importado —hay una cargada en «Río de Janeiro», que en la
+    /// Ciudad es una avenida y no un barrio— y conviene verlas para corregirlas:
+    /// generan una página por barrio que no le sirve a nadie.
+    /// </summary>
+    public IReadOnlyList<Propiedad> ConBarrioFueraDeLista { get; private set; } = Array.Empty<Propiedad>();
+
     /// <summary>True cuando hay más destacadas que lugares en la portada.</summary>
     public bool SobranDestacadas => TotalDestacadas > CupoDePortada;
 
@@ -52,6 +60,8 @@ public class IndexModel : PageModel
         TotalPublicadas = Publicaciones.Count(p => p.Estado != EstadoPublicacion.Vendida);
         TotalDestacadas = Publicaciones.Count(p => p.Destacada && p.Estado != EstadoPublicacion.Vendida);
         TotalDadasDeBaja = Publicaciones.Count(p => p.Estado == EstadoPublicacion.Vendida);
+
+        ConBarrioFueraDeLista = Publicaciones.Where(p => p.BarrioFueraDeLista).ToList();
     }
 
     /// <summary>Elimina la publicación y, con ella, las fotos que se subieron desde el panel.</summary>

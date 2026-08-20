@@ -69,43 +69,36 @@
                 <span class="error-campo" asp-validation-for="Datos.Direccion"></span>
             </div>
 
+            @* Lista cerrada y no texto libre: así se coló un «Río de Janeiro»,
+               que en la Ciudad es una avenida y no un barrio. La provincia se
+               deduce del barrio elegido, no se carga aparte. *@
             <div class="campo">
-                <label asp-for="Datos.Barrio">Barrio</label>
-                <input class="control" asp-for="Datos.Barrio" list="barrios" placeholder="Monserrat" />
-                <datalist id="barrios">
-                    @foreach (var barrio in Model.BarriosSugeridos)
+                <label asp-for="Datos.Barrio">Barrio o partido</label>
+                <select class="control" asp-for="Datos.Barrio">
+                    <option value="">Elegí uno…</option>
+
+                    @* Si la publicación traía un barrio que no está en la lista
+                       —pasa con las importadas— se ofrece igual, marcado, para
+                       no perderlo en silencio al abrir el formulario. *@
+                    @if (Model.Datos.BarrioFueraDeLista && !string.IsNullOrWhiteSpace(Model.Datos.Barrio))
                     {
-                        <option value="@barrio"></option>
+                        <optgroup label="Fuera de la lista — conviene corregirlo">
+                            <option value="@Model.Datos.Barrio" selected>@Model.Datos.Barrio</option>
+                        </optgroup>
                     }
-                </datalist>
+
+                    @foreach (var grupo in Enricci_Propiedades.Models.BarriosDeBuenosAires.PorGrupo)
+                    {
+                        <optgroup label="@grupo.Key">
+                            @foreach (var zona in grupo)
+                            {
+                                <option value="@zona.Nombre">@zona.Nombre</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
                 <span class="error-campo" asp-validation-for="Datos.Barrio"></span>
             </div>
-
-            @* Casi todo el catálogo es de CABA y viene rellenado por omisión,
-               pero no todo: hay una publicación en Río de Janeiro. Sin estos dos
-               campos el sitio le declararía a los buscadores que está en Buenos
-               Aires. *@
-            <div class="campo">
-                <label asp-for="Datos.Ciudad">Ciudad</label>
-                <input class="control" asp-for="Datos.Ciudad" list="ciudades"
-                       placeholder="@Enricci_Propiedades.Models.Propiedad.CiudadPredeterminada" />
-                <datalist id="ciudades">
-                    @foreach (var ciudad in Model.CiudadesSugeridas)
-                    {
-                        <option value="@ciudad"></option>
-                    }
-                </datalist>
-                <span class="error-campo" asp-validation-for="Datos.Ciudad"></span>
-            </div>
-
-            <div class="campo">
-                <label asp-for="Datos.Pais">País</label>
-                <input class="control" asp-for="Datos.Pais" maxlength="2" size="2"
-                       placeholder="AR" />
-                <small class="panel-ayuda">Código de dos letras: AR, BR, UY…</small>
-                <span class="error-campo" asp-validation-for="Datos.Pais"></span>
-            </div>
-
             <div class="campo">
                 <label asp-for="Datos.Operacion">Operación</label>
                 <select class="control" asp-for="Datos.Operacion" asp-items="Model.Operaciones"></select>

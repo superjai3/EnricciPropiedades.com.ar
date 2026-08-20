@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Enricci_Propiedades.Models;
 
@@ -42,39 +43,31 @@ public class Propiedad
     [Display(Name = "Dirección")]
     public string Direccion { get; set; } = "";
 
-    [Required(ErrorMessage = "Indicá el barrio.")]
+    [Required(ErrorMessage = "Elegí el barrio o partido.")]
     [StringLength(60)]
+    [BarrioValido]
+    [Display(Name = "Barrio o partido")]
     public string Barrio { get; set; } = "";
 
     /// <summary>
-    /// Ciudad donde está la propiedad. Casi todo el catálogo es de la Ciudad de
-    /// Buenos Aires, pero no todo: existe al menos una publicación en Río de
-    /// Janeiro. Sin este campo, los datos estructurados declararían que está en
-    /// Buenos Aires, que es exactamente el tipo de dato falso que le hace perder
-    /// confianza al buscador en todo el resto del sitio.
+    /// Provincia que le corresponde al barrio. No se guarda: se deduce de la
+    /// lista de barrios, porque un dato que se puede derivar y además se guarda
+    /// termina, tarde o temprano, diciendo algo distinto del que lo origina.
     /// </summary>
-    [Required(ErrorMessage = "Indicá la ciudad.")]
-    [StringLength(80)]
-    public string Ciudad { get; set; } = CiudadPredeterminada;
+    [NotMapped]
+    public string Region => BarriosDeBuenosAires.RegionDe(Barrio);
 
-    /// <summary>Código ISO de dos letras del país (AR, BR, UY…).</summary>
-    [Required]
-    [StringLength(2, MinimumLength = 2)]
-    [Display(Name = "País")]
-    public string Pais { get; set; } = PaisPredeterminado;
+    /// <summary>Siempre Argentina: el sitio publica en la Ciudad y el Gran Buenos Aires.</summary>
+    [NotMapped]
+    public string Pais => BarriosDeBuenosAires.Pais;
 
-    public const string CiudadPredeterminada = "Ciudad Autónoma de Buenos Aires";
-    public const string PaisPredeterminado = "AR";
+    /// <summary>True si el barrio guardado no está en la lista de zonas válidas.</summary>
+    [NotMapped]
+    public bool BarrioFueraDeLista => !BarriosDeBuenosAires.EsValido(Barrio);
 
-    /// <summary>True si la propiedad está en la ciudad donde opera la inmobiliaria.</summary>
-    public bool EsDeBuenosAires =>
-        Pais == PaisPredeterminado && Ciudad == CiudadPredeterminada;
-
-    /// <summary>"Monserrat, Ciudad Autónoma de Buenos Aires" — sin repetir si coinciden.</summary>
-    public string UbicacionTexto =>
-        string.Equals(Barrio, Ciudad, StringComparison.OrdinalIgnoreCase)
-            ? Ciudad
-            : $"{Barrio}, {Ciudad}";
+    /// <summary>"Monserrat, Ciudad Autónoma de Buenos Aires".</summary>
+    [NotMapped]
+    public string UbicacionTexto => $"{Barrio}, {Region}";
 
     public Operacion Operacion { get; set; }
     public TipoPropiedad Tipo { get; set; }

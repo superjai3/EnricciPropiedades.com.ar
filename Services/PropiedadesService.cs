@@ -176,7 +176,4 @@ public class PropiedadesService
     public Task<List<string>> BarriosCargadosAsync() =>
         _bd.Propiedades.Select(p => p.Barrio).Distinct().OrderBy(b => b).ToListAsync();
 
-    /// <summary>Ciudades ya cargadas, para el mismo formulario.</summary>
-    public Task<List<string>> CiudadesCargadasAsync() =>
-        _bd.Propiedades.Select(p => p.Ciudad).Distinct().OrderBy(c => c).ToListAsync();
 }

@@ -119,7 +119,7 @@ public class FichaModel : PageModel
                 // La ciudad y el país salen de la publicación: el catálogo es de
                 // CABA salvo excepciones, y declarar mal dónde queda una
                 // propiedad es peor que no declararlo.
-                ["addressRegion"] = p.Ciudad,
+                ["addressRegion"] = p.Region,
                 ["addressCountry"] = p.Pais
             }
         };

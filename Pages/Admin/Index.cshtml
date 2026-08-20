@@ -45,6 +45,26 @@
     </div>
 }
 
+@if (Model.ConBarrioFueraDeLista.Count > 0)
+{
+    <div class="panel-aviso panel-aviso--error" role="status">
+        @Model.ConBarrioFueraDeLista.Count
+        @(Model.ConBarrioFueraDeLista.Count == 1 ? "publicación tiene" : "publicaciones tienen")
+        un barrio que no está en la lista de barrios de la Ciudad y el Gran Buenos Aires.
+        Vienen del catálogo importado y conviene corregirlas: cada una genera una página
+        por barrio que no le sirve a nadie.
+        <ul>
+            @foreach (var p in Model.ConBarrioFueraDeLista)
+            {
+                <li>
+                    <a asp-page="/Admin/Editar" asp-route-id="@p.Id">@p.Titulo</a>
+                    — figura en «@p.Barrio»
+                </li>
+            }
+        </ul>
+    </div>
+}
+
 <div class="panel-metricas">
     <div class="panel-metrica">
         <strong>@Model.TotalPublicadas</strong>

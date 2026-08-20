@@ -41,27 +41,15 @@ public class BarrioModel : PageModel
     /// <summary>Precio de venta más bajo publicado, o null si están todos a consultar.</summary>
     public decimal? DesdeVenta { get; private set; }
 
-    /// <summary>
-    /// Ciudad del barrio, tomada de las propias publicaciones. No se da por
-    /// sentado que sea Buenos Aires: el catálogo tiene al menos una propiedad
-    /// en Río de Janeiro, y una página que dijera "Copacabana, Ciudad de
-    /// Buenos Aires" sería falsa a la vista y en los datos estructurados.
-    /// </summary>
-    public string Ciudad { get; private set; } = Propiedad.CiudadPredeterminada;
+    /// <summary>Provincia del barrio: la Ciudad, o la de Buenos Aires si es del GBA.</summary>
+    public string Region => BarriosDeBuenosAires.RegionDe(Barrio);
 
-    /// <summary>Rótulo del barrio con su ciudad, sin repetir cuando coinciden.</summary>
-    public string UbicacionTexto =>
-        string.Equals(Barrio, Ciudad, StringComparison.OrdinalIgnoreCase)
-            ? Ciudad
-            : $"{Barrio} · {Ciudad}";
+    /// <summary>Rótulo del barrio con su provincia, para el encabezado.</summary>
+    public string UbicacionTexto => $"{Barrio} · {Region}";
 
-    /// <summary>
-    /// True si la oficina de la inmobiliaria queda en este barrio. Exige que
-    /// además sea el mismo país: hay un "Río de Janeiro" en el catálogo.
-    /// </summary>
+    /// <summary>True si la oficina de la inmobiliaria queda en este barrio.</summary>
     public bool EsElBarrioDeLaOficina =>
-        Slug.De(Barrio) == Slug.De(SitioInfo.BarrioOficina) &&
-        Ciudad == Propiedad.CiudadPredeterminada;
+        Slug.De(Barrio) == Slug.De(SitioInfo.BarrioOficina);
 
     public string DatosEstructuradosJson { get; private set; } = "";
 
@@ -82,7 +70,6 @@ public class BarrioModel : PageModel
         Barrio = nombre;
         Resultados = _propiedades.Buscar(barrio: nombre).ToList();
 
-        Ciudad = Resultados.Count > 0 ? Resultados[0].Ciudad : Propiedad.CiudadPredeterminada;
 
         EnVenta = Resultados.Count(p => p.Operacion == Operacion.Venta);
         EnAlquiler = Resultados.Count(p => p.Operacion != Operacion.Venta);
@@ -107,7 +94,7 @@ public class BarrioModel : PageModel
         Resumen = ArmarResumen();
 
         DatosEstructuradosJson = DatosEstructurados.ListadoDeBarrio(
-            _sitio.UrlBase(Request), Barrio, Ciudad, Resumen, Resultados);
+            _sitio.UrlBase(Request), Barrio, Region, Resumen, Resultados);
 
         return Page();
     }

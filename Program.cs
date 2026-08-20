@@ -5,6 +5,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,11 @@ var builder = WebApplication.CreateBuilder(args);
 // No anunciar el servidor: es información gratis para quien busca vulnerabilidades.
 builder.WebHost.ConfigureKestrel(opciones => opciones.AddServerHeader = false);
 
+// Corriendo como servicio de systemd, avisa cuando terminó de arrancar y escribe
+// el registro con el formato que espera journalctl. Fuera de systemd no hace nada,
+// así que no molesta en desarrollo.
+builder.Host.UseSystemd();
+
 // Base de datos: un archivo SQLite junto a la aplicación. La resolución de la
 // ruta vive en RutaBaseDeDatos porque el respaldo necesita apuntar al mismo
 // archivo que el contexto.
@@ -30,6 +36,25 @@ var cadenaDeConexion = RutaBaseDeDatos.CadenaDeConexion(
     builder.Configuration, builder.Environment.ContentRootPath);
 
 builder.Services.AddDbContext<EnricciContexto>(opciones => opciones.UseSqlite(cadenaDeConexion));
+
+// Las claves con las que se firman la cookie de sesión y el token antiforgery.
+// Por omisión ASP.NET Core las guarda en la carpeta del usuario y las pierde al
+// reiniciar: en un servidor eso significa que cada despliegue cierra la sesión
+// del panel y hace fallar los formularios abiertos. Con una carpeta fija que
+// sobreviva al despliegue, no pasa.
+var carpetaDeClaves = builder.Configuration["Hosting:CarpetaDeClaves"];
+
+if (!string.IsNullOrWhiteSpace(carpetaDeClaves))
+{
+    Directory.CreateDirectory(carpetaDeClaves);
+
+    builder.Services
+        .AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(carpetaDeClaves))
+        // El nombre fija el "compartimento" de las claves: si cambia, lo firmado
+        // antes deja de validar.
+        .SetApplicationName("EnricciPropiedades");
+}
 
 // Servicios del contenedor.
 builder.Services.AddScoped<PropiedadesService>();

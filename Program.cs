@@ -1,11 +1,12 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Text.Unicode;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.WebEncoders;
 using Enricci_Propiedades.Data;
@@ -22,27 +23,60 @@ var builder = WebApplication.CreateBuilder(args);
 // No anunciar el servidor: es información gratis para quien busca vulnerabilidades.
 builder.WebHost.ConfigureKestrel(opciones => opciones.AddServerHeader = false);
 
-// Base de datos: un archivo SQLite junto a la aplicación. La ruta se resuelve
-// contra la carpeta del sitio y no contra el directorio de trabajo, que cambia
-// según cómo se lo arranque (consola, servicio de Windows, IIS).
-var cadena = builder.Configuration.GetConnectionString("Enricci") ?? "Data Source=enricci.db";
-var constructor = new SqliteConnectionStringBuilder(cadena);
+// Base de datos: un archivo SQLite junto a la aplicación. La resolución de la
+// ruta vive en RutaBaseDeDatos porque el respaldo necesita apuntar al mismo
+// archivo que el contexto.
+var cadenaDeConexion = RutaBaseDeDatos.CadenaDeConexion(
+    builder.Configuration, builder.Environment.ContentRootPath);
 
-if (!string.IsNullOrWhiteSpace(constructor.DataSource) && !Path.IsPathRooted(constructor.DataSource))
-{
-    constructor.DataSource = Path.Combine(builder.Environment.ContentRootPath, constructor.DataSource);
-}
-
-builder.Services.AddDbContext<EnricciContexto>(opciones => opciones.UseSqlite(constructor.ConnectionString));
+builder.Services.AddDbContext<EnricciContexto>(opciones => opciones.UseSqlite(cadenaDeConexion));
 
 // Servicios del contenedor.
 builder.Services.AddScoped<PropiedadesService>();
 builder.Services.AddScoped<UsuariosService>();
+builder.Services.AddScoped<ConsultasService>();
 builder.Services.AddSingleton<FotosService>();
 
 // Envío de correo de los formularios (ver sección "Correo" de appsettings.json).
 builder.Services.Configure<OpcionesCorreo>(builder.Configuration.GetSection(OpcionesCorreo.Seccion));
 builder.Services.AddSingleton<CorreoService>();
+
+// Dominio del sitio, para las URL absolutas (canónicas, Open Graph, sitemap).
+builder.Services.Configure<OpcionesSitio>(builder.Configuration.GetSection(OpcionesSitio.Seccion));
+
+// Respaldo diario de la base y de las fotos.
+builder.Services.Configure<OpcionesRespaldo>(builder.Configuration.GetSection(OpcionesRespaldo.Seccion));
+builder.Services.AddSingleton<RespaldoService>();
+builder.Services.AddHostedService<RespaldoProgramado>();
+
+// Compresión de las respuestas. El grueso de lo que baja el visitante es texto
+// —HTML, CSS y JavaScript— y comprimido pesa alrededor de un cuarto.
+//
+// EnableForHttps viene apagado de fábrica por el ataque BREACH, que deduce un
+// secreto de la página midiendo cuánto comprime. Acá se puede activar: el único
+// secreto en el HTML es el token antiforgery, que ASP.NET Core genera distinto
+// en cada pedido justamente para que la medición no sirva de nada.
+builder.Services.AddResponseCompression(opciones =>
+{
+    opciones.EnableForHttps = true;
+    opciones.Providers.Add<BrotliCompressionProvider>();
+    opciones.Providers.Add<GzipCompressionProvider>();
+
+    // Las fotos y las tipografías ya vienen comprimidas: pasarlas de nuevo por
+    // el compresor gasta procesador y no achica nada.
+    opciones.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "image/svg+xml",
+        "application/xml",
+        "application/manifest+json"
+    });
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(opciones =>
+    opciones.Level = CompressionLevel.Fastest);
+
+builder.Services.Configure<GzipCompressionProviderOptions>(opciones =>
+    opciones.Level = CompressionLevel.Fastest);
 
 // Tope al tamaño de lo que se sube: el máximo por foto lo controla FotosService,
 // esto acota el pedido completo para que nadie llene el disco de una.
@@ -174,7 +208,37 @@ app.UseCabecerasSeguridad();
 
 app.UseStatusCodePagesWithReExecute("/Error", "?codigo={0}");
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Antes de los archivos estáticos, que es la mitad de lo que hay para comprimir.
+app.UseResponseCompression();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = contexto =>
+    {
+        var ruta = contexto.Context.Request.Path.Value ?? "";
+
+        // El CSS y el JavaScript salen de las vistas con ?v=… (asp-append-version),
+        // así que cada cambio estrena URL y el archivo se puede guardar para
+        // siempre. Las tipografías directamente no cambian nunca.
+        var inmutable =
+            ruta.StartsWith("/fonts/", StringComparison.OrdinalIgnoreCase) ||
+            contexto.Context.Request.Query.ContainsKey("v");
+
+        // Las fotos del catálogo llevan un nombre generado al azar: reemplazar
+        // una foto crea un archivo nuevo con otra URL, nunca pisa la anterior.
+        var fotoDelCatalogo = ruta.StartsWith("/imagenes/propiedades/", StringComparison.OrdinalIgnoreCase);
+
+        var segundos = inmutable || fotoDelCatalogo
+            ? 365 * 24 * 60 * 60
+            : 7 * 24 * 60 * 60;
+
+        contexto.Context.Response.Headers.CacheControl =
+            inmutable || fotoDelCatalogo
+                ? $"public, max-age={segundos}, immutable"
+                : $"public, max-age={segundos}";
+    }
+});
 
 app.UseRouting();
 

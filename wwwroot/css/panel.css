@@ -501,3 +501,174 @@
 @media (max-width: 860px) {
     .panel-tabla { font-size: .95rem; }
 }
+
+/* --- Aviso de consultas sin atender en la barra --------------------------- */
+.panel-nav__cuenta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 .35rem;
+    margin-inline-start: .35rem;
+    border-radius: var(--r-full);
+    background: var(--rojo);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* --- Filtros de la pantalla de consultas ---------------------------------- */
+.panel-filtros {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--sp-4);
+}
+
+.panel-pestanias {
+    display: flex;
+    gap: .25rem;
+    flex-wrap: wrap;
+}
+
+.panel-pestanias a {
+    padding: .45rem .8rem;
+    border-radius: var(--r-sm);
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    text-decoration: none;
+}
+
+.panel-pestanias a:hover { background: var(--hueso-2); color: var(--texto); }
+.panel-pestanias a[aria-current="page"] { background: var(--rojo-100); color: var(--rojo-800); }
+
+/* --- Listado de consultas ------------------------------------------------- */
+.consultas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--sp-4);
+}
+
+.consulta {
+    border: 1px solid var(--linea);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    background: var(--bg-elev);
+}
+
+/* Las atendidas siguen a la vista pero pierden peso: lo que importa es lo que falta. */
+.consulta--atendida { opacity: .72; }
+
+.consulta__cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+}
+
+.consulta__nombre {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.consulta__meta {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin: .2rem 0 0;
+    font-size: .8rem;
+    color: var(--texto-suave);
+}
+
+.consulta__etiqueta {
+    padding: .15rem .5rem;
+    border-radius: var(--r-full);
+    background: var(--hueso-2);
+    border: 1px solid var(--linea);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.consulta__etiqueta--aviso {
+    background: var(--rojo-100);
+    border-color: color-mix(in srgb, var(--rojo) 45%, transparent);
+    color: var(--rojo-800);
+}
+
+.consulta__datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem var(--sp-5);
+    margin: var(--sp-4) 0 0;
+}
+
+.consulta__datos dt {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--texto-suave);
+    font-weight: 700;
+}
+
+.consulta__datos dd { margin: .1rem 0 0; font-size: .9rem; }
+
+.consulta__wsp {
+    margin-inline-start: .5rem;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.consulta__detalle {
+    margin: var(--sp-4) 0 0;
+    padding: var(--sp-3);
+    background: var(--hueso-2);
+    border-radius: var(--r-sm);
+    font-family: var(--f-ui);
+    font-size: .85rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.consulta__mensaje {
+    margin: var(--sp-4) 0 0;
+    padding-inline-start: var(--sp-4);
+    border-inline-start: 3px solid var(--linea-fuerte);
+    font-size: .95rem;
+    /* El texto llega tal cual lo escribió el visitante: los saltos de línea
+       son parte de lo que quiso decir. */
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.consulta__notas { margin-top: var(--sp-4); }
+
+.consulta__notas summary {
+    cursor: pointer;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+}
+
+.consulta__notas .control { margin: var(--sp-3) 0; }
+
+.consulta__punto { color: var(--rojo); font-size: .7rem; }
+
+.consulta__borrar { margin-top: var(--sp-3); }
+
+@media (max-width: 720px) {
+    .consulta__cabecera { flex-direction: column; }
+    .consulta__cabecera form { width: 100%; }
+    .consulta__cabecera .btn { width: 100%; justify-content: center; }
+}

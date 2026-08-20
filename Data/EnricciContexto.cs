@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Enricci_Propiedades.Data;
 
 /// <summary>
-/// Base de datos del sitio: el catálogo de propiedades y los usuarios del panel.
+/// Base de datos del sitio: el catálogo de propiedades, los usuarios del panel
+/// y las consultas recibidas por los formularios.
 /// Corre sobre SQLite (un único archivo junto a la aplicación).
 /// </summary>
 public class EnricciContexto : DbContext
@@ -16,6 +17,7 @@ public class EnricciContexto : DbContext
 
     public DbSet<Propiedad> Propiedades => Set<Propiedad>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<Consulta> Consultas => Set<Consulta>();
 
     protected override void OnModelCreating(ModelBuilder modelo)
     {
@@ -50,5 +52,14 @@ public class EnricciContexto : DbContext
         propiedad.HasIndex(p => p.Barrio);
 
         modelo.Entity<Usuario>().HasIndex(u => u.Email).IsUnique();
+
+        var consulta = modelo.Entity<Consulta>();
+
+        consulta.Property(c => c.Origen).HasConversion<string>().HasMaxLength(24);
+
+        // El panel entra siempre por «últimas primero» y por «las que faltan
+        // atender»: los dos índices son los que se usan de verdad.
+        consulta.HasIndex(c => c.Fecha);
+        consulta.HasIndex(c => c.Atendida);
     }
 }

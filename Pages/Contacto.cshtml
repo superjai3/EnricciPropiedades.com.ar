@@ -66,6 +66,13 @@
                 else
                 {
                     <form method="post" novalidate>
+                        @* Por qué propiedad se consulta. Va como campo oculto y no
+                           sólo en la URL: así el dato sobrevive aunque el formulario
+                           se reenvíe tras un error de validación. *@
+                        @if (Model.Propiedad is > 0)
+                        {
+                            <input type="hidden" asp-for="Propiedad" />
+                        }
                         <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
                         <div class="dos-columnas" style="gap:1rem 1.5rem">

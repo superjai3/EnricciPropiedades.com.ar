@@ -7,6 +7,11 @@ Aplicación **ASP.NET Core Razor Pages** (net8.0) con base **SQLite**, sin
 dependencias de front-end: el diseño, los componentes y los comportamientos son
 propios.
 
+Del lado del servidor la única dependencia que no es de Microsoft es
+**SixLabors.ImageSharp**, que procesa las fotos que se suben desde el panel. Va
+bajo la Six Labors Split License, que es gratuita para organizaciones de menos
+de un millón de dólares de facturación anual.
+
 ## Cómo ejecutarlo
 
 ```bash
@@ -27,17 +32,24 @@ Models/
   Propiedad.cs          Publicación (operación, tipo, superficies, precio, fotos…)
   Usuario.cs            Usuario del panel; guarda hash y sal, nunca la contraseña
   SitioInfo.cs          Datos de contacto de la inmobiliaria en un único lugar
+  Consulta.cs           Consulta recibida por los formularios; incluye la hora local
+  OpcionesSitio.cs      Dominio del sitio, para las URL absolutas
+  OpcionesRespaldo.cs   Configuración del respaldo automático
   ArteFachada.cs        Portada SVG generada para publicaciones sin fotografía
   OpcionesCorreo.cs     Configuración del envío de correo
 Data/
-  EnricciContexto.cs    DbContext: propiedades y usuarios
+  EnricciContexto.cs    DbContext: propiedades, usuarios y consultas
   SembradorInicial.cs   Migración, catálogo de ejemplo y alta del administrador
   Migraciones/          Historial de cambios del esquema
 Services/
   PropiedadesService.cs Catálogo: consulta pública, búsqueda y ABM del panel
   UsuariosService.cs    Autenticación y cambio de contraseña
   ClaveHash.cs          PBKDF2-SHA256, 210.000 iteraciones
-  FotosService.cs       Alta y baja de las fotos que se suben desde el panel
+  ConsultasService.cs   Alta y seguimiento de las consultas del sitio
+  FotosService.cs       Reduce a WEBP, genera miniatura y borra las fotos del panel
+  RespaldoService.cs    Copia la base y las fotos en un .zip, con rotación
+  RespaldoProgramado.cs Dispara el respaldo una vez por día
+  RutaBaseDeDatos.cs    Resuelve dónde está el archivo .db
   CorreoService.cs      Envío por SMTP de las consultas de los formularios
 Pages/
   Index                 Portada: hero, buscador, destacadas, servicios, barrios
@@ -52,10 +64,13 @@ Pages/
   Contacto              Formulario de consulta
   Error                 404 y errores generales
   Sitemap               Mapa del sitio en /sitemap.xml
+  Robots                robots.txt generado con el dominio configurado
   Admin/                Panel de administración (requiere sesión iniciada)
     Ingresar            Pantalla de acceso
     Index               Listado de publicaciones con alta, edición y baja
     Editar              Formulario de carga y edición, con subida de fotos
+    Consultas           Consultas recibidas, con notas y marcado de atendidas
+    Respaldos           Respaldos hechos, descarga y «Respaldar ahora»
     Cuenta              Cambio de contraseña
     Salir               Cierre de sesión (sólo por POST)
   Shared/
@@ -76,7 +91,8 @@ db/                     Scripts SQL sueltos, fuera de wwwroot para que no se sir
 
 Se entra por `/Admin/Ingresar`, o por el enlace **Administrar** al pie del sitio.
 Desde ahí se publican, editan y dan de baja las propiedades, se suben fotos y se
-elige cuáles aparecen en la portada.
+elige cuáles aparecen en la portada. También se trabajan las **consultas** que
+llegan por el sitio y se manejan los **respaldos**.
 
 ### El usuario del panel
 
@@ -119,11 +135,30 @@ siguiente arranque se crea de nuevo con una clave nueva.
 ### Fotos
 
 Se suben desde el formulario de la publicación: JPG, JFIF, PNG o WEBP, hasta
-20 MB cada una y 12 por propiedad. Se guardan en
-`wwwroot/imagenes/propiedades/{id}/` con un nombre generado, nunca con el del
-archivo subido; `.jfif` y `.jpeg` se normalizan a `.jpg` para que el servidor
-las entregue como `image/jpeg`. Se valida la firma del archivo además de la
-extensión. **La primera foto es la portada.** Si una publicación no tiene
+20 MB cada una y 12 por propiedad.
+
+**Ninguna foto se publica como vino.** Al subirla se la procesa con ImageSharp:
+
+- Se aplica la orientación EXIF, para que las fotos sacadas de costado no salgan
+  acostadas.
+- Se le sacan todos los metadatos. Además de pesar, las fotos de teléfono suelen
+  traer las coordenadas GPS de dónde fueron sacadas: publicarlas sería dar la
+  ubicación exacta de la propiedad sin haberlo decidido.
+- Se guardan dos versiones en WEBP con calidad 78: la publicada, de 1600 px de
+  lado mayor, y una miniatura de 600 px con el sufijo `-min` para las tarjetas
+  del listado.
+
+La diferencia no es menor: una foto de teléfono de 4032×3024 y 1,9 MB queda en
+241 KB la grande y 77 KB la miniatura. Sin esto, el listado de propiedades
+cargaba varios megabytes de fotos por visita.
+
+Las publicaciones cargadas antes de que existieran las miniaturas no las tienen;
+en ese caso el sitio usa la foto original, que se ve igual y sólo pesa más.
+
+Los archivos van a `wwwroot/imagenes/propiedades/{id}/` con un nombre generado,
+nunca con el del archivo subido. Se valida la firma del archivo además de la
+extensión. **La primera foto es la portada** —y es también la que se ve al
+compartir el aviso por WhatsApp o por redes—. Si una publicación no tiene
 ninguna, el sitio dibuja una portada vectorial generada a partir del `Id`, así
 nunca queda una imagen rota.
 
@@ -217,8 +252,9 @@ SQLite, en el archivo que indique `ConnectionStrings:Enricci` (por defecto
 `enricci.db`, junto a la aplicación). La ruta relativa se resuelve contra la
 carpeta del sitio, no contra el directorio de trabajo.
 
-**El respaldo es copiar dos cosas:** el archivo `.db` y la carpeta
-`wwwroot/imagenes/propiedades/`. Ninguna de las dos se versiona.
+Lo que hay que respaldar son dos cosas: el archivo `.db` y la carpeta
+`wwwroot/imagenes/propiedades/`. Ninguna de las dos se versiona, y de las dos
+se ocupa el respaldo automático (ver *Respaldos*).
 
 Para cambiar el esquema:
 
@@ -228,13 +264,29 @@ dotnet dotnet-ef migrations add NombreDelCambio --output-dir Data/Migraciones
 
 Las migraciones pendientes se aplican solas al arrancar.
 
-## Formularios y envío de correo
+## Las consultas del sitio
 
-Los formularios de **Contacto** y **Tasación** validan del lado del servidor,
-tienen un campo trampa contra robots y registran la consulta en el log.
+Los formularios de **Contacto** y **Tasación** validan del lado del servidor y
+tienen un campo trampa contra robots. Lo que llega se **guarda en la base** y se
+ve en el panel, en *Consultas*: quién escribió, cuándo, por qué propiedad, y si
+ya se le respondió. Cada una admite notas internas.
 
-Además intentan enviarla por correo a la inmobiliaria. El envío se configura en
-la sección `Correo` de `appsettings.json`:
+El orden importa y es a propósito: **primero se guarda, después se avisa por
+correo**. Al revés —que es como estaba— una casilla mal configurada o un
+servidor SMTP caído hacían desaparecer el contacto, porque el único registro era
+el log. El correo es un aviso; el registro es la base.
+
+Las que no se pudieron avisar quedan marcadas *Sin aviso por correo*, y el panel
+avisa arriba de todo cuando hay alguna: es la señal de que el envío está apagado
+o mal configurado.
+
+La barra del panel lleva el número de consultas sin atender, para que no haga
+falta entrar a mirar.
+
+## Envío de correo
+
+El aviso de las consultas se configura en la sección `Correo` de
+`appsettings.json`:
 
 ```json
 "Correo": {
@@ -262,15 +314,105 @@ Con Gmail hay que generar una *contraseña de aplicación* (no sirve la del
 correo) y tener la verificación en dos pasos activada.
 
 Si el envío está apagado o el servidor de correo falla, el formulario **no se
-rompe**: la consulta queda en el log y la pantalla de confirmación le ofrece al
-visitante mandar el mismo mensaje por WhatsApp o por correo con un clic.
+rompe**: la consulta ya quedó guardada, y la pantalla de confirmación le ofrece
+al visitante mandar el mismo mensaje por WhatsApp o por correo con un clic.
+
+## Respaldos
+
+Todo lo que no está en el repositorio —la base y las fotos cargadas desde el
+panel— se respalda solo. Sección `Respaldo` de `appsettings.json`:
+
+```json
+"Respaldo": {
+  "Habilitado": true,
+  "Carpeta": "respaldos",
+  "HoraDiaria": 3,
+  "Conservar": 14
+}
+```
+
+Cada corrida deja un único `.zip` con `enricci.db` y la carpeta
+`imagenes/propiedades`, y borra los más viejos hasta dejar los `Conservar`
+últimos. La hora es la de Buenos Aires.
+
+La base **no se copia con un File.Copy**: con el sitio andando, el archivo puede
+tener escrituras a medio confirmar en el diario (`-wal`) y la copia saldría
+inconsistente. Se usa `VACUUM INTO`, que es la forma que tiene SQLite de sacar
+una foto entera y coherente sin frenar el sitio.
+
+Desde *Panel → Respaldos* se puede hacer uno a mano, ver los que hay y
+**descargarlos**. Conviene bajar uno cada tanto o apuntar `Carpeta` a un disco
+distinto o a una carpeta sincronizada con la nube: un respaldo que vive en el
+mismo servidor no sirve el día que se pierde el servidor.
+
+Para restaurar: parar el sitio, reemplazar `enricci.db` por el del zip, dejar la
+carpeta de fotos en `wwwroot/imagenes/propiedades` y volver a arrancar.
+
+## Rendimiento
+
+- **Compresión de respuestas** con Brotli y gzip. El HTML del listado pasa de
+  130 KB a 20 KB.
+- **Caché de archivos estáticos**: un año e `immutable` para lo que estrena URL
+  cuando cambia —el CSS y el JavaScript, que salen con `?v=…`, las tipografías y
+  las fotos del catálogo, que llevan nombre generado— y una semana para el
+  resto.
+- Las fotos se reducen y se convierten a WEBP al subirlas (ver *Fotos*), y las
+  tarjetas del listado usan la miniatura.
+
+`EnableForHttps` viene apagado de fábrica por el ataque BREACH, que deduce un
+secreto de la página midiendo cuánto comprime. Acá está activado a propósito: el
+único secreto en el HTML es el token antiforgery, y ASP.NET Core lo genera
+distinto en cada pedido justamente para que esa medición no sirva de nada.
+
+## El dominio
+
+El dominio vive en la configuración y no escrito dentro del código. Sección
+`Sitio` de `appsettings.json`:
+
+```json
+"Sitio": {
+  "Dominio": "www.enricci-propiedades.com.ar"
+}
+```
+
+De ahí salen las URL canónicas, las de Open Graph, el `sitemap.xml` y la línea
+`Sitemap:` de `robots.txt`. Con el dominio puesto se usa **siempre** ese, aunque
+el visitante haya entrado por la IP o por un túnel de pruebas: si no, los
+buscadores verían la misma página publicada en dos direcciones distintas y
+repartirían el posicionamiento entre las dos.
+
+**Vacío** —que es como viene— las URL absolutas salen del host del pedido, que
+es lo correcto en desarrollo y mientras el dominio no esté dado de alta.
+
+Cuando el dominio esté andando conviene además acotar `AllowedHosts`, que hoy
+está en `*`:
+
+```json
+"AllowedHosts": "enricci-propiedades.com.ar;www.enricci-propiedades.com.ar"
+```
+
+Ojo con esto último: si el proxy reenvía otro nombre de host, el sitio responde
+400 a todo. Conviene cambiarlo con el sitio ya publicado y andando, no antes.
 
 ## Buscadores
 
 `/sitemap.xml` se genera solo a partir de las páginas fijas y de cada propiedad
-publicada; las dadas de baja no figuran. `wwwroot/robots.txt` lo declara: si el
-dominio final no es `www.enriccipropiedades.com.ar`, hay que actualizar esa
-línea. El panel lleva `noindex, nofollow`.
+publicada; las dadas de baja no figuran. `/robots.txt` también se genera —no es
+un archivo suelto en `wwwroot`— para que la línea del sitemap salga siempre del
+dominio configurado: escrita a mano se desactualiza en cuanto el sitio cambia de
+dirección, y apuntar el sitemap a un dominio que ya no es queda como un error en
+las herramientas de los buscadores.
+
+Cada ficha lleva sus **datos estructurados** de schema.org (`RealEstateListing`
+más el `BreadcrumbList` de la ruta): precio, moneda, ambientes, dormitorios,
+baños, superficie en m² y comodidades. Con eso el buscador entiende que la
+página es un aviso inmobiliario y puede mostrar esos datos en el resultado, en
+vez de dos líneas de texto suelto. Los campos que faltan —que en la base son 0—
+no se declaran, para no afirmar que la propiedad no tiene ninguno; un precio en
+0 significa *Consultar* y tampoco se publica como oferta.
+
+Al compartir una ficha, la vista previa muestra la **foto de la propiedad** y no
+el isologo. El panel lleva `noindex, nofollow`.
 
 ## Datos de contacto
 

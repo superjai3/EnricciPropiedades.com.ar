@@ -9,12 +9,18 @@ namespace Enricci_Propiedades.Pages;
 public class ContactoModel : PageModel
 {
     private readonly PropiedadesService _propiedades;
+    private readonly ConsultasService _consultas;
     private readonly CorreoService _correo;
     private readonly ILogger<ContactoModel> _log;
 
-    public ContactoModel(PropiedadesService propiedades, CorreoService correo, ILogger<ContactoModel> log)
+    public ContactoModel(
+        PropiedadesService propiedades,
+        ConsultasService consultas,
+        CorreoService correo,
+        ILogger<ContactoModel> log)
     {
         _propiedades = propiedades;
+        _consultas = consultas;
         _correo = correo;
         _log = log;
     }
@@ -104,10 +110,6 @@ public class ContactoModel : PageModel
             return Page();
         }
 
-        _log.LogInformation(
-            "Consulta web recibida de {Nombre} ({Email}, {Telefono}). Motivo: {Motivo}",
-            Datos.Nombre, Datos.Email, Datos.Telefono ?? "sin teléfono", Datos.Motivo);
-
         var resumen =
             $"Consulta desde la web\n" +
             $"Nombre: {Datos.Nombre}\n" +
@@ -115,10 +117,34 @@ public class ContactoModel : PageModel
             $"Teléfono: {Datos.Telefono ?? "-"}\n" +
             $"Motivo: {Datos.Motivo}\n\n{Datos.Mensaje}";
 
+        var ficha = Propiedad is > 0 ? _propiedades.PorId(Propiedad.Value) : null;
+
+        // Primero se guarda y después se intenta el correo. Al revés, una casilla
+        // mal configurada o un servidor SMTP caído harían desaparecer el contacto.
+        var registro = await _consultas.RegistrarAsync(new Models.Consulta
+        {
+            Origen = OrigenConsulta.Contacto,
+            Nombre = Datos.Nombre,
+            Email = Datos.Email,
+            Telefono = Datos.Telefono,
+            Motivo = Datos.Motivo,
+            Mensaje = Datos.Mensaje,
+            PropiedadId = ficha?.Id,
+            PropiedadTitulo = ficha?.Titulo
+        });
+
+        _log.LogInformation(
+            "Consulta web {Id} recibida de {Nombre} ({Email}, {Telefono}). Motivo: {Motivo}",
+            registro.Id, Datos.Nombre, Datos.Email, Datos.Telefono ?? "sin teléfono", Datos.Motivo);
+
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
         MensajeMail = $"{SitioInfo.MailA($"Consulta web: {Datos.Motivo}")}&body={Uri.EscapeDataString(resumen)}";
+
         CorreoEnviado = await _correo.EnviarAsync(
             $"Consulta web: {Datos.Motivo} — {Datos.Nombre}", resumen, Datos.Email);
+
+        await _consultas.MarcarCorreoEnviadoAsync(registro.Id, CorreoEnviado);
+
         Enviado = true;
 
         return Page();

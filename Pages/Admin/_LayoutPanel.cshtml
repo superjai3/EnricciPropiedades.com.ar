@@ -1,3 +1,4 @@
+@inject Enricci_Propiedades.Services.ConsultasService Consultas
 @{
     var titulo = ViewData["Title"] as string ?? "Panel";
     var identificado = User.Identity?.IsAuthenticated == true;
@@ -5,6 +6,9 @@
     var paginaActual = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
     string? Activo(string ruta) =>
         paginaActual.Equals(ruta, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+    // Cuántas consultas esperan respuesta, para el aviso de la barra. Sólo se
+    // pregunta con la sesión iniciada: la pantalla de ingreso no lo necesita.
+    var consultasPendientes = identificado ? await Consultas.ContarPendientesAsync() : 0;
 }
 <!DOCTYPE html>
 <html lang="es-AR">
@@ -44,6 +48,15 @@
                 <nav class="panel-nav" aria-label="Secciones del panel">
                     <a asp-page="/Admin/Index" aria-current="@Activo("/Admin/Index")">Propiedades</a>
                     <a asp-page="/Admin/Editar" aria-current="@Activo("/Admin/Editar")">Nueva</a>
+                    <a asp-page="/Admin/Consultas" aria-current="@Activo("/Admin/Consultas")">
+                        Consultas
+                        @if (consultasPendientes > 0)
+                        {
+                            <span class="panel-nav__cuenta"
+                                  aria-label="@consultasPendientes sin atender">@consultasPendientes</span>
+                        }
+                    </a>
+                    <a asp-page="/Admin/Respaldos" aria-current="@Activo("/Admin/Respaldos")">Respaldos</a>
                     <a asp-page="/Admin/Cuenta" aria-current="@Activo("/Admin/Cuenta")">Mi cuenta</a>
                 </nav>
 

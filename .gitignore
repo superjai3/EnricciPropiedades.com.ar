@@ -49,3 +49,6 @@ Desktop.ini
 *.log
 *.tmp
 *~
+
+# Respaldos automáticos (base + fotos). Viven en el servidor, no en el repositorio.
+respaldos/

@@ -1,0 +1,100 @@
+@page
+@model Enricci_Propiedades.Pages.Admin.RespaldosModel
+@{
+    ViewData["Title"] = "Respaldos";
+}
+
+<div class="panel-cabecera">
+    <div>
+        <h1>Respaldos</h1>
+        <p>Copias de la base de datos y de las fotos de las publicaciones.</p>
+    </div>
+    <form method="post" asp-page-handler="Respaldar">
+        <button class="btn" type="submit" data-texto-envio="Respaldando…">Respaldar ahora</button>
+    </form>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="panel-aviso panel-aviso--ok" role="status">@Model.Mensaje</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Advertencia))
+{
+    <div class="panel-aviso panel-aviso--error" role="alert">@Model.Advertencia</div>
+}
+
+<div class="panel-aviso" role="status">
+    @if (Model.Automatico)
+    {
+        <text>
+            El respaldo corre solo todos los días a las <strong>@Model.HoraDiaria:00</strong> y se
+            conservan los <strong>@Model.Conservar</strong> últimos.
+        </text>
+    }
+    else
+    {
+        <text>El respaldo automático está <strong>apagado</strong>: sólo se hacen los que se piden desde acá.</text>
+    }
+    <br />
+    Los archivos quedan en <code>@Model.Carpeta</code>, en el mismo servidor.
+    <strong>Bajate uno cada tanto:</strong> si el servidor se pierde, se pierden también los respaldos que estén ahí.
+</div>
+
+<div class="panel-tarjeta">
+    @if (Model.Archivos.Count == 0)
+    {
+        <div class="panel-vacio">
+            <p>Todavía no hay ningún respaldo hecho.</p>
+            <form method="post" asp-page-handler="Respaldar">
+                <button class="btn" type="submit" data-texto-envio="Respaldando…">Hacer el primero</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="panel-scroll">
+            <table class="panel-tabla">
+                <thead>
+                    <tr>
+                        <th scope="col">Archivo</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Tamaño</th>
+                        <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Archivos)
+                    {
+                        <tr>
+                            <td><strong>@a.Nombre</strong></td>
+                            <td data-rotulo="Fecha">@a.FechaLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td data-rotulo="Tamaño">@a.TamanioTexto</td>
+                            <td>
+                                <div class="panel-acciones">
+                                    <a class="panel-btn-icono"
+                                       asp-page-handler="Descargar" asp-route-nombre="@a.Nombre">Descargar</a>
+                                    <form method="post" asp-page-handler="Eliminar" asp-route-nombre="@a.Nombre"
+                                          data-confirmar="¿Eliminar el respaldo @a.Nombre? No se puede deshacer.">
+                                        <button class="panel-btn-icono panel-btn-icono--peligro" type="submit">Eliminar</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="panel-tarjeta">
+    <h2>Cómo se restaura</h2>
+    <p class="panel-ayuda">
+        El .zip trae <code>enricci.db</code> y la carpeta <code>imagenes/propiedades</code>.
+        Para volver atrás: parar el sitio, reemplazar el archivo <code>enricci.db</code> de la
+        carpeta de la aplicación por el del respaldo, dejar la carpeta de fotos en
+        <code>wwwroot/imagenes/propiedades</code> y volver a arrancar.
+        Conviene guardar aparte lo que se reemplaza, por las dudas.
+    </p>
+</div>

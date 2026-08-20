@@ -1,5 +1,6 @@
 @page
 @model Enricci_Propiedades.Pages.Admin.IndexModel
+@inject Enricci_Propiedades.Services.FotosService Fotos
 @{
     ViewData["Title"] = "Propiedades";
 }
@@ -107,7 +108,7 @@
                                     <div class="panel-miniatura">
                                         @if (p.Fotos.Count > 0)
                                         {
-                                            <img src="@p.Fotos[0]" alt="" loading="lazy" />
+                                            <img src="@Fotos.Miniatura(p.Fotos[0])" alt="" loading="lazy" />
                                         }
                                         else
                                         {

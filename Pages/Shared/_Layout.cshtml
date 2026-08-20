@@ -1,11 +1,22 @@
+@inject Microsoft.Extensions.Options.IOptions<OpcionesSitio> OpcionesDelSitio
 @{
     var paginaActual = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
     string? Activo(string ruta) =>
         paginaActual.Equals(ruta, StringComparison.OrdinalIgnoreCase) ? "page" : null;
 
     var titulo = ViewData["Title"] as string;
-    var urlBase = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var urlBase = OpcionesDelSitio.Value.UrlBase(Context.Request);
     var urlCanonica = urlBase + Context.Request.Path;
+
+    // Imagen para redes: cada página puede poner la suya (la ficha manda la
+    // foto de la propiedad). Sin eso, compartir un aviso mostraría el logo.
+    var imagenSocial = ViewData["OgImagen"] as string;
+    var urlImagen = urlBase + (imagenSocial ?? "/imagenes/isologo.png");
+
+    // Con una foto de verdad conviene la tarjeta grande; con el logo, la chica:
+    // el isologo estirado a todo el ancho se ve mal.
+    var tipoTarjeta = imagenSocial is null ? "summary" : "summary_large_image";
+    var tipoOg = ViewData["OgTipo"] as string ?? "website";
     var descripcion = ViewData["Descripcion"] as string
         ?? "Inmobiliaria en la Ciudad de Buenos Aires desde 1932. Venta y alquiler de propiedades, tasaciones, administración de cobranzas y asesoría legal en Monserrat, Constitución, San Cristóbal y alrededores.";
 }
@@ -19,14 +30,14 @@
     <meta name="theme-color" content="#F5333F" />
     <meta name="author" content="@SitioInfo.Nombre" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="@tipoOg" />
     <meta property="og:site_name" content="@SitioInfo.Nombre" />
     <meta property="og:title" content="@(titulo ?? SitioInfo.Nombre)" />
     <meta property="og:description" content="@descripcion" />
     <meta property="og:locale" content="es_AR" />
     <meta property="og:url" content="@urlCanonica" />
-    <meta property="og:image" content="@(urlBase + "/imagenes/isologo.png")" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="@urlImagen" />
+    <meta name="twitter:card" content="@tipoTarjeta" />
 
     <link rel="canonical" href="@urlCanonica" />
 

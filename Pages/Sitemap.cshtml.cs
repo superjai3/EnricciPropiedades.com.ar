@@ -1,8 +1,10 @@
 using System.Text;
 using System.Xml;
+using Enricci_Propiedades.Models;
 using Enricci_Propiedades.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 
 namespace Enricci_Propiedades.Pages;
 
@@ -27,12 +29,17 @@ public class SitemapModel : PageModel
     };
 
     private readonly PropiedadesService _propiedades;
+    private readonly OpcionesSitio _sitio;
 
-    public SitemapModel(PropiedadesService propiedades) => _propiedades = propiedades;
+    public SitemapModel(PropiedadesService propiedades, IOptions<OpcionesSitio> sitio)
+    {
+        _propiedades = propiedades;
+        _sitio = sitio.Value;
+    }
 
     public IActionResult OnGet()
     {
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = _sitio.UrlBase(Request);
         var hoy = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
         var texto = new StringBuilder();

@@ -1,19 +1,51 @@
+using System.Collections.Concurrent;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
+
 namespace Enricci_Propiedades.Services;
 
 /// <summary>
 /// Guarda en disco las fotos que se suben desde el panel y devuelve la ruta
 /// pública para referenciarlas en la publicación.
+///
+/// Ninguna foto se guarda como vino: se la reduce, se la convierte a WEBP y se
+/// le genera una miniatura. Una foto de teléfono sin tocar pesa varios MB y el
+/// listado carga seis de una; publicada tal cual, el sitio se vuelve inusable
+/// con datos móviles.
 /// </summary>
 public class FotosService
 {
-    // Una foto de teléfono actual pasa los 8 MB sin ninguna dificultad, así que
-    // el tope tiene que dar lugar a lo que la gente sube de verdad.
+    // Tope de lo que se acepta subir. Una foto de teléfono actual pasa los 8 MB
+    // sin ninguna dificultad, así que tiene que dar lugar a lo que la gente sube
+    // de verdad; lo que se guarda después pesa una fracción de eso.
     private const long TamanioMaximo = 20 * 1024 * 1024;
     private const int MaximoPorPropiedad = 12;
 
     /// <summary>
-    /// Formatos que el navegador sabe mostrar. ".jfif" es un JPEG con otro
-    /// nombre: así los guarda Windows al bajarlos desde el navegador.
+    /// Lado mayor de la foto publicada. 1600 px cubre una pantalla grande con el
+    /// visor abierto; más allá de eso el peso sube y no se nota.
+    /// </summary>
+    private const int LadoMaximo = 1600;
+
+    /// <summary>Lado mayor de la miniatura: la que va en las tarjetas del listado.</summary>
+    private const int LadoMiniatura = 600;
+
+    /// <summary>
+    /// Calidad del WEBP. En 78 la diferencia con el original no se ve en una
+    /// fotografía y el archivo queda varias veces más liviano.
+    /// </summary>
+    private const int CalidadWebp = 78;
+
+    /// <summary>Sufijo del archivo de miniatura, que queda junto al de la foto grande.</summary>
+    private const string SufijoMiniatura = "-min";
+
+    /// <summary>Carpeta pública donde viven todas las fotos del catálogo.</summary>
+    private const string RaizPublicaFotos = "/imagenes/propiedades/";
+
+    /// <summary>
+    /// Formatos que se aceptan subir. ".jfif" es un JPEG con otro nombre: así
+    /// los guarda Windows al bajarlos desde el navegador.
     /// </summary>
     private static readonly string[] ExtensionesValidas =
         { ".jpg", ".jpeg", ".jfif", ".png", ".webp" };
@@ -37,6 +69,13 @@ public class FotosService
     private readonly IWebHostEnvironment _entorno;
     private readonly ILogger<FotosService> _log;
 
+    /// <summary>
+    /// Qué fotos tienen miniatura en disco. Las publicaciones cargadas antes de
+    /// que existieran las miniaturas no la tienen, y preguntárselo al disco en
+    /// cada tarjeta sería un acceso por imagen y por visita.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, string> _miniaturas = new();
+
     public FotosService(IWebHostEnvironment entorno, ILogger<FotosService> log)
     {
         _entorno = entorno;
@@ -55,6 +94,38 @@ public class FotosService
     private string RaizWeb => string.IsNullOrEmpty(_entorno.WebRootPath)
         ? Path.Combine(_entorno.ContentRootPath, "wwwroot")
         : _entorno.WebRootPath;
+
+    /// <summary>
+    /// Versión chica de una foto, para las tarjetas del listado y del panel. Si
+    /// la publicación es anterior a las miniaturas devuelve la foto original,
+    /// que se sigue viendo igual: sólo pesa más.
+    /// </summary>
+    public string Miniatura(string rutaPublica)
+    {
+        if (string.IsNullOrEmpty(rutaPublica) ||
+            !rutaPublica.StartsWith(RaizPublicaFotos, StringComparison.Ordinal))
+        {
+            return rutaPublica;
+        }
+
+        return _miniaturas.GetOrAdd(rutaPublica, ruta =>
+        {
+            var candidata = ConSufijoMiniatura(ruta);
+            var fisica = ARutaFisica(candidata);
+
+            return fisica is not null && File.Exists(fisica) ? candidata : ruta;
+        });
+    }
+
+    /// <summary>Convierte "/…/abc.webp" en "/…/abc-min.webp".</summary>
+    private static string ConSufijoMiniatura(string rutaPublica)
+    {
+        var punto = rutaPublica.LastIndexOf('.');
+
+        return punto < 0
+            ? rutaPublica + SufijoMiniatura
+            : rutaPublica[..punto] + SufijoMiniatura + rutaPublica[punto..];
+    }
 
     /// <summary>
     /// Guarda los archivos válidos y devuelve las rutas públicas. Los que no
@@ -123,18 +194,25 @@ public class FotosService
 
             Directory.CreateDirectory(carpetaFisica);
 
-            // Nombre propio: nunca se usa el del archivo subido, que podría
-            // traer rutas o caracteres inesperados. La extensión se normaliza
-            // para que el archivo se sirva con el tipo correcto.
-            var nombre = $"{Guid.NewGuid():N}{Normalizar(extension)}";
-            var destino = Path.Combine(carpetaFisica, nombre);
+            // Nombre propio: nunca se usa el del archivo subido, que podría traer
+            // rutas o caracteres inesperados. Todo sale en WEBP, sin importar con
+            // qué formato haya entrado.
+            var nombre = $"{Guid.NewGuid():N}.webp";
 
-            await using (var salida = File.Create(destino))
+            try
             {
-                await archivo.CopyToAsync(salida);
+                await ProcesarYGuardarAsync(archivo, carpetaFisica, nombre);
+            }
+            catch (Exception ex) when (ex is ImageFormatException or InvalidImageContentException)
+            {
+                // La firma decía que era una imagen, pero el archivo está cortado
+                // o dañado y el decodificador no pudo con él.
+                _log.LogWarning(ex, "No se pudo procesar la foto {Nombre}.", archivo.FileName);
+                errores.Add($"«{archivo.FileName}» está dañada y no se pudo procesar.");
+                continue;
             }
 
-            guardadas.Add($"/imagenes/propiedades/{propiedadId}/{nombre}");
+            guardadas.Add($"{RaizPublicaFotos}{propiedadId}/{nombre}");
             _log.LogInformation("Foto cargada para la propiedad {Id}: {Nombre}", propiedadId, nombre);
         }
 
@@ -142,30 +220,90 @@ public class FotosService
     }
 
     /// <summary>
-    /// ".jfif" y ".jpeg" son JPEG con otro nombre. Se guardan como ".jpg" para
-    /// que el servidor los entregue como image/jpeg y no como el heredado
-    /// image/pjpeg, que es lo que devuelve para .jfif.
+    /// Reduce la foto, le saca los metadatos y escribe la versión grande y la
+    /// miniatura, las dos en WEBP.
     /// </summary>
-    private static string Normalizar(string extension) => extension switch
+    private async Task ProcesarYGuardarAsync(IFormFile archivo, string carpetaFisica, string nombre)
     {
-        ".jfif" or ".jpeg" => ".jpg",
-        _ => extension
-    };
+        await using var entrada = archivo.OpenReadStream();
+        using var imagen = await Image.LoadAsync(entrada);
 
-    /// <summary>Borra el archivo físico de una foto. Ignora las que no existan.</summary>
+        var anchoOriginal = imagen.Width;
+        var altoOriginal = imagen.Height;
+
+        // La cámara del teléfono no rota la foto: deja la orientación anotada en
+        // los metadatos EXIF. Hay que aplicarla antes de tocar nada, o las fotos
+        // sacadas de costado quedan acostadas.
+        imagen.Mutate(x => x.AutoOrient());
+
+        // Fuera los metadatos. Además de pesar, las fotos de teléfono suelen
+        // traer las coordenadas GPS de dónde fueron sacadas: publicarlas sería
+        // dar la ubicación exacta de la propiedad sin haberlo decidido.
+        imagen.Metadata.ExifProfile = null;
+        imagen.Metadata.IptcProfile = null;
+        imagen.Metadata.XmpProfile = null;
+
+        var codificador = new WebpEncoder
+        {
+            Quality = CalidadWebp,
+            FileFormat = WebpFileFormatType.Lossy
+        };
+
+        var rutaGrande = Path.Combine(carpetaFisica, nombre);
+        var rutaMiniatura = Path.Combine(
+            carpetaFisica, Path.GetFileNameWithoutExtension(nombre) + SufijoMiniatura + ".webp");
+
+        using (var grande = Redimensionar(imagen, LadoMaximo))
+        {
+            await grande.SaveAsWebpAsync(rutaGrande, codificador);
+        }
+
+        using (var chica = Redimensionar(imagen, LadoMiniatura))
+        {
+            await chica.SaveAsWebpAsync(rutaMiniatura, codificador);
+        }
+
+        _log.LogInformation(
+            "Foto procesada: {Nombre}, {Ancho}x{Alto} y {MbOriginal:N1} MB, quedó en {Kb:N0} KB " +
+            "más {KbMin:N0} KB de miniatura.",
+            archivo.FileName, anchoOriginal, altoOriginal, archivo.Length / 1024d / 1024d,
+            new FileInfo(rutaGrande).Length / 1024d, new FileInfo(rutaMiniatura).Length / 1024d);
+    }
+
+    /// <summary>
+    /// Copia reducida para que el lado mayor no pase de <paramref name="lado"/>.
+    /// Las fotos que ya son más chicas no se agrandan: sólo se verían borrosas.
+    /// </summary>
+    private static Image Redimensionar(Image original, int lado) =>
+        original.Clone(x => x.Resize(new ResizeOptions
+        {
+            Size = new Size(lado, lado),
+            Mode = ResizeMode.Max,
+            Sampler = KnownResamplers.Lanczos3
+        }));
+
+    /// <summary>
+    /// Borra el archivo físico de una foto y el de su miniatura. Ignora las que
+    /// no existan.
+    /// </summary>
     public void Borrar(string rutaPublica)
     {
         // Sólo se borran archivos dentro de la carpeta de fotos del sitio.
-        if (!rutaPublica.StartsWith("/imagenes/propiedades/", StringComparison.Ordinal))
+        if (!rutaPublica.StartsWith(RaizPublicaFotos, StringComparison.Ordinal))
         {
             return;
         }
 
-        var relativa = rutaPublica.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-        var fisica = Path.GetFullPath(Path.Combine(RaizWeb, relativa));
-        var raizFotos = Path.GetFullPath(Path.Combine(RaizWeb, "imagenes", "propiedades"));
+        BorrarArchivo(rutaPublica);
+        BorrarArchivo(ConSufijoMiniatura(rutaPublica));
+        _miniaturas.TryRemove(rutaPublica, out _);
+    }
 
-        if (!fisica.StartsWith(raizFotos, StringComparison.Ordinal) || !File.Exists(fisica))
+    private void BorrarArchivo(string rutaPublica)
+    {
+        var fisica = ARutaFisica(rutaPublica);
+
+        if (fisica is null || !File.Exists(fisica))
         {
             return;
         }
@@ -179,6 +317,24 @@ public class FotosService
         {
             _log.LogWarning(ex, "No se pudo borrar la foto {Ruta}.", rutaPublica);
         }
+    }
+
+    /// <summary>
+    /// Ruta en disco de una foto del sitio, o null si la ruta pública apunta
+    /// fuera de la carpeta de fotos.
+    /// </summary>
+    private string? ARutaFisica(string rutaPublica)
+    {
+        if (!rutaPublica.StartsWith(RaizPublicaFotos, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var relativa = rutaPublica.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var fisica = Path.GetFullPath(Path.Combine(RaizWeb, relativa));
+        var raizFotos = Path.GetFullPath(Path.Combine(RaizWeb, "imagenes", "propiedades"));
+
+        return fisica.StartsWith(raizFotos, StringComparison.Ordinal) ? fisica : null;
     }
 
     /// <summary>

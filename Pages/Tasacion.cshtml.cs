@@ -8,11 +8,13 @@ namespace Enricci_Propiedades.Pages;
 
 public class TasacionModel : PageModel
 {
+    private readonly ConsultasService _consultas;
     private readonly CorreoService _correo;
     private readonly ILogger<TasacionModel> _log;
 
-    public TasacionModel(CorreoService correo, ILogger<TasacionModel> log)
+    public TasacionModel(ConsultasService consultas, CorreoService correo, ILogger<TasacionModel> log)
     {
+        _consultas = consultas;
         _correo = correo;
         _log = log;
     }
@@ -104,25 +106,46 @@ public class TasacionModel : PageModel
             return Page();
         }
 
-        _log.LogInformation(
-            "Pedido de tasación de {Nombre} para {Direccion}, {Barrio}",
-            Datos.Nombre, Datos.Direccion, Datos.Barrio);
-
-        var resumen =
-            $"Pedido de tasación desde la web\n" +
+        // Los datos de la propiedad a tasar van juntos en el detalle: son propios
+        // de este formulario y no tienen dónde caer en el resto de las consultas.
+        var detalle =
             $"Propiedad: {Datos.Direccion}, {Datos.Barrio}\n" +
             $"Tipo: {Datos.Tipo}\n" +
             $"Ambientes: {Datos.Ambientes?.ToString() ?? "-"}\n" +
-            $"Superficie: {(Datos.Superficie.HasValue ? Datos.Superficie + " m²" : "-")}\n" +
+            $"Superficie: {(Datos.Superficie.HasValue ? Datos.Superficie + " m²" : "-")}";
+
+        var resumen =
+            $"Pedido de tasación desde la web\n" +
+            $"{detalle}\n" +
             $"Objetivo: {Datos.Objetivo}\n\n" +
             $"Nombre: {Datos.Nombre}\n" +
             $"Email: {Datos.Email}\n" +
             $"Teléfono: {Datos.Telefono}\n" +
             $"Comentarios: {Datos.Comentario ?? "-"}";
 
+        // Igual que en Contacto: primero queda registrado, después se avisa.
+        var registro = await _consultas.RegistrarAsync(new Consulta
+        {
+            Origen = OrigenConsulta.Tasacion,
+            Nombre = Datos.Nombre,
+            Email = Datos.Email,
+            Telefono = Datos.Telefono,
+            Motivo = Datos.Objetivo,
+            Mensaje = string.IsNullOrWhiteSpace(Datos.Comentario) ? "(sin comentarios)" : Datos.Comentario,
+            Detalle = detalle
+        });
+
+        _log.LogInformation(
+            "Pedido de tasación {Id} de {Nombre} para {Direccion}, {Barrio}",
+            registro.Id, Datos.Nombre, Datos.Direccion, Datos.Barrio);
+
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
+
         CorreoEnviado = await _correo.EnviarAsync(
             $"Pedido de tasación: {Datos.Direccion}, {Datos.Barrio}", resumen, Datos.Email);
+
+        await _consultas.MarcarCorreoEnviadoAsync(registro.Id, CorreoEnviado);
+
         Enviado = true;
 
         return Page();

@@ -1,10 +1,24 @@
 @page "/propiedad/{id:int}"
 @model FichaModel
+@inject Enricci_Propiedades.Services.FotosService Fotos
 @{
     var p = Model.Ficha;
     ViewData["Title"] = $"{p.Titulo} · {p.Barrio}";
     ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}. {p.Ambientes} ambientes, {p.SuperficieTotal} m². {p.PrecioTexto}.";
     var mensajeWsp = $"Hola, me interesa la propiedad de {p.Direccion} ({p.Barrio}) publicada en la web. ¿Podemos coordinar una visita?";
+
+    // La foto de portada es lo que se ve al compartir el aviso por WhatsApp o
+    // por redes. Sin esto se mostraba siempre el isologo de la inmobiliaria.
+    ViewData["OgImagen"] = Model.FotoDePortada;
+    ViewData["OgTipo"] = "article";
+}
+
+@section Head {
+    @* Dentro de un @@section el Context no está en alcance: el nonce se toma
+       del ViewContext. Sin nonce, la política de contenido bloquea el bloque. *@
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructurados)
+    </script>
 }
 
 <section class="encabezado-pagina" style="padding-bottom:1.5rem">
@@ -76,7 +90,7 @@
                         {
                             <button class="visor__mini @(i == 0 ? "activo" : "")" type="button"
                                     data-visor-ir="@i" aria-label="Ver la foto @(i + 1) de @p.Fotos.Count">
-                                <img src="@p.Fotos[i]" alt="" loading="lazy" decoding="async" />
+                                <img src="@Fotos.Miniatura(p.Fotos[i])" alt="" loading="lazy" decoding="async" />
                             </button>
                         }
                     </div>

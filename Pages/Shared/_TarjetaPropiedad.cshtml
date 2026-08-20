@@ -1,10 +1,11 @@
+@inject Enricci_Propiedades.Services.FotosService Fotos
 @model Enricci_Propiedades.Models.Propiedad
 
 <article class="prop">
     <a class="prop__media" asp-page="/Ficha" asp-route-id="@Model.Id" aria-label="Ver @Model.Titulo">
         @if (Model.Fotos.Count > 0)
         {
-            <img src="@Model.Fotos[0]" alt="Fachada de @Model.Direccion, @Model.Barrio" loading="lazy" decoding="async" width="400" height="300" />
+            <img src="@Fotos.Miniatura(Model.Fotos[0])" alt="Fachada de @Model.Direccion, @Model.Barrio" loading="lazy" decoding="async" width="400" height="300" />
         }
         else
         {

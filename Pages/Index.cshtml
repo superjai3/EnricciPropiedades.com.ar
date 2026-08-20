@@ -320,7 +320,7 @@
         <div class="barrios revelar">
             @foreach (var barrio in Model.Barrios)
             {
-                <a class="barrio" asp-page="/Propiedades" asp-route-barrio="@barrio">
+                <a class="barrio" asp-page="/Barrio" asp-route-barrio="@Slug.De(barrio)">
                     <strong>@barrio</strong>
                     <span>Ver propiedades disponibles</span>
                 </a>

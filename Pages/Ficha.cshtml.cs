@@ -93,7 +93,9 @@ public class FichaModel : PageModel
             {
                 Miga(1, "Inicio", urlBase),
                 Miga(2, "Propiedades", $"{urlBase}/Propiedades"),
-                Miga(3, p.Barrio, $"{urlBase}/Propiedades?barrio={Uri.EscapeDataString(p.Barrio)}"),
+                // La ruta pasa por la página del barrio, no por el listado
+                // filtrado: es la que queremos que el buscador siga y valore.
+                Miga(3, p.Barrio, $"{urlBase}/propiedades/{Slug.De(p.Barrio)}"),
                 Miga(4, p.Direccion, urlFicha)
             }
         };
@@ -114,8 +116,11 @@ public class FichaModel : PageModel
                 ["@type"] = "PostalAddress",
                 ["streetAddress"] = p.Direccion,
                 ["addressLocality"] = p.Barrio,
-                ["addressRegion"] = "Ciudad Autónoma de Buenos Aires",
-                ["addressCountry"] = "AR"
+                // La ciudad y el país salen de la publicación: el catálogo es de
+                // CABA salvo excepciones, y declarar mal dónde queda una
+                // propiedad es peor que no declararlo.
+                ["addressRegion"] = p.Ciudad,
+                ["addressCountry"] = p.Pais
             }
         };
 

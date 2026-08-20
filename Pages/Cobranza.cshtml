@@ -5,6 +5,12 @@
     ViewData["Descripcion"] = "Administramos tu alquiler en CABA: cobranza mensual, actualización por índice, control de expensas e impuestos y rendición en tiempo y forma.";
 }
 
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
 <section class="encabezado-pagina">
     <div class="contenedor">
         <nav class="migas" aria-label="Ruta de navegación">

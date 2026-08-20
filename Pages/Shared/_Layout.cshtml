@@ -59,26 +59,12 @@
         })();
     </script>
 
+    @* Quién es la inmobiliaria y qué es este sitio, en el vocabulario de
+       schema.org. Se arma en Services/DatosEstructurados.cs a partir de
+       SitioInfo, así lo que se declara y lo que se muestra salen del mismo dato. *@
     <script type="application/ld+json" nonce="@Context.Nonce()">
-        {
-          "@@context": "https://schema.org",
-          "@@type": "RealEstateAgent",
-          "name": "@SitioInfo.Nombre",
-          "description": "@descripcion",
-          "email": "@SitioInfo.Email",
-          "telephone": "@SitioInfo.Telefono",
-          "foundingDate": "@SitioInfo.AnioFundacion",
-          "areaServed": "Ciudad Autónoma de Buenos Aires, Argentina",
-          "address": {
-            "@@type": "PostalAddress",
-            "streetAddress": "@SitioInfo.Direccion",
-            "addressLocality": "Ciudad Autónoma de Buenos Aires",
-            "addressCountry": "AR",
-            "postalCode": "@SitioInfo.CodigoPostal"
-          }
-        }
+        @Html.Raw(Enricci_Propiedades.Services.DatosEstructurados.Grafo(urlBase, descripcion))
     </script>
-
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body>

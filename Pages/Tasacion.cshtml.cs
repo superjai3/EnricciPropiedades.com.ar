@@ -3,17 +3,24 @@ using Enricci_Propiedades.Models;
 using Enricci_Propiedades.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 
 namespace Enricci_Propiedades.Pages;
 
 public class TasacionModel : PageModel
 {
+    private readonly OpcionesSitio _sitio;
     private readonly ConsultasService _consultas;
     private readonly CorreoService _correo;
     private readonly ILogger<TasacionModel> _log;
 
-    public TasacionModel(ConsultasService consultas, CorreoService correo, ILogger<TasacionModel> log)
+    public TasacionModel(
+        IOptions<OpcionesSitio> sitio,
+        ConsultasService consultas,
+        CorreoService correo,
+        ILogger<TasacionModel> log)
     {
+        _sitio = sitio.Value;
         _consultas = consultas;
         _correo = correo;
         _log = log;
@@ -67,6 +74,14 @@ public class TasacionModel : PageModel
         public string? Sitio { get; set; }
     }
 
+    /// <summary>El pedido de tasación como servicio, para los buscadores.</summary>
+    public string DatosEstructuradosJson => DatosEstructurados.Servicio(
+        _sitio.UrlBase(Request),
+        "Tasación de inmuebles",
+        "Tasación gratuita y sin compromiso de departamentos, casas, PH y locales en la Ciudad " +
+        "de Buenos Aires, con informe de valor por escrito.",
+        _sitio.UrlBase(Request) + Request.Path);
+
     [BindProperty]
     public Pedido Datos { get; set; } = new();
 
@@ -76,11 +91,13 @@ public class TasacionModel : PageModel
     public bool CorreoEnviado { get; private set; }
     public string MensajeWhatsapp { get; private set; } = SitioInfo.Whatsapp("Hola, quisiera pedir una tasación.");
 
+    /// <summary>
+    /// Los barrios donde la inmobiliaria trabaja, más una salida para el resto.
+    /// Sale de SitioInfo y no de una lista propia: es el mismo dato que se les
+    /// declara a los buscadores, y repetido se desincroniza.
+    /// </summary>
     public static readonly string[] Barrios =
-    {
-        "Monserrat", "Constitución", "San Cristóbal", "San Telmo",
-        "Balvanera", "Boedo", "Almagro", "Parque Patricios", "Otro barrio de CABA"
-    };
+        SitioInfo.BarriosQueAtiende.Append("Otro barrio de CABA").ToArray();
 
     public static readonly string[] Tipos =
     {

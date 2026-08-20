@@ -58,6 +58,13 @@ public class SitemapModel : PageModel
                 EscribirUrl(escritor, baseUrl + ruta, hoy, frecuencia, prioridad);
             }
 
+            // Una entrada por barrio con publicaciones: son las páginas que
+            // compiten por "propiedades en tal barrio".
+            foreach (var barrio in _propiedades.Barrios)
+            {
+                EscribirUrl(escritor, $"{baseUrl}/propiedades/{Slug.De(barrio)}", hoy, "weekly", "0.8");
+            }
+
             foreach (var propiedad in _propiedades.Todas)
             {
                 EscribirUrl(escritor, $"{baseUrl}/propiedad/{propiedad.Id}", hoy, "weekly", "0.8");

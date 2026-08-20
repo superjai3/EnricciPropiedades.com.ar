@@ -51,6 +51,9 @@ public class EditarModel : PageModel
     public List<string> ErroresDeFotos { get; } = new();
     public List<string> BarriosSugeridos { get; private set; } = new();
 
+    /// <summary>Ciudades ya cargadas, para sugerirlas sin tener que escribirlas.</summary>
+    public List<string> CiudadesSugeridas { get; private set; } = new();
+
     public SelectList Operaciones => new(
         new[]
         {
@@ -86,6 +89,7 @@ public class EditarModel : PageModel
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         BarriosSugeridos = await _propiedades.BarriosCargadosAsync();
+        CiudadesSugeridas = await _propiedades.CiudadesCargadasAsync();
 
         if (id is null or 0)
         {
@@ -110,6 +114,7 @@ public class EditarModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         BarriosSugeridos = await _propiedades.BarriosCargadosAsync();
+        CiudadesSugeridas = await _propiedades.CiudadesCargadasAsync();
 
         // Las listas no llegan del formulario tal cual: se rearman acá.
         ModelState.Remove("Datos.Comodidades");
@@ -222,6 +227,8 @@ public class EditarModel : PageModel
         destino.Titulo = origen.Titulo.Trim();
         destino.Direccion = origen.Direccion.Trim();
         destino.Barrio = origen.Barrio.Trim();
+        destino.Ciudad = origen.Ciudad.Trim();
+        destino.Pais = origen.Pais.Trim().ToUpperInvariant();
         destino.Operacion = origen.Operacion;
         destino.Tipo = origen.Tipo;
         destino.Estado = origen.Estado;

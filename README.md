@@ -29,9 +29,11 @@ panel.
 
 ```
 Models/
-  Propiedad.cs          Publicación (operación, tipo, superficies, precio, fotos…)
+  Propiedad.cs          Publicación (operación, tipo, ubicación, precio, fotos…)
   Usuario.cs            Usuario del panel; guarda hash y sal, nunca la contraseña
-  SitioInfo.cs          Datos de contacto de la inmobiliaria en un único lugar
+  SitioInfo.cs          Datos de la inmobiliaria: contacto, coordenadas, horario
+                        y barrios; de acá salen también los datos estructurados
+  Slug.cs               "Constitución" → "constitucion", para las URL de barrio
   Consulta.cs           Consulta recibida por los formularios; incluye la hora local
   OpcionesSitio.cs      Dominio del sitio, para las URL absolutas
   OpcionesRespaldo.cs   Configuración del respaldo automático
@@ -46,6 +48,7 @@ Services/
   UsuariosService.cs    Autenticación y cambio de contraseña
   ClaveHash.cs          PBKDF2-SHA256, 210.000 iteraciones
   ConsultasService.cs   Alta y seguimiento de las consultas del sitio
+  DatosEstructurados.cs Bloques de schema.org para buscadores y asistentes
   FotosService.cs       Reduce a WEBP, genera miniatura y borra las fotos del panel
   RespaldoService.cs    Copia la base y las fotos en un .zip, con rotación
   RespaldoProgramado.cs Dispara el respaldo una vez por día
@@ -64,7 +67,9 @@ Pages/
   Contacto              Formulario de consulta
   Error                 404 y errores generales
   Sitemap               Mapa del sitio en /sitemap.xml
-  Robots                robots.txt generado con el dominio configurado
+  Robots                robots.txt generado, con los rastreadores de IA
+  Llms                  /llms.txt: resumen del sitio para asistentes con IA
+  Barrio                Página por barrio en /propiedades/{barrio}
   Admin/                Panel de administración (requiere sesión iniciada)
     Ingresar            Pantalla de acceso
     Index               Listado de publicaciones con alta, edición y baja
@@ -394,25 +399,101 @@ está en `*`:
 Ojo con esto último: si el proxy reenvía otro nombre de host, el sitio responde
 400 a todo. Conviene cambiarlo con el sitio ya publicado y andando, no antes.
 
-## Buscadores
+## Buscadores y asistentes con IA
 
-`/sitemap.xml` se genera solo a partir de las páginas fijas y de cada propiedad
+Todo lo que sigue sale de un solo lugar: `Models/SitioInfo.cs` para los datos de
+la empresa y `Services/DatosEstructurados.cs` para armar los bloques. Los datos
+estructurados repartidos por las vistas se desincronizan del contenido visible al
+primer cambio de texto, y un buscador que encuentra que lo declarado no coincide
+con lo que se ve deja de confiar en el resto.
+
+### Qué se declara y dónde
+
+| Página | Datos estructurados |
+| --- | --- |
+| Todas | `RealEstateAgent` + `WebSite`, enlazados en un `@graph` |
+| Ficha | `RealEstateListing` + `BreadcrumbList` |
+| Barrio | `CollectionPage` con `ItemList` + `BreadcrumbList` |
+| Servicios | `FAQPage` |
+| Tasación, Cobranza, Asesoría legal | `Service` |
+
+La inmobiliaria lleva un `@id` fijo (`{dominio}/#inmobiliaria`) al que apuntan
+las demás entidades. Sin eso, cada página declara *otra* empresa con el mismo
+nombre, y el buscador no termina de armar una ficha única.
+
+Del `RealEstateAgent` cuelgan las **coordenadas** de la oficina —tomadas de
+OpenStreetMap—, el **horario** en piezas, la **matrícula CUCICBA** como
+credencial, los **barrios donde opera** y los perfiles de redes. Es lo que
+contesta «¿atienden en San Cristóbal?» o «¿a qué hora abren?» sin que nadie
+tenga que leer la página.
+
+### Páginas por barrio
+
+`/propiedades/{barrio}` —por ejemplo `/propiedades/monserrat`— es una página
+propia, no el listado filtrado. La diferencia importa: lo que la gente busca no
+es «propiedades» sino «departamentos en venta en Monserrat», y una página que se
+distingue de otra sólo por la cadena de consulta no compite, porque los
+buscadores la tratan como la misma página filtrada.
+
+Se generan solas a partir de los barrios que tienen publicaciones, entran en el
+sitemap y se enlazan desde la portada, desde cada ficha y entre ellas. Un barrio
+sin publicaciones devuelve 404: si no hay contenido, mejor decirlo.
+
+El texto de cada una sale del catálogo —cuántas hay, de qué tipo, desde qué
+precio—, así dice algo distinto en cada barrio y no queda desactualizado solo.
+
+### Dónde queda cada propiedad
+
+Cada publicación tiene **ciudad y país** propios, además del barrio. Parece de
+más para una inmobiliaria de CABA, pero el catálogo tiene al menos una propiedad
+en Copacabana, Río de Janeiro: sin esos campos el sitio le declaraba a los
+buscadores que quedaba en Buenos Aires. Los valores vienen rellenados con CABA y
+`AR`, y se cambian desde el formulario del panel.
+
+### GEO: los asistentes con IA
+
+- **`/llms.txt`** — un resumen del sitio en Markdown, generado: quiénes son,
+  desde cuándo, qué matrícula, qué barrios, qué horario, el índice de páginas,
+  las páginas por barrio con su cantidad de publicaciones y las preguntas
+  frecuentes completas. Un asistente que tiene que contestar «¿qué inmobiliarias
+  hay en Monserrat?» no se lee el sitio entero; de acá saca los datos duros sin
+  tener que interpretarlos.
+- **`/robots.txt` nombra uno por uno** a GPTBot, OAI-SearchBot, ChatGPT-User,
+  ClaudeBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended y
+  Applebot-Extended. Con `User-agent: *` ya estarían permitidos, pero varios
+  buscan su propio nombre y Google-Extended sólo se gobierna con una regla
+  propia. Además deja la decisión por escrito: a una inmobiliaria le conviene
+  que la citen.
+- **Las preguntas frecuentes son el contenido más citable del sitio.** Viven
+  como datos en `Servicios.cshtml.cs` y de ahí salen las tres cosas: el
+  acordeón que se ve, el bloque `FAQPage` y la sección de `llms.txt`. No pueden
+  decir cosas distintas.
+- Todo el sitio se sirve renderizado desde el servidor, sin necesidad de
+  ejecutar JavaScript para ver el contenido, que es lo que estos rastreadores
+  necesitan.
+
+### El resto
+
+`/sitemap.xml` se arma con las páginas fijas, las de barrio y cada propiedad
 publicada; las dadas de baja no figuran. `/robots.txt` también se genera —no es
 un archivo suelto en `wwwroot`— para que la línea del sitemap salga siempre del
-dominio configurado: escrita a mano se desactualiza en cuanto el sitio cambia de
-dirección, y apuntar el sitemap a un dominio que ya no es queda como un error en
-las herramientas de los buscadores.
+dominio configurado.
 
-Cada ficha lleva sus **datos estructurados** de schema.org (`RealEstateListing`
-más el `BreadcrumbList` de la ruta): precio, moneda, ambientes, dormitorios,
-baños, superficie en m² y comodidades. Con eso el buscador entiende que la
-página es un aviso inmobiliario y puede mostrar esos datos en el resultado, en
-vez de dos líneas de texto suelto. Los campos que faltan —que en la base son 0—
-no se declaran, para no afirmar que la propiedad no tiene ninguno; un precio en
-0 significa *Consultar* y tampoco se publica como oferta.
+Al compartir una ficha o una página de barrio, la vista previa muestra una
+**foto de la propiedad** y no el isologo. El panel lleva `noindex, nofollow` y
+queda fuera por `Disallow`.
 
-Al compartir una ficha, la vista previa muestra la **foto de la propiedad** y no
-el isologo. El panel lleva `noindex, nofollow`.
+### Lo que no se puede hacer desde el código
+
+- **Google Business Profile**: darlo de alta y verificarlo por correo postal es
+  lo que más mueve la aguja en búsquedas locales, y hay que hacerlo a mano. Los
+  datos tienen que coincidir *exactamente* con los del sitio (nombre, dirección,
+  teléfono), que salen de `SitioInfo.cs`.
+- **Google Search Console y Bing Webmaster Tools**: dar de alta el dominio y
+  enviar el sitemap cuando esté publicado.
+- El sitio no declara un `SearchAction` porque **no tiene buscador de texto
+  libre**, sólo filtros. Declarar uno que no funciona es peor que no declararlo.
+  Si en algún momento se agrega la búsqueda por texto, ahí sí conviene sumarlo.
 
 ## Datos de contacto
 

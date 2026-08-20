@@ -46,6 +46,36 @@ public class Propiedad
     [StringLength(60)]
     public string Barrio { get; set; } = "";
 
+    /// <summary>
+    /// Ciudad donde está la propiedad. Casi todo el catálogo es de la Ciudad de
+    /// Buenos Aires, pero no todo: existe al menos una publicación en Río de
+    /// Janeiro. Sin este campo, los datos estructurados declararían que está en
+    /// Buenos Aires, que es exactamente el tipo de dato falso que le hace perder
+    /// confianza al buscador en todo el resto del sitio.
+    /// </summary>
+    [Required(ErrorMessage = "Indicá la ciudad.")]
+    [StringLength(80)]
+    public string Ciudad { get; set; } = CiudadPredeterminada;
+
+    /// <summary>Código ISO de dos letras del país (AR, BR, UY…).</summary>
+    [Required]
+    [StringLength(2, MinimumLength = 2)]
+    [Display(Name = "País")]
+    public string Pais { get; set; } = PaisPredeterminado;
+
+    public const string CiudadPredeterminada = "Ciudad Autónoma de Buenos Aires";
+    public const string PaisPredeterminado = "AR";
+
+    /// <summary>True si la propiedad está en la ciudad donde opera la inmobiliaria.</summary>
+    public bool EsDeBuenosAires =>
+        Pais == PaisPredeterminado && Ciudad == CiudadPredeterminada;
+
+    /// <summary>"Monserrat, Ciudad Autónoma de Buenos Aires" — sin repetir si coinciden.</summary>
+    public string UbicacionTexto =>
+        string.Equals(Barrio, Ciudad, StringComparison.OrdinalIgnoreCase)
+            ? Ciudad
+            : $"{Barrio}, {Ciudad}";
+
     public Operacion Operacion { get; set; }
     public TipoPropiedad Tipo { get; set; }
     public EstadoPublicacion Estado { get; set; } = EstadoPublicacion.Disponible;

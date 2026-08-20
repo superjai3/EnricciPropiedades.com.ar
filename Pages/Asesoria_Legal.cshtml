@@ -5,6 +5,12 @@
     ViewData["Descripcion"] = "Contratos, boletos de compraventa, sucesiones, regularización de títulos y desalojos, con estudio jurídico y escribanía de confianza en CABA.";
 }
 
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
 <section class="encabezado-pagina">
     <div class="contenedor">
         <nav class="migas" aria-label="Ruta de navegación">

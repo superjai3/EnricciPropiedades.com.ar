@@ -1,0 +1,95 @@
+@page "/propiedades/{barrio}"
+@model BarrioModel
+@{
+    ViewData["Title"] = $"Propiedades en {Model.Barrio}";
+    ViewData["Descripcion"] = Model.Resumen;
+
+    // La portada de la primera publicación representa mejor al barrio que el
+    // isologo cuando alguien comparte la página.
+    var primeraConFoto = Model.Resultados.FirstOrDefault(p => p.Fotos.Count > 0);
+    ViewData["OgImagen"] = primeraConFoto?.Fotos[0];
+}
+
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Propiedades">Propiedades</a> <span aria-hidden="true">/</span>
+            <span>@Model.Barrio</span>
+        </nav>
+        <p class="eyebrow">@Model.UbicacionTexto</p>
+        <h1>Propiedades en @Model.Barrio</h1>
+
+        <p class="plomo">
+            @{
+                var total = Model.Resultados.Count;
+            }
+            Tenemos @total @(total == 1 ? "publicación disponible" : "publicaciones disponibles")
+            en @Model.Barrio@(Model.EnVenta > 0 && Model.EnAlquiler > 0
+                ? $": {Model.EnVenta} en venta y {Model.EnAlquiler} en alquiler."
+                : ".")
+            @if (Model.DesdeVenta is > 0)
+            {
+                <text>La venta arranca en USD @Model.DesdeVenta.Value.ToString("N0").</text>
+            }
+        </p>
+
+        @if (Model.EsElBarrioDeLaOficina)
+        {
+            <p class="plomo">
+                Nuestra oficina está acá mismo, en @SitioInfo.DireccionCompleta.
+                Trabajamos en @Model.Barrio desde @SitioInfo.AnioFundacion.
+            </p>
+        }
+
+        @if (Model.Tipos.Count > 0)
+        {
+            <div class="chips mt-4">
+                @foreach (var tipo in Model.Tipos)
+                {
+                    <span class="chip">@tipo</span>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="grilla-props">
+            @foreach (var propiedad in Model.Resultados)
+            {
+                <partial name="_TarjetaPropiedad" model="propiedad" />
+            }
+        </div>
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <h2 class="titulo-seccion">¿Buscás en otro barrio?</h2>
+        <div class="barrios mt-6">
+            @foreach (var otro in Model.OtrosBarrios)
+            {
+                <a class="barrio" asp-page="/Barrio" asp-route-barrio="@Slug.De(otro)">
+                    <strong>@otro</strong>
+                </a>
+            }
+            <a class="barrio" asp-page="/Propiedades">
+                <strong>Ver todas</strong>
+            </a>
+        </div>
+
+        <p class="mt-6">
+            Si no encontrás lo que buscás en @Model.Barrio,
+            <a asp-page="/Contacto">contanos qué necesitás</a>:
+            muchas operaciones se cierran con propiedades que todavía no publicamos.
+        </p>
+    </div>
+</section>

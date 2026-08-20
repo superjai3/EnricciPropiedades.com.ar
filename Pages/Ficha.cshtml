@@ -26,7 +26,7 @@
         <nav class="migas" aria-label="Ruta de navegación">
             <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
             <a asp-page="/Propiedades">Propiedades</a> <span aria-hidden="true">/</span>
-            <a asp-page="/Propiedades" asp-route-barrio="@p.Barrio">@p.Barrio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Barrio" asp-route-barrio="@Slug.De(p.Barrio)">@p.Barrio</a> <span aria-hidden="true">/</span>
             <span>@p.Direccion</span>
         </nav>
         <div class="chips mt-4" style="margin-bottom:1rem">
@@ -239,7 +239,7 @@
                     <p class="eyebrow">También te puede interesar</p>
                     <h2 class="titulo-seccion">Propiedades <em>similares</em></h2>
                 </div>
-                <a class="btn btn--fantasma" asp-page="/Propiedades" asp-route-barrio="@p.Barrio">
+                <a class="btn btn--fantasma" asp-page="/Barrio" asp-route-barrio="@Slug.De(p.Barrio)">
                     Ver todo en @p.Barrio
                     <svg aria-hidden="true"><use href="#i-flecha" /></svg>
                 </a>

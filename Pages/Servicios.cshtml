@@ -5,6 +5,15 @@
     ViewData["Descripcion"] = "Venta, alquiler, tasación, administración de alquileres, cobranza y asesoría legal inmobiliaria en la Ciudad de Buenos Aires.";
 }
 
+@section Head {
+    @* Las preguntas frecuentes en el vocabulario de schema.org. Es lo que
+       permite que un buscador —o un asistente con IA— tome la respuesta y la
+       cite, en vez de mandar a leer la página entera. *@
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
 <section class="encabezado-pagina">
     <div class="contenedor">
         <nav class="migas" aria-label="Ruta de navegación">
@@ -142,85 +151,23 @@
         <p class="eyebrow">Preguntas frecuentes</p>
         <h2 class="titulo-seccion">Dudas que nos traen <em>todos los días</em></h2>
 
+        @* El acordeón y el bloque FAQPage salen de la misma lista, en
+           Servicios.cshtml.cs: así no pueden decir cosas distintas. *@
         <div class="faq mt-6">
-            <div class="faq__item">
-                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
-                    ¿Cuánto cobran de comisión?
-                    <span class="faq__mas" aria-hidden="true"></span>
-                </button>
-                <div class="faq__panel">
-                    <div>
-                        <p>
-                            Depende de la operación y del tipo de propiedad. Los honorarios se
-                            informan por escrito antes de firmar cualquier autorización, junto con
-                            el detalle de sellos, gastos de escrituración y certificaciones.
-                            Nunca vas a encontrarte con un costo que no te hayamos anticipado.
-                        </p>
+            @foreach (var (pregunta, respuesta) in Enricci_Propiedades.Pages.ServiciosModel.Preguntas)
+            {
+                <div class="faq__item">
+                    <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
+                        @pregunta
+                        <span class="faq__mas" aria-hidden="true"></span>
+                    </button>
+                    <div class="faq__panel">
+                        <div>
+                            <p>@respuesta</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="faq__item">
-                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
-                    ¿La tasación tiene costo?
-                    <span class="faq__mas" aria-hidden="true"></span>
-                </button>
-                <div class="faq__panel">
-                    <div>
-                        <p>
-                            No. La visita y el informe de valor son sin cargo y no te obligan a
-                            darnos la venta ni a firmar exclusividad. Si necesitás una tasación
-                            formal para una sucesión o un juicio, te avisamos porque ese trámite
-                            sí tiene un arancel específico.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="faq__item">
-                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
-                    ¿Qué garantías aceptan para alquilar?
-                    <span class="faq__mas" aria-hidden="true"></span>
-                </button>
-                <div class="faq__panel">
-                    <div>
-                        <p>
-                            Garantía propietaria en CABA o GBA, recibo de sueldo con antigüedad
-                            comprobable, o seguro de caución de compañías habilitadas. Si no
-                            tenés garantía, escribinos igual: en la mayoría de los casos hay
-                            solución.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="faq__item">
-                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
-                    ¿Trabajan con propiedades fuera de esos barrios?
-                    <span class="faq__mas" aria-hidden="true"></span>
-                </button>
-                <div class="faq__panel">
-                    <div>
-                        <p>
-                            Nuestra zona de trabajo diaria es el sur porteño, donde conocemos el
-                            valor cuadra por cuadra. Fuera de ese radio evaluamos caso por caso,
-                            y si no somos los indicados te lo decimos de entrada.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="faq__item">
-                <button class="faq__boton" type="button" data-desplegable aria-expanded="false">
-                    ¿Cuánto tarda una venta?
-                    <span class="faq__mas" aria-hidden="true"></span>
-                </button>
-                <div class="faq__panel">
-                    <div>
-                        <p>
-                            Con el precio bien puesto y los papeles en orden, la mayoría de las
-                            operaciones de la zona se cierran entre 60 y 120 días. El informe de
-                            tasación incluye una estimación realista para tu caso puntual.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>

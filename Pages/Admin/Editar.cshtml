@@ -81,6 +81,31 @@
                 <span class="error-campo" asp-validation-for="Datos.Barrio"></span>
             </div>
 
+            @* Casi todo el catálogo es de CABA y viene rellenado por omisión,
+               pero no todo: hay una publicación en Río de Janeiro. Sin estos dos
+               campos el sitio le declararía a los buscadores que está en Buenos
+               Aires. *@
+            <div class="campo">
+                <label asp-for="Datos.Ciudad">Ciudad</label>
+                <input class="control" asp-for="Datos.Ciudad" list="ciudades"
+                       placeholder="@Enricci_Propiedades.Models.Propiedad.CiudadPredeterminada" />
+                <datalist id="ciudades">
+                    @foreach (var ciudad in Model.CiudadesSugeridas)
+                    {
+                        <option value="@ciudad"></option>
+                    }
+                </datalist>
+                <span class="error-campo" asp-validation-for="Datos.Ciudad"></span>
+            </div>
+
+            <div class="campo">
+                <label asp-for="Datos.Pais">País</label>
+                <input class="control" asp-for="Datos.Pais" maxlength="2" size="2"
+                       placeholder="AR" />
+                <small class="panel-ayuda">Código de dos letras: AR, BR, UY…</small>
+                <span class="error-campo" asp-validation-for="Datos.Pais"></span>
+            </div>
+
             <div class="campo">
                 <label asp-for="Datos.Operacion">Operación</label>
                 <select class="control" asp-for="Datos.Operacion" asp-items="Model.Operaciones"></select>

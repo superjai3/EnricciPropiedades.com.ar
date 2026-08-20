@@ -5,6 +5,12 @@
     ViewData["Descripcion"] = "Tasación sin cargo de departamentos, casas, PH y locales en CABA. Informe escrito en 48 horas hábiles, con operaciones comparables de la zona.";
 }
 
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
 <section class="encabezado-pagina">
     <div class="contenedor">
         <nav class="migas" aria-label="Ruta de navegación">

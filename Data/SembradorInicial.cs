@@ -42,6 +42,7 @@ public static class SembradorInicial
         }
 
         await CrearAdministradorAsync(servicios, bd, log);
+        await CrearAdministradoresAdicionalesAsync(servicios, bd, log);
     }
 
     /// <summary>
@@ -82,6 +83,61 @@ public static class SembradorInicial
             log.LogInformation(
                 "Usuario del panel creado: {Email}, con la contraseña de la configuración.", email);
         }
+    }
+
+    /// <summary>
+    /// Da de alta a los administradores extra declarados en la configuración
+    /// ("Admin:Adicionales", varios correos separados por punto y coma). Corre en
+    /// cada arranque y saltea a los que ya existen, así sumar una persona al panel
+    /// es agregar su correo a la configuración y reiniciar el servicio; y quitarla,
+    /// desactivarla desde el panel.
+    /// </summary>
+    private static async Task CrearAdministradoresAdicionalesAsync(
+        IServiceProvider servicios, EnricciContexto bd, ILogger log)
+    {
+        var configuracion = servicios.GetRequiredService<IConfiguration>();
+        var lista = configuracion["Admin:Adicionales"];
+
+        if (string.IsNullOrWhiteSpace(lista))
+        {
+            return;
+        }
+
+        var usuarios = servicios.GetRequiredService<UsuariosService>();
+        var separadores = new[] { ';', ',' };
+
+        foreach (var entrada in lista.Split(
+                     separadores, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            // CrearAsync guarda el correo en minúsculas: hay que comparar igual.
+            var email = entrada.ToLowerInvariant();
+
+            if (await bd.Usuarios.AnyAsync(u => u.Email == email))
+            {
+                continue;
+            }
+
+            var clave = GenerarClave();
+            await usuarios.CrearAsync(NombreDesdeEmail(email), email, clave, debeCambiarClave: true);
+
+            log.LogWarning(
+                "Administrador adicional creado: {Email} · contraseña inicial: {Clave} — " +
+                "anotala ahora, no se vuelve a mostrar. Hay que cambiarla al ingresar.",
+                email, clave);
+        }
+    }
+
+    /// <summary>
+    /// "info@holdinginsurtech.com" queda como "Info". Es sólo para que la fila
+    /// tenga un nombre legible; después cada uno lo edita desde su cuenta.
+    /// </summary>
+    private static string NombreDesdeEmail(string email)
+    {
+        var local = email.Split('@')[0].Replace('.', ' ').Replace('_', ' ').Replace('-', ' ').Trim();
+
+        return local.Length == 0
+            ? email
+            : char.ToUpperInvariant(local[0]) + local[1..];
     }
 
     /// <summary>Contraseña legible pero impredecible, para entregarle a Horacio.</summary>

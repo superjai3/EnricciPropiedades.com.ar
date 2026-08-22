@@ -157,4 +157,32 @@ public class Propiedad
 
     /// <summary>Visible en el sitio público: las vendidas se dan de baja del catálogo.</summary>
     public bool EstaPublicada => Estado != EstadoPublicacion.Vendida;
+
+    /// <summary>
+    /// "A estrenar" cuando no tiene años cargados, que es lo que diría un aviso
+    /// de verdad. "0 años" no lo escribe nadie.
+    /// </summary>
+    public string AntiguedadTexto => Antiguedad <= 0 ? "A estrenar" : $"{Antiguedad} años";
+
+    /// <summary>
+    /// Resumen para la descripción que ven los buscadores, armado sólo con los
+    /// datos que están cargados. Sin esto, una cochera aparece en Google
+    /// descrita como "0 ambientes, 0 m²".
+    /// </summary>
+    public string ResumenParaBuscadores
+    {
+        get
+        {
+            var partes = new List<string>();
+
+            if (Ambientes > 0) { partes.Add($"{Ambientes} ambientes"); }
+            if (Dormitorios > 0) { partes.Add($"{Dormitorios} dormitorios"); }
+            if (Banios > 0) { partes.Add(Banios == 1 ? "1 baño" : $"{Banios} baños"); }
+
+            if (SuperficieTotal > 0) { partes.Add($"{SuperficieTotal} m²"); }
+            else if (SuperficieCubierta > 0) { partes.Add($"{SuperficieCubierta} m² cubiertos"); }
+
+            return string.Join(", ", partes);
+        }
+    }
 }

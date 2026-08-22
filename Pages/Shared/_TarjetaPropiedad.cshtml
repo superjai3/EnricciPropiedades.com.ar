@@ -59,7 +59,14 @@
             {
                 <li><svg aria-hidden="true"><use href="#i-banio" /></svg>@Model.Banios baño@(Model.Banios > 1 ? "s" : "")</li>
             }
-            <li><svg aria-hidden="true"><use href="#i-superficie" /></svg>@Model.SuperficieTotal m²</li>
+            @if (Model.SuperficieTotal > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-superficie" /></svg>@Model.SuperficieTotal m²</li>
+            }
+            else if (Model.SuperficieCubierta > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-superficie" /></svg>@Model.SuperficieCubierta m²</li>
+            }
             @if (Model.Cochera)
             {
                 <li><svg aria-hidden="true"><use href="#i-auto" /></svg>Cochera</li>

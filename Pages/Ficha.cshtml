@@ -4,7 +4,10 @@
 @{
     var p = Model.Ficha;
     ViewData["Title"] = $"{p.Titulo} · {p.Barrio}";
-    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}. {p.Ambientes} ambientes, {p.SuperficieTotal} m². {p.PrecioTexto}.";
+    var resumen = p.ResumenParaBuscadores;
+    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}."
+        + (resumen.Length > 0 ? $" {resumen}." : "")
+        + $" {p.PrecioTexto}.";
     var mensajeWsp = $"Hola, me interesa la propiedad de {p.Direccion} ({p.Barrio}) publicada en la web. ¿Podemos coordinar una visita?";
 
     // La foto de portada es lo que se ve al compartir el aviso por WhatsApp o
@@ -126,14 +129,22 @@
         <div class="ficha">
             <div>
                 <div class="datos revelar">
-                    <div class="dato">
-                        <dt>Superficie total</dt>
-                        <dd>@p.SuperficieTotal m²</dd>
-                    </div>
-                    <div class="dato">
-                        <dt>Cubierta</dt>
-                        <dd>@p.SuperficieCubierta m²</dd>
-                    </div>
+                    @* Una cochera o un lote sin medir no tienen todos estos datos:
+                       mostrar "0 m²" queda peor que no mostrar el dato. *@
+                    @if (p.SuperficieTotal > 0)
+                    {
+                        <div class="dato">
+                            <dt>Superficie total</dt>
+                            <dd>@p.SuperficieTotal m²</dd>
+                        </div>
+                    }
+                    @if (p.SuperficieCubierta > 0)
+                    {
+                        <div class="dato">
+                            <dt>Cubierta</dt>
+                            <dd>@p.SuperficieCubierta m²</dd>
+                        </div>
+                    }
                     @if (p.Ambientes > 0)
                     {
                         <div class="dato">
@@ -157,7 +168,7 @@
                     }
                     <div class="dato">
                         <dt>Antigüedad</dt>
-                        <dd>@p.Antiguedad años</dd>
+                        <dd>@p.AntiguedadTexto</dd>
                     </div>
                 </div>
 

@@ -1,4 +1,5 @@
 @inject Enricci_Propiedades.Services.FotosService Fotos
+@inject Enricci_Propiedades.Services.CotizacionService Cotizacion
 @model Enricci_Propiedades.Models.Propiedad
 
 <article class="prop" data-tarjeta-propiedad="@Model.Id">
@@ -46,6 +47,11 @@
                 <small>@Model.PrecioSufijo</small>
             }
         </p>
+        @if (Model.Moneda == "USD" && Cotizacion.APesos(Model.Precio) is { } enPesos)
+        {
+            <p class="prop__precio-pesos">≈ $ @enPesos.ToString("N0")</p>
+        }
+
         <h3 class="prop__titulo">
             <a asp-page="/Ficha" asp-route-id="@Model.Id">@Model.Titulo</a>
         </h3>

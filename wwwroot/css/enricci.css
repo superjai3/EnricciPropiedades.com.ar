@@ -869,6 +869,13 @@ select.control {
 .prop__cuerpo { padding: var(--sp-5); display: flex; flex-direction: column; gap: .55rem; flex: 1; }
 .prop__precio { font-size: 1.45rem; font-weight: 800; letter-spacing: -.03em; }
 .prop__precio small { font-size: .78rem; font-weight: 600; color: var(--texto-suave); letter-spacing: 0; }
+.prop__precio-pesos {
+    margin: -.3rem 0 0;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    letter-spacing: -.01em;
+}
 .prop__titulo { font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; margin: 0; line-height: 1.25; }
 /* El enlace del título se estira por encima de toda la tarjeta: en el teléfono
    se toca en cualquier parte y no sólo sobre dos renglones de texto. El foco

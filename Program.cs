@@ -70,6 +70,12 @@ builder.Services.AddSingleton<CorreoService>();
 builder.Services.Configure<OpcionesSitio>(builder.Configuration.GetSection(OpcionesSitio.Seccion));
 
 // Respaldo diario de la base y de las fotos.
+// Cotización del Banco Nación, para mostrar en pesos lo que se publica en dólares.
+builder.Services.AddHttpClient();
+builder.Services.Configure<OpcionesCotizacion>(builder.Configuration.GetSection(OpcionesCotizacion.Seccion));
+builder.Services.AddSingleton<CotizacionService>();
+builder.Services.AddHostedService<CotizacionProgramada>();
+
 builder.Services.Configure<OpcionesRespaldo>(builder.Configuration.GetSection(OpcionesRespaldo.Seccion));
 builder.Services.AddSingleton<RespaldoService>();
 builder.Services.AddHostedService<RespaldoProgramado>();

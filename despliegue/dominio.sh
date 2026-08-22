@@ -120,13 +120,21 @@ server {
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
-    http2 on;
+HTTP2_AQUI
     server_name DOMINIO_AQUI;
 
     ssl_certificate     /etc/letsencrypt/live/DOMINIO_AQUI/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/DOMINIO_AQUI/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Los ajustes de TLS van escritos acá y no incluidos desde un archivo de
+    # certbot: ese archivo lo instala el complemento de nginx, que puede no
+    # estar, y entonces nginx no arranca por un include que falta.
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
 
     # El panel acepta hasta 12 fotos de 20 MB en una sola tanda y el límite de
     # nginx viene en 1 MB. Sin esto, subir fotos falla con un 413.
@@ -163,6 +171,21 @@ server {
 NGINX
 
 sudo sed -i "s/DOMINIO_AQUI/$DOMINIO/g" /etc/nginx/sites-available/enricci
+
+# HTTP/2 se pide de dos maneras distintas según la versión de nginx, y la que
+# no corresponde no es una advertencia: nginx directamente no arranca. Hasta la
+# 1.25.0 va pegado al listen; de la 1.25.1 en adelante es una directiva aparte.
+VERSION_NGINX="$(nginx -v 2>&1 | sed 's|.*/||' | tr -d '[:space:]')"
+if [[ "$(printf '%s\n1.25.1\n' "$VERSION_NGINX" | sort -V | head -1)" == "1.25.1" ]]; then
+    echo "    nginx $VERSION_NGINX: http2 como directiva"
+    sudo sed -i 's/^HTTP2_AQUI$/    http2 on;/' /etc/nginx/sites-available/enricci
+else
+    echo "    nginx $VERSION_NGINX: http2 pegado al listen"
+    sudo sed -i '/^HTTP2_AQUI$/d' /etc/nginx/sites-available/enricci
+    sudo sed -i 's/^\( *\)listen 443 ssl;$/\1listen 443 ssl http2;/' /etc/nginx/sites-available/enricci
+    sudo sed -i 's/^\( *\)listen \[::\]:443 ssl;$/\1listen [::]:443 ssl http2;/' /etc/nginx/sites-available/enricci
+fi
+
 sudo nginx -t
 sudo systemctl reload nginx
 

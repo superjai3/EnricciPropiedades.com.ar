@@ -84,26 +84,22 @@ comentado hasta que el sitio esté andando por el dominio.
 
 Este archivo nunca va al repositorio: tiene contraseñas.
 
-### El servicio y nginx
+### El servicio
 
 ```bash
 # desde la máquina de desarrollo
-scp -i ~/.ssh/enricci.key despliegue/enricci.service despliegue/nginx-enricci.conf ubuntu@LA-IP:/tmp/
+scp -i ~/.ssh/enricci.key despliegue/enricci.service ubuntu@LA-IP:/tmp/
 
 # en el servidor
 sudo install -m 644 /tmp/enricci.service /etc/systemd/system/enricci.service
 sudo systemctl daemon-reload
 sudo systemctl enable enricci
-
-sudo install -m 644 /tmp/nginx-enricci.conf /etc/nginx/sites-available/enricci
-sudo ln -sf /etc/nginx/sites-available/enricci /etc/nginx/sites-enabled/enricci
-sudo rm -f /etc/nginx/sites-enabled/default
 ```
 
-nginx todavía **no** va a arrancar: esa configuración de ejemplo pide
-certificados que aún no existen. No hay que tocarla a mano: el paso siguiente la
-reemplaza por una hecha para el dominio que se elija, primero por HTTP para
-poder sacar el certificado y después por HTTPS.
+La configuración de nginx no se copia a mano: la escribe `dominio.sh` en el paso
+siguiente, hecha a medida del dominio que se elija y de la versión de nginx que
+tenga la máquina. Un archivo de ejemplo guardado en el repositorio envejece sin
+que nadie se entere y se descubre el día del apuro.
 
 ---
 

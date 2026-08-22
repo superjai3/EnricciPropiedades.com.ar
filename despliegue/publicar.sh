@@ -14,7 +14,9 @@
 set -euo pipefail
 
 # --- Configurar esto una vez --------------------------------------------------
-SERVIDOR="${SERVIDOR:-ubuntu@CAMBIAR-POR-LA-IP}"
+# La IP es la efímera que tiene la instancia hoy. Si Oracle le asigna otra
+# —pasa si la instancia se apaga y se vuelve a encender—, se cambia acá.
+SERVIDOR="${SERVIDOR:-ubuntu@168.138.128.137}"
 LLAVE="${LLAVE:-$HOME/.ssh/enricci.key}"
 # ------------------------------------------------------------------------------
 

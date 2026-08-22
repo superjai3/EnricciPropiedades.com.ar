@@ -176,6 +176,32 @@ El script compila, sube, reemplaza la aplicación, reinicia y **comprueba que el
 sitio responda**. Si no responde, deja el registro a la vista y explica cómo
 volver a la versión anterior, que quedó guardada.
 
+### Desde PowerShell
+
+`publicar.sh` es un script de bash y PowerShell no lo entiende. Para eso está
+`publicar.ps1`, que es una envoltura: busca el bash que viene con Git para
+Windows y le pasa el trabajo. El despliegue sigue siendo uno solo.
+
+```powershell
+git pull origin claude/horacio-real-estate-website-bt6gfo
+.\despliegue\publicar.ps1
+```
+
+Se puede correr desde cualquier carpeta: el script se ubica solo. Acepta las
+mismas opciones:
+
+```powershell
+.\despliegue\publicar.ps1 -PrimeraVez
+.\despliegue\publicar.ps1 -Servidor ubuntu@1.2.3.4 -Llave "C:\Users\vos\.ssh\enricci.key"
+```
+
+Si Windows se niega a ejecutar el script por la política de scripts, esto lo
+habilita para el usuario actual y se pide una sola vez:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
 ### La contraseña del panel
 
 Si la base es nueva, en el primer arranque se genera una contraseña al azar que

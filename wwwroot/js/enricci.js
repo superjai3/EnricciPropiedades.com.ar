@@ -483,6 +483,77 @@
         }
     });
 
+    /* ---------- Calculadora de gastos de escrituración ---------- */
+    /* El servidor ya dejó la página calculada; esto sólo rehace la cuenta
+       mientras se escribe, para no tener que recargar por cada prueba. Si algo
+       de acá falla, el formulario sigue funcionando como formulario. */
+    var calculadora = document.querySelector('[data-calculadora]');
+
+    if (calculadora) {
+        var campoPrecio = calculadora.querySelector('[data-calculadora-precio]');
+        var filas = document.querySelectorAll('[data-gasto]');
+        var cotizacion = parseFloat(calculadora.dataset.cotizacion || '0');
+        var fuente = calculadora.dataset.fuente || '';
+
+        var moneda = function (valor) {
+            return 'USD ' + Math.round(valor).toLocaleString('es-AR');
+        };
+
+        var escribir = function (selector, texto) {
+            var destino = document.querySelector(selector);
+            if (destino) { destino.textContent = texto; }
+        };
+
+        var recalcular = function () {
+            var precio = parseFloat(campoPrecio.value);
+            if (!isFinite(precio) || precio <= 0) { return; }
+
+            var comprador = 0;
+            var vendedor = 0;
+
+            filas.forEach(function (fila) {
+                var porcentaje = parseFloat(fila.dataset.porcentaje || '0');
+                var fijo = parseFloat(fila.dataset.fijo || '0');
+                var importe = precio * porcentaje / 100 + fijo;
+
+                var paga = fila.dataset.paga;
+                if (paga === 'Vendedor') { vendedor += importe; }
+                else if (paga === 'Ambos') { comprador += importe / 2; vendedor += importe / 2; }
+                else { comprador += importe; }
+
+                var celda = fila.querySelector('[data-gasto-importe]');
+                if (celda) { celda.textContent = moneda(importe); }
+            });
+
+            escribir('[data-total-comprador]', moneda(comprador));
+            escribir('[data-total-vendedor]', moneda(vendedor));
+            escribir('[data-total-necesita]', moneda(precio + comprador));
+
+            var enPesos = document.querySelector('[data-total-pesos]');
+            if (enPesos && cotizacion > 0) {
+                /* Se rearma entero para que la aclaración de la fuente no se
+                   pierda: sin fecha ni origen, el número en pesos no dice nada. */
+                enPesos.textContent = '≈ $ ' + Math.round((precio + comprador) * cotizacion).toLocaleString('es-AR');
+
+                var pie = document.createElement('span');
+                pie.style.display = 'block';
+                pie.style.fontSize = '.76rem';
+                pie.style.opacity = '.85';
+                pie.textContent = 'Según ' + fuente + ' · valor orientativo';
+                enPesos.appendChild(pie);
+            }
+        };
+
+        campoPrecio.addEventListener('input', recalcular);
+
+        /* Con la cuenta al vuelo el botón deja de hacer falta. Se esconde recién
+           acá, cuando ya sabemos que el script corrió. */
+        var boton = calculadora.querySelector('[data-calculadora-boton]');
+        if (boton) { boton.hidden = true; }
+
+        calculadora.addEventListener('submit', function (ev) { ev.preventDefault(); recalcular(); });
+    }
+
     /* ---------- Año dinámico en el pie ---------- */
     var anio = document.querySelector('[data-anio]');
     if (anio) { anio.textContent = String(new Date().getFullYear()); }

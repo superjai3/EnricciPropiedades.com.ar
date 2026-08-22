@@ -1,0 +1,184 @@
+@page "/gastos-de-escrituracion"
+@model EscrituracionModel
+@{
+    ViewData["Title"] = "Calculadora de gastos de escrituración";
+    ViewData["Descripcion"] = "Estimá cuánto se paga además del precio al escriturar una propiedad en la Ciudad de Buenos Aires: sellos, honorarios, certificaciones e informes.";
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Servicios">Servicios</a> <span aria-hidden="true">/</span>
+            <span>Gastos de escrituración</span>
+        </nav>
+        <p class="eyebrow">Cuentas claras</p>
+        <h1>¿Cuánto hay que tener,<br />además del precio?</h1>
+        <p class="plomo">
+            Al comprar una propiedad no alcanza con el valor publicado: la escritura tiene
+            gastos propios. Poné el precio de la operación y mirá el detalle, concepto por
+            concepto y con quién lo paga.
+        </p>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="ficha">
+            <div>
+                @* Con JavaScript el resultado se recalcula mientras se escribe.
+                   Sin JavaScript, el botón envía el formulario y la página vuelve
+                   con el cálculo hecho en el servidor: nunca queda inservible. *@
+                <form class="calculadora revelar" method="get" data-calculadora
+                      data-cotizacion="@Model.ValorDolar.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                      data-fuente="@Model.FuenteCotizacion@(Model.TipoDeCambio is { } tc ? $" al {tc.FechaTexto}" : "")">
+                    @if (Model.Propiedad is > 0)
+                    {
+                        <input type="hidden" name="propiedad" value="@Model.Propiedad" />
+                    }
+
+                    <div class="campo">
+                        <label for="precio">Precio de la operación, en dólares</label>
+                        <div class="campo-con-icono">
+                            <svg aria-hidden="true"><use href="#i-calculadora" /></svg>
+                            <input class="control" id="precio" name="precio" type="number"
+                                   inputmode="numeric" min="1000" max="50000000" step="1000"
+                                   value="@Model.Precio.ToString("0")"
+                                   data-calculadora-precio />
+                        </div>
+                    </div>
+
+                    @if (Model.Origen is { } origen)
+                    {
+                        <p class="texto-suave" style="font-size:.85rem">
+                            Tomado de
+                            <a asp-page="/Ficha" asp-route-id="@origen.Id">@origen.Direccion, @origen.Barrio</a>.
+                            Podés cambiarlo y probar con otro valor.
+                        </p>
+                    }
+
+                    <div class="acciones mt-4" data-calculadora-boton>
+                        <button class="btn" type="submit">
+                            Calcular
+                            <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="gastos mt-6 revelar">
+                    <div class="gastos__fila gastos__fila--cabecera" aria-hidden="true">
+                        <span>Concepto</span>
+                        <span>Lo paga</span>
+                        <span>Importe</span>
+                    </div>
+
+                    @foreach (var (concepto, importe) in Model.Detalle)
+                    {
+                        <div class="gastos__fila"
+                             data-gasto
+                             data-porcentaje="@concepto.Porcentaje.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                             data-fijo="@concepto.Fijo.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                             data-paga="@concepto.Paga">
+                            <span>
+                                <strong>@concepto.Nombre</strong>
+                                @if (!string.IsNullOrWhiteSpace(concepto.Detalle))
+                                {
+                                    <span class="gastos__detalle">@concepto.Detalle</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(concepto.FormulaTexto))
+                                {
+                                    <span class="gastos__detalle">@concepto.FormulaTexto</span>
+                                }
+                            </span>
+                            <span class="gastos__paga">@concepto.Paga</span>
+                            <span class="gastos__importe" data-gasto-importe>
+                                USD @importe.ToString("N0")
+                            </span>
+                        </div>
+                    }
+
+                    <div class="gastos__fila gastos__fila--total">
+                        <span><strong>Gastos que paga el comprador</strong></span>
+                        <span></span>
+                        <span class="gastos__importe" data-total-comprador>
+                            USD @Model.TotalComprador.ToString("N0")
+                        </span>
+                    </div>
+
+                    <div class="gastos__fila gastos__fila--total">
+                        <span><strong>Gastos que paga el vendedor</strong></span>
+                        <span></span>
+                        <span class="gastos__importe" data-total-vendedor>
+                            USD @Model.TotalVendedor.ToString("N0")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="prosa mt-7 revelar">
+                    <h2>Qué es cada cosa</h2>
+                    <dl>
+                        @foreach (var concepto in Model.Conceptos)
+                        {
+                            <dt><strong>@concepto.Nombre</strong></dt>
+                            <dd>
+                                @(string.IsNullOrWhiteSpace(concepto.Detalle)
+                                    ? $"Lo paga: {concepto.Paga.ToLowerInvariant()}."
+                                    : concepto.Detalle)
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            <aside class="ficha__panel">
+                <div>
+                    <p class="texto-suave mb-0" style="font-size:.85rem">
+                        Quien compra necesita tener, en total
+                    </p>
+                    <p class="prop__precio" style="font-size:2rem" data-total-necesita>
+                        USD @Model.NecesitaElComprador.ToString("N0")
+                    </p>
+                    @if (Model.EnPesos is { } pesos && Model.TipoDeCambio is { } tipoDeCambio)
+                    {
+                        <p class="texto-suave mb-0" style="font-size:.9rem" data-total-pesos>
+                            ≈ $ @pesos.ToString("N0")
+                            <span style="display:block;font-size:.76rem;opacity:.85">
+                                Según @Model.FuenteCotizacion al @tipoDeCambio.FechaTexto · valor orientativo
+                            </span>
+                        </p>
+                    }
+                    <p class="texto-suave mb-0" style="font-size:.85rem">
+                        Precio de la propiedad más los gastos de escritura que le corresponden.
+                    </p>
+                </div>
+
+                <p class="texto-suave mb-0" style="font-size:.88rem;border-top:1px solid var(--linea);padding-top:1rem">
+                    <strong>Esto es una estimación.</strong> Los importes definitivos los fija el
+                    escribano de la operación y dependen del caso: si es vivienda única, si hay
+                    crédito hipotecario, si la propiedad está en sucesión o si el vendedor no
+                    reside en el país.
+                    @if (!string.IsNullOrWhiteSpace(Model.Vigencia))
+                    {
+                        <span style="display:block;margin-top:.5rem">
+                            Valores revisados en @Model.Vigencia.
+                        </span>
+                    }
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Nota))
+                {
+                    <p class="texto-suave mb-0" style="font-size:.85rem">@Model.Nota</p>
+                }
+
+                <a class="btn btn--bloque" asp-page="/Contacto" asp-route-propiedad="@Model.Propiedad">
+                    Consultar el caso concreto
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+                <a class="btn btn--wsp btn--bloque" href="@SitioInfo.Whatsapp("Hola, quisiera saber los gastos de escrituración de una operación.")" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    Preguntar por WhatsApp
+                </a>
+            </aside>
+        </div>
+    </div>
+</section>

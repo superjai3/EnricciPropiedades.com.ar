@@ -38,6 +38,26 @@ public class CotizacionService
     public bool Habilitada => _opciones.Habilitada;
     public string Fuente => _opciones.Fuente;
 
+    /// <summary>
+    /// Pesos por dólar con los que se está convirtiendo, o null si no hay
+    /// cotización. Lo usa la calculadora para rehacer la cuenta en el navegador
+    /// sin volver a pedirle la página al servidor.
+    /// </summary>
+    public decimal? Valor
+    {
+        get
+        {
+            if (!_opciones.Habilitada || Actual is null)
+            {
+                return null;
+            }
+
+            var valor = Actual.Valor(_opciones.Punta);
+
+            return valor > 0 ? valor : null;
+        }
+    }
+
     /// <summary>Cuánto es en pesos un importe en dólares. Null si no hay cotización.</summary>
     public decimal? APesos(decimal dolares)
     {

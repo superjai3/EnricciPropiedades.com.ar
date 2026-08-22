@@ -1,5 +1,6 @@
 @page "/propiedad/{id:int}"
 @inject Enricci_Propiedades.Services.CotizacionService Cotizacion
+@inject Microsoft.Extensions.Options.IOptions<Enricci_Propiedades.Models.OpcionesEscritura> Escritura
 @model FichaModel
 @inject Enricci_Propiedades.Services.FotosService Fotos
 @{
@@ -336,6 +337,15 @@
                     Coordinar una visita
                     <svg aria-hidden="true"><use href="#i-flecha" /></svg>
                 </a>
+                @* La calculadora sólo se ofrece si los porcentajes están cargados
+                   y confirmados: ver OpcionesEscritura. *@
+                @if (Escritura.Value.Lista && p.Moneda == "USD" && p.Precio > 0)
+                {
+                    <a class="btn btn--fantasma btn--bloque" asp-page="/Escrituracion" asp-route-propiedad="@p.Id">
+                        <svg aria-hidden="true"><use href="#i-calculadora" /></svg>
+                        Calcular gastos de escrituración
+                    </a>
+                }
                 <a class="btn btn--fantasma btn--bloque" href="@SitioInfo.TelefonoLink">
                     <svg aria-hidden="true"><use href="#i-telefono" /></svg>
                     @SitioInfo.Telefono

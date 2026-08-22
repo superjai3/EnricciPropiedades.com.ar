@@ -78,6 +78,10 @@ builder.Services.Configure<OpcionesSitio>(builder.Configuration.GetSection(Opcio
 builder.Services.AddHttpClient();
 builder.Services.Configure<OpcionesCotizacion>(builder.Configuration.GetSection(OpcionesCotizacion.Seccion));
 builder.Services.AddSingleton<CotizacionService>();
+
+// Porcentajes de la calculadora de gastos de escrituración. Nace apagada: sin
+// valores confirmados por la inmobiliaria, la página no se publica.
+builder.Services.Configure<OpcionesEscritura>(builder.Configuration.GetSection(OpcionesEscritura.Seccion));
 builder.Services.AddHostedService<CotizacionProgramada>();
 
 builder.Services.Configure<OpcionesRespaldo>(builder.Configuration.GetSection(OpcionesRespaldo.Seccion));

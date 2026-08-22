@@ -285,7 +285,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .marca { display: flex; align-items: center; gap: .7rem; min-width: 0; }
 .marca__logo { width: 40px; height: 40px; object-fit: contain; }
-.marca__texto { display: flex; flex-direction: column; line-height: 1; }
+.marca__texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    /* Sin esto el nombre desborda su caja en vez de recortarse: un hijo de flex
+       no baja de su ancho de contenido salvo que se lo autorice. */
+    min-width: 0;
+}
 .marca__nombre {
     font-weight: 800;
     font-size: .98rem;
@@ -295,6 +302,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
     text-overflow: ellipsis;
 }
 .marca__nombre em { font-style: normal; color: var(--rojo); }
+/* En teléfonos angostos el nombre completo se montaba sobre el botón de tema.
+   Se cae la última palabra: "R. H. Enricci · Inmobiliaria" sigue leyéndose como
+   la marca, y recortar con puntos suspensivos quedaría peor. */
+@media (max-width: 400px) {
+    .marca__cola { display: none; }
+}
 .marca__bajada {
     font-size: .58rem;
     letter-spacing: .34em;
@@ -1528,6 +1541,50 @@ select.control {
     display: grid;
     gap: var(--sp-4);
 }
+/* Calculadora de gastos de escrituración: el formulario y la lista de conceptos.
+   Se arma con filas de grilla y no con una tabla porque en el teléfono una
+   tabla de tres columnas obliga a desplazar a lo ancho. */
+.calculadora {
+    padding: clamp(1.25rem, 3vw, var(--sp-6));
+    border: 1px solid var(--linea);
+    border-radius: var(--r-lg);
+    background: var(--bg-elev);
+    box-shadow: var(--sombra-sm);
+}
+.calculadora .campo { margin-bottom: 0; }
+
+.gastos { border: 1px solid var(--linea); border-radius: var(--r-lg); overflow: hidden; }
+.gastos__fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, auto);
+    gap: var(--sp-2) var(--sp-4);
+    align-items: baseline;
+    padding: var(--sp-4) var(--sp-5);
+    border-top: 1px solid var(--linea);
+}
+.gastos__fila:first-child { border-top: 0; }
+.gastos__fila--cabecera {
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    background: var(--hueso-2);
+    padding-block: var(--sp-3);
+}
+.gastos__fila--total { background: var(--hueso-2); font-size: 1.05rem; }
+.gastos__detalle { display: block; font-size: .82rem; color: var(--texto-suave); margin-top: .15rem; }
+.gastos__paga { font-size: .82rem; color: var(--texto-suave); white-space: nowrap; }
+.gastos__importe { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; white-space: nowrap; }
+
+@media (max-width: 560px) {
+    /* En pantallas angostas el importe pasa a su propia línea, alineado a la
+       izquierda: si no, el nombre del concepto queda partido en cuatro. */
+    .gastos__fila { grid-template-columns: 1fr auto; }
+    .gastos__fila--cabecera { display: none; }
+    .gastos__importe { grid-column: 1 / -1; text-align: left; }
+    .gastos__fila--total .gastos__importe { font-size: 1.15rem; }
+}
+
 /* Formulario de consulta dentro de la ficha. Se separa del texto con un panel
    propio para que no se lea como un párrafo más de la descripción. */
 .consulta-ficha {

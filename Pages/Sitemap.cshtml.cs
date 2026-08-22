@@ -30,11 +30,16 @@ public class SitemapModel : PageModel
 
     private readonly PropiedadesService _propiedades;
     private readonly OpcionesSitio _sitio;
+    private readonly OpcionesEscritura _escritura;
 
-    public SitemapModel(PropiedadesService propiedades, IOptions<OpcionesSitio> sitio)
+    public SitemapModel(
+        PropiedadesService propiedades,
+        IOptions<OpcionesSitio> sitio,
+        IOptions<OpcionesEscritura> escritura)
     {
         _propiedades = propiedades;
         _sitio = sitio.Value;
+        _escritura = escritura.Value;
     }
 
     public IActionResult OnGet()
@@ -56,6 +61,13 @@ public class SitemapModel : PageModel
             foreach (var (ruta, prioridad, frecuencia) in PaginasFijas)
             {
                 EscribirUrl(escritor, baseUrl + ruta, hoy, frecuencia, prioridad);
+            }
+
+            // La calculadora se lista sólo si está publicada: ofrecerle al
+            // buscador una dirección que redirige es mandarlo a una puerta falsa.
+            if (_escritura.Lista)
+            {
+                EscribirUrl(escritor, baseUrl + "/gastos-de-escrituracion", hoy, "monthly", "0.7");
             }
 
             // Una entrada por barrio con publicaciones: son las páginas que

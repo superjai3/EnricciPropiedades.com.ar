@@ -23,6 +23,15 @@
 <section class="seccion--compacta">
     <div class="contenedor">
         <form class="filtros" method="get" asp-page="/Propiedades">
+            <div class="campo campo--ancho">
+                <label for="f-texto">Buscar</label>
+                <div class="campo-con-icono">
+                    <svg aria-hidden="true"><use href="#i-lupa" /></svg>
+                    <input class="control" id="f-texto" type="search" asp-for="Texto"
+                           placeholder="Dirección, barrio, tipo… por ejemplo: cochera Rivadavia"
+                           autocomplete="off" />
+                </div>
+            </div>
             <div class="campo">
                 <label for="f-operacion">Operación</label>
                 <select class="control" id="f-operacion" asp-for="Operacion">
@@ -111,6 +120,22 @@
         }
         else
         {
+            @* Se guarda en el navegador de cada visitante, sin registrarse.
+               El botón aparece recién cuando hay algo guardado. *@
+            <div class="chips" style="margin-bottom:var(--sp-5)">
+                <button class="chip" type="button" data-filtro-favoritos aria-pressed="false" hidden>
+                    <svg aria-hidden="true" style="width:15px;height:15px"><use href="#i-corazon" /></svg>
+                    Solo mis favoritos (<span data-cuenta-favoritos>0</span>)
+                </button>
+            </div>
+
+            <div class="sin-resultados" data-favoritos-vacio hidden>
+                <h2 class="titulo-seccion" style="font-size:var(--t-xl)">Todavía no guardaste ninguna</h2>
+                <p class="texto-suave mb-0">
+                    Tocá el corazón de una publicación para tenerla a mano cuando vuelvas.
+                </p>
+            </div>
+
             <div class="grilla-props">
                 @{ var i = 0; }
                 @foreach (var propiedad in Model.Resultados)

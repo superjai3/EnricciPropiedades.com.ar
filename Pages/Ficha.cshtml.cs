@@ -32,6 +32,13 @@ public class FichaModel : PageModel
     /// <summary>Foto de portada en URL absoluta, para Open Graph. Null si no tiene.</summary>
     public string? FotoDePortada { get; private set; }
 
+    /// <summary>
+    /// Dirección absoluta de la publicación. Se arma con el dominio configurado
+    /// y no con lo que muestra el navegador, para que el enlace compartido
+    /// siga funcionando aunque alguien esté entrando por la IP.
+    /// </summary>
+    public string UrlPublica { get; private set; } = "";
+
     public IActionResult OnGet(int id)
     {
         var propiedad = _propiedades.PorId(id);
@@ -43,6 +50,7 @@ public class FichaModel : PageModel
         Ficha = propiedad;
         Similares = _propiedades.Similares(propiedad).ToList();
         FotoDePortada = propiedad.Fotos.Count > 0 ? propiedad.Fotos[0] : null;
+        UrlPublica = $"{_sitio.UrlBase(Request)}/propiedad/{propiedad.Id}";
         DatosEstructurados = ArmarDatosEstructurados(propiedad);
 
         return Page();

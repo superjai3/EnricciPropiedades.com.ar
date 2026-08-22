@@ -232,6 +232,18 @@
                     @SitioInfo.Telefono
                 </a>
 
+                @* Compartir la publicación con otra persona, que es distinto de
+                   consultarle a la inmobiliaria. En el teléfono abre el menú del
+                   sistema; en la computadora copia el enlace. *@
+                <button class="btn btn--fantasma btn--bloque" type="button"
+                        data-compartir
+                        data-titulo="@p.Titulo"
+                        data-texto="@p.Titulo — @p.Direccion, @p.Barrio. @p.PrecioTexto"
+                        data-url="@Model.UrlPublica">
+                    <svg aria-hidden="true"><use href="#i-compartir" /></svg>
+                    <span data-compartir-texto>Compartir</span>
+                </button>
+
                 <p class="texto-suave mb-0" style="font-size:.8rem;border-top:1px solid var(--linea);padding-top:1rem">
                     Los valores son orientativos y pueden variar sin previo aviso.
                     Consultá la disponibilidad antes de coordinar la visita.

@@ -1,7 +1,7 @@
 @inject Enricci_Propiedades.Services.FotosService Fotos
 @model Enricci_Propiedades.Models.Propiedad
 
-<article class="prop">
+<article class="prop" data-tarjeta-propiedad="@Model.Id">
     <a class="prop__media" asp-page="/Ficha" asp-route-id="@Model.Id" aria-label="Ver @Model.Titulo">
         @if (Model.Fotos.Count > 0)
         {
@@ -30,6 +30,13 @@
             </span>
         }
     </a>
+
+    @* Fuera del enlace de la foto: un botón dentro de un enlace no es válido y
+       los lectores de pantalla lo anuncian mal. *@
+    <button class="prop__favorito" type="button" data-favorito="@Model.Id" data-titulo="@Model.Titulo" aria-pressed="false"
+            aria-label="Guardar «@Model.Titulo» en favoritos">
+        <svg aria-hidden="true"><use href="#i-corazon" /></svg>
+    </button>
 
     <div class="prop__cuerpo">
         <p class="prop__precio">

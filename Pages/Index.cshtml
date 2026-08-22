@@ -73,6 +73,18 @@
 
             <input type="hidden" name="operacion" id="campo-operacion" value="" />
 
+            @* La búsqueda por texto va primera y a todo el ancho: es la forma
+               en que la gente busca cuando ya sabe qué quiere. *@
+            <div class="campo campo--ancho" style="margin-bottom:var(--sp-3)">
+                <label for="b-texto">Qué estás buscando</label>
+                <div class="campo-con-icono">
+                    <svg aria-hidden="true"><use href="#i-lupa" /></svg>
+                    <input class="control" id="b-texto" name="texto" type="search"
+                           placeholder="Dirección, barrio o tipo… por ejemplo: cochera Rivadavia"
+                           autocomplete="off" />
+                </div>
+            </div>
+
             <div class="buscador__campos">
                 <div class="campo">
                     <label for="b-tipo">Tipo de propiedad</label>

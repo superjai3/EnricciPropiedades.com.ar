@@ -11,6 +11,10 @@ public class PropiedadesModel : PageModel
 
     public PropiedadesModel(PropiedadesService propiedades) => _propiedades = propiedades;
 
+    /// <summary>Búsqueda libre: dirección, barrio, tipo o cualquier palabra del aviso.</summary>
+    [BindProperty(SupportsGet = true)]
+    public string? Texto { get; set; }
+
     [BindProperty(SupportsGet = true)]
     public string? Operacion { get; set; }
 
@@ -33,6 +37,7 @@ public class PropiedadesModel : PageModel
     public IReadOnlyList<string> Barrios { get; private set; } = Array.Empty<string>();
 
     public bool HayFiltros =>
+        !string.IsNullOrWhiteSpace(Texto) ||
         !string.IsNullOrWhiteSpace(Operacion) ||
         !string.IsNullOrWhiteSpace(Tipo) ||
         !string.IsNullOrWhiteSpace(Barrio) ||
@@ -58,7 +63,14 @@ public class PropiedadesModel : PageModel
     {
         Barrios = _propiedades.Barrios.ToList();
         Resultados = _propiedades
-            .Buscar(Operacion, Tipo, Barrio, Ambientes, Precio, Orden)
+            .Buscar(
+                texto: Texto,
+                operacion: Operacion,
+                tipo: Tipo,
+                barrio: Barrio,
+                ambientesMinimos: Ambientes,
+                precioMaximo: Precio,
+                orden: Orden)
             .ToList();
     }
 }

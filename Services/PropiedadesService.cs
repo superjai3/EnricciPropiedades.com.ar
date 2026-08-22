@@ -69,6 +69,7 @@ public class PropiedadesService
             .Take(cantidad);
 
     public IEnumerable<Propiedad> Buscar(
+        string? texto = null,
         string? operacion = null,
         string? tipo = null,
         string? barrio = null,
@@ -105,13 +106,44 @@ public class PropiedadesService
             consulta = consulta.Where(p => p.Precio > 0 && p.Precio <= precioMaximo);
         }
 
+        var resultados = consulta.ToList();
+
+        // La búsqueda libre se resuelve en memoria y no en la base: así se puede
+        // comparar sin tildes ni mayúsculas —"solis" encuentra "Solís"— y mirar
+        // también el tipo y la operación, que son texto calculado y no columnas.
+        // Con un catálogo de barrio el costo es irrelevante.
+        if (!string.IsNullOrWhiteSpace(texto))
+        {
+            var terminos = Slug.De(texto).Split('-', StringSplitOptions.RemoveEmptyEntries);
+
+            if (terminos.Length > 0)
+            {
+                resultados = resultados
+                    .Where(p => TodasLasPalabrasEstan(p, terminos))
+                    .ToList();
+            }
+        }
+
         return orden switch
         {
-            "precio-asc" => consulta.OrderBy(p => p.Precio == 0).ThenBy(p => p.Precio).ToList(),
-            "precio-desc" => consulta.OrderByDescending(p => p.Precio).ToList(),
-            "superficie" => consulta.OrderByDescending(p => p.SuperficieTotal).ToList(),
-            _ => consulta.OrderByDescending(p => p.Destacada).ThenBy(p => p.Id).ToList()
+            "precio-asc" => resultados.OrderBy(p => p.Precio == 0).ThenBy(p => p.Precio).ToList(),
+            "precio-desc" => resultados.OrderByDescending(p => p.Precio).ToList(),
+            "superficie" => resultados.OrderByDescending(p => p.SuperficieTotal).ToList(),
+            _ => resultados.OrderByDescending(p => p.Destacada).ThenBy(p => p.Id).ToList()
         };
+    }
+
+    /// <summary>
+    /// Todas las palabras buscadas tienen que aparecer en algún lado de la
+    /// publicación. Con "cochera rivadavia" se espera la cochera de Rivadavia, y
+    /// no todo lo que diga "cochera" más todo lo que diga "Rivadavia".
+    /// </summary>
+    private static bool TodasLasPalabrasEstan(Propiedad p, string[] terminos)
+    {
+        var texto = Slug.De(
+            $"{p.Titulo} {p.Direccion} {p.Barrio} {p.TipoTexto} {p.OperacionTexto} {p.Descripcion}");
+
+        return terminos.All(t => texto.Contains(t, StringComparison.Ordinal));
     }
 
     // ------------------------------------------------------ panel de administración

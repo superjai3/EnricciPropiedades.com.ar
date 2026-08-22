@@ -350,6 +350,139 @@
         }, 0);
     });
 
+    /* ---------- Propiedades guardadas ----------
+       Viven en el navegador de cada visitante: no hace falta que se registre y
+       la inmobiliaria no guarda ningún dato de quien mira. */
+    var CLAVE_FAVORITOS = 'enricci-favoritos';
+
+    function favoritos() {
+        try {
+            var crudo = localStorage.getItem(CLAVE_FAVORITOS);
+            var lista = crudo ? JSON.parse(crudo) : [];
+            return Array.isArray(lista) ? lista.map(String) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function guardarFavoritos(lista) {
+        try { localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(lista)); } catch (e) { }
+    }
+
+    function pintarFavoritos() {
+        var guardados = favoritos();
+
+        document.querySelectorAll('[data-favorito]').forEach(function (boton) {
+            var guardado = guardados.indexOf(String(boton.dataset.favorito)) !== -1;
+            boton.setAttribute('aria-pressed', guardado ? 'true' : 'false');
+            boton.setAttribute(
+                'aria-label',
+                (guardado ? 'Quitar de favoritos: ' : 'Guardar en favoritos: ') + (boton.dataset.titulo || ''));
+        });
+
+        var chip = document.querySelector('[data-filtro-favoritos]');
+        if (chip) {
+            var cuenta = chip.querySelector('[data-cuenta-favoritos]');
+            if (cuenta) { cuenta.textContent = guardados.length; }
+            chip.hidden = guardados.length === 0 && chip.getAttribute('aria-pressed') !== 'true';
+        }
+    }
+
+    document.addEventListener('click', function (ev) {
+        var boton = ev.target.closest('[data-favorito]');
+        if (!boton) { return; }
+
+        // La tarjeta entera es un enlace: sin esto, guardar navegaría.
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        var id = String(boton.dataset.favorito);
+        var lista = favoritos();
+        var posicion = lista.indexOf(id);
+
+        if (posicion === -1) { lista.push(id); } else { lista.splice(posicion, 1); }
+
+        guardarFavoritos(lista);
+        pintarFavoritos();
+        aplicarFiltroFavoritos();
+    });
+
+    /* Mostrar sólo lo guardado, sin volver al servidor. */
+    function aplicarFiltroFavoritos() {
+        var chip = document.querySelector('[data-filtro-favoritos]');
+        if (!chip) { return; }
+
+        var soloFavoritos = chip.getAttribute('aria-pressed') === 'true';
+        var guardados = favoritos();
+        var visibles = 0;
+
+        document.querySelectorAll('[data-tarjeta-propiedad]').forEach(function (tarjeta) {
+            var guardada = guardados.indexOf(String(tarjeta.dataset.tarjetaPropiedad)) !== -1;
+            var mostrar = !soloFavoritos || guardada;
+            // Se esconde la celda de la grilla: si se escondiera sólo la
+            // tarjeta, quedaría el hueco vacío ocupando lugar.
+            var celda = tarjeta.closest('.grilla-props > *') || tarjeta;
+            celda.hidden = !mostrar;
+            if (mostrar) { visibles++; }
+        });
+
+        var vacio = document.querySelector('[data-favoritos-vacio]');
+        if (vacio) { vacio.hidden = !(soloFavoritos && visibles === 0); }
+    }
+
+    var chipFavoritos = document.querySelector('[data-filtro-favoritos]');
+    if (chipFavoritos) {
+        chipFavoritos.addEventListener('click', function () {
+            var activo = chipFavoritos.getAttribute('aria-pressed') === 'true';
+            chipFavoritos.setAttribute('aria-pressed', activo ? 'false' : 'true');
+            chipFavoritos.classList.toggle('activo', !activo);
+            aplicarFiltroFavoritos();
+            pintarFavoritos();
+        });
+    }
+
+    pintarFavoritos();
+    aplicarFiltroFavoritos();
+
+    /* ---------- Compartir la publicación ----------
+       En el teléfono abre el menú del sistema —WhatsApp, mensajes, correo—; en
+       la computadora, donde ese menú no existe, copia el enlace. */
+    document.addEventListener('click', function (ev) {
+        var boton = ev.target.closest('[data-compartir]');
+        if (!boton) { return; }
+
+        ev.preventDefault();
+
+        var datos = {
+            title: boton.dataset.titulo || document.title,
+            text: boton.dataset.texto || '',
+            url: boton.dataset.url || window.location.href
+        };
+
+        if (navigator.share) {
+            navigator.share(datos).catch(function () { /* el visitante canceló */ });
+            return;
+        }
+
+        var avisar = function (texto) {
+            var original = boton.dataset.textoOriginal || boton.textContent.trim();
+            boton.dataset.textoOriginal = original;
+            var etiqueta = boton.querySelector('[data-compartir-texto]');
+            if (etiqueta) {
+                etiqueta.textContent = texto;
+                window.setTimeout(function () { etiqueta.textContent = original; }, 2200);
+            }
+        };
+
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(datos.url)
+                .then(function () { avisar('¡Enlace copiado!'); })
+                .catch(function () { window.prompt('Copiá el enlace:', datos.url); });
+        } else {
+            window.prompt('Copiá el enlace:', datos.url);
+        }
+    });
+
     /* ---------- Año dinámico en el pie ---------- */
     var anio = document.querySelector('[data-anio]');
     if (anio) { anio.textContent = String(new Date().getFullYear()); }

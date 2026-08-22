@@ -1528,6 +1528,20 @@ select.control {
     display: grid;
     gap: var(--sp-4);
 }
+/* Formulario de consulta dentro de la ficha. Se separa del texto con un panel
+   propio para que no se lea como un párrafo más de la descripción. */
+.consulta-ficha {
+    padding: clamp(1.25rem, 3vw, var(--sp-6));
+    border: 1px solid var(--linea);
+    border-radius: var(--r-lg);
+    background: var(--bg-elev);
+    box-shadow: var(--sombra-sm);
+    /* El botón "Coordinar una visita" del panel baja hasta acá: sin este
+       margen, el título queda pegado al borde superior de la pantalla. */
+    scroll-margin-top: calc(var(--nav-h) + 20px);
+}
+.consulta-ficha .dos-columnas { margin-top: var(--sp-5); }
+
 .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr)); gap: var(--sp-4); }
 .dato { padding: var(--sp-4); border: 1px solid var(--linea); border-radius: var(--r-md); background: var(--bg-elev); }
 .dato dt { font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--texto-suave); font-weight: 700; }

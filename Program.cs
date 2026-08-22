@@ -62,6 +62,10 @@ builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ConsultasService>();
 builder.Services.AddSingleton<FotosService>();
 
+// Freno de envíos de los formularios públicos. Singleton porque la cuenta por
+// IP tiene que sobrevivir a los pedidos, no morir con cada uno.
+builder.Services.AddSingleton<LimiteEnvios>();
+
 // Envío de correo de los formularios (ver sección "Correo" de appsettings.json).
 builder.Services.Configure<OpcionesCorreo>(builder.Configuration.GetSection(OpcionesCorreo.Seccion));
 builder.Services.AddSingleton<CorreoService>();

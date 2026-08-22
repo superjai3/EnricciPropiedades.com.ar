@@ -199,6 +199,93 @@
                         incluidos sábados por la mañana.
                     </p>
                 </div>
+
+                @* Preguntar sin irse de la página. El formulario de /Contacto
+                   sigue existiendo para lo general; este es sólo por esta
+                   propiedad, y por eso ya viene con el mensaje escrito. *@
+                <div class="consulta-ficha mt-7 revelar" id="consultar">
+                    @if (Model.Enviado)
+                    {
+                        <h2 style="font-size:var(--t-xl);margin-bottom:.5rem">Recibimos tu consulta</h2>
+                        @if (Model.CorreoEnviado)
+                        {
+                            <p>
+                                Gracias por escribirnos: tu consulta por @p.Direccion ya llegó a la
+                                oficina y te vamos a responder a la brevedad.
+                            </p>
+                        }
+                        else
+                        {
+                            <p>
+                                Gracias por escribirnos. Tu consulta por @p.Direccion quedó registrada
+                                y te vamos a responder a la brevedad.
+                            </p>
+                        }
+                        <div class="acciones mt-5">
+                            <a class="btn btn--wsp" href="@Model.MensajeWhatsapp" target="_blank" rel="noopener">
+                                <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                Enviar lo mismo por WhatsApp
+                            </a>
+                            <a class="btn btn--fantasma" asp-page="/Propiedades">Seguir viendo propiedades</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <h2 style="font-size:var(--t-xl);margin-bottom:.35rem">Consultá por esta propiedad</h2>
+                        <p class="texto-suave" style="font-size:.9rem">
+                            Te respondemos por correo o por teléfono, como prefieras.
+                        </p>
+
+                        <form method="post" novalidate>
+                            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                            <div class="dos-columnas" style="gap:1rem 1.5rem">
+                                <div class="campo">
+                                    <label asp-for="Datos.Nombre"></label>
+                                    <input class="control" asp-for="Datos.Nombre" autocomplete="name" placeholder="Ej.: María González" required />
+                                    <span class="error-campo" asp-validation-for="Datos.Nombre"></span>
+                                </div>
+                                <div class="campo">
+                                    <label asp-for="Datos.Email"></label>
+                                    <input class="control" asp-for="Datos.Email" type="email" autocomplete="email" placeholder="nombre@@ejemplo.com" required />
+                                    <span class="error-campo" asp-validation-for="Datos.Email"></span>
+                                </div>
+                                <div class="campo campo--ancho">
+                                    <label asp-for="Datos.Telefono"></label>
+                                    <input class="control" asp-for="Datos.Telefono" type="tel" autocomplete="tel" placeholder="11 5555-5555" />
+                                    <span class="error-campo" asp-validation-for="Datos.Telefono"></span>
+                                </div>
+                            </div>
+
+                            <div class="campo mt-5">
+                                <label asp-for="Datos.Mensaje"></label>
+                                <textarea class="control" asp-for="Datos.Mensaje" rows="4" required></textarea>
+                                <span class="error-campo" asp-validation-for="Datos.Mensaje"></span>
+                            </div>
+
+                            @* Campo trampa: invisible para personas, tentador para robots. *@
+                            <div class="solo-lectores" aria-hidden="true">
+                                <label asp-for="Datos.Sitio">No completar</label>
+                                <input asp-for="Datos.Sitio" tabindex="-1" autocomplete="off" />
+                            </div>
+
+                            <div class="acciones mt-5">
+                                <button class="btn btn--lg" type="submit">
+                                    Enviar consulta
+                                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                                </button>
+                                <a class="btn btn--wsp btn--lg" href="@SitioInfo.Whatsapp(mensajeWsp)" target="_blank" rel="noopener">
+                                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                    Prefiero WhatsApp
+                                </a>
+                            </div>
+
+                            <p class="texto-suave mt-5 mb-0" style="font-size:.82rem">
+                                Usamos tus datos únicamente para responder esta consulta. No los compartimos con terceros.
+                            </p>
+                        </form>
+                    }
+                </div>
             </div>
 
             <aside class="ficha__panel">
@@ -242,7 +329,10 @@
                     <svg aria-hidden="true"><use href="#i-wsp" /></svg>
                     Consultar por WhatsApp
                 </a>
-                <a class="btn btn--bloque" asp-page="/Contacto" asp-route-propiedad="@p.Id">
+                @* Baja al formulario de esta misma ficha en lugar de mandar a
+                   /Contacto: un salto de página menos entre el interés y la
+                   consulta. Como es un ancla, funciona igual sin JavaScript. *@
+                <a class="btn btn--bloque" href="#consultar">
                     Coordinar una visita
                     <svg aria-hidden="true"><use href="#i-flecha" /></svg>
                 </a>

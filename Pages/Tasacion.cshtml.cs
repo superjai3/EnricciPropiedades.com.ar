@@ -12,17 +12,20 @@ public class TasacionModel : PageModel
     private readonly OpcionesSitio _sitio;
     private readonly ConsultasService _consultas;
     private readonly CorreoService _correo;
+    private readonly LimiteEnvios _limite;
     private readonly ILogger<TasacionModel> _log;
 
     public TasacionModel(
         IOptions<OpcionesSitio> sitio,
         ConsultasService consultas,
         CorreoService correo,
+        LimiteEnvios limite,
         ILogger<TasacionModel> log)
     {
         _sitio = sitio.Value;
         _consultas = consultas;
         _correo = correo;
+        _limite = limite;
         _log = log;
     }
 
@@ -120,6 +123,18 @@ public class TasacionModel : PageModel
 
         if (!ModelState.IsValid)
         {
+            return Page();
+        }
+
+        if (!_limite.Permite(HttpContext.Connection.RemoteIpAddress?.ToString()))
+        {
+            _log.LogWarning("Se frenó un envío repetido desde {Ip}",
+                HttpContext.Connection.RemoteIpAddress);
+
+            ModelState.AddModelError(string.Empty,
+                "Recibimos varios envíos seguidos desde tu conexión. " +
+                "Esperá unos minutos o escribinos directamente por WhatsApp.");
+
             return Page();
         }
 

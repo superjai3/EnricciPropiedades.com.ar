@@ -11,17 +11,20 @@ public class ContactoModel : PageModel
     private readonly PropiedadesService _propiedades;
     private readonly ConsultasService _consultas;
     private readonly CorreoService _correo;
+    private readonly LimiteEnvios _limite;
     private readonly ILogger<ContactoModel> _log;
 
     public ContactoModel(
         PropiedadesService propiedades,
         ConsultasService consultas,
         CorreoService correo,
+        LimiteEnvios limite,
         ILogger<ContactoModel> log)
     {
         _propiedades = propiedades;
         _consultas = consultas;
         _correo = correo;
+        _limite = limite;
         _log = log;
     }
 
@@ -107,6 +110,18 @@ public class ContactoModel : PageModel
 
         if (!ModelState.IsValid)
         {
+            return Page();
+        }
+
+        if (!_limite.Permite(HttpContext.Connection.RemoteIpAddress?.ToString()))
+        {
+            _log.LogWarning("Se frenó un envío repetido desde {Ip}",
+                HttpContext.Connection.RemoteIpAddress);
+
+            ModelState.AddModelError(string.Empty,
+                "Recibimos varios envíos seguidos desde tu conexión. " +
+                "Esperá unos minutos o escribinos directamente por WhatsApp.");
+
             return Page();
         }
 

@@ -100,60 +100,58 @@ sudo ln -sf /etc/nginx/sites-available/enricci /etc/nginx/sites-enabled/enricci
 sudo rm -f /etc/nginx/sites-enabled/default
 ```
 
-nginx todavía **no** va a arrancar: la configuración pide certificados que
-aún no existen. Es lo que sigue.
+nginx todavía **no** va a arrancar: esa configuración de ejemplo pide
+certificados que aún no existen. No hay que tocarla a mano: el paso siguiente la
+reemplaza por una hecha para el dominio que se elija, primero por HTTP para
+poder sacar el certificado y después por HTTPS.
 
 ---
 
-## 4. El dominio
+## 4. El dominio y el certificado
 
-En NIC Argentina, delegar el dominio a un servicio de DNS. Cloudflare tiene un
-plan gratuito que alcanza de sobra.
+Sirve igual para un dominio provisorio —para mostrarle el sitio a alguien antes
+de comprar el definitivo— que para el real cuando esté comprado.
 
-Cargar dos registros apuntando a la IP reservada:
+### Un dominio provisorio y gratuito, con DuckDNS
 
-| Tipo | Nombre | Valor |
-| --- | --- | --- |
-| A | `@` | la IP pública |
-| A | `www` | la IP pública |
+1. Entrar a <https://www.duckdns.org>, iniciar sesión con Google o GitHub.
+2. En **domains**, escribir el nombre que se quiera (por ejemplo `enricci`) y
+   crearlo. Queda `enricci.duckdns.org`.
+3. En la fila del dominio, poner en **current ip** la IP del servidor y
+   **update ip**. Tarda alrededor de un minuto en propagarse.
 
-**En Cloudflare, dejar el proxy en «DNS only» (la nube gris).** Con el proxy
-encendido, la validación de Let's Encrypt por HTTP falla y el sitio ve la IP de
-Cloudflare en lugar de la del visitante.
+### Aplicarlo
 
-La propagación puede tardar. Comprobar antes de seguir:
-
-```bash
-dig +short www.enricci-propiedades.com.ar
+```powershell
+.\despliegue\dominio.ps1 enricci.duckdns.org
 ```
 
-Tiene que devolver la IP del servidor. **No seguir hasta que la devuelva**: el
-certificado no se puede emitir antes.
+```bash
+bash despliegue/dominio.sh enricci.duckdns.org
+```
+
+Deja nginx atendiendo en ese nombre, saca el certificado de Let's Encrypt, pasa
+todo a HTTPS, le anota el dominio a la aplicación —así las URL canónicas, las de
+compartir y el mapa del sitio salen con el dominio y no con la IP— y comprueba
+que responda. Se puede correr las veces que haga falta: si el certificado ya
+está, lo reutiliza.
+
+El mismo comando sirve el día que esté el dominio definitivo:
+
+```powershell
+.\despliegue\dominio.ps1 enricci-propiedades.com.ar
+```
+
+### Si el navegador no abre el sitio
+
+Casi siempre falta la regla del puerto **443** en el cortafuegos de Oracle, que
+es el único que el script no puede tocar: *Networking → Virtual Cloud Networks →
+la VCN → Security Lists → Default Security List → Add Ingress Rules*, origen
+`0.0.0.0/0`, TCP, puerto de destino 443.
 
 ---
 
-## 5. El certificado
-
-Con el dominio resolviendo:
-
-```bash
-# en el servidor
-sudo certbot certonly --webroot -w /var/www/certbot \
-  -d enricci-propiedades.com.ar -d www.enricci-propiedades.com.ar \
-  --agree-tos -m horacioenricci@gmail.com --no-eff-email
-
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-certbot deja instalado un temporizador que renueva solo. Comprobarlo:
-
-```bash
-sudo certbot renew --dry-run
-```
-
----
-
-## 6. Desplegar el sitio
+## 5. Desplegar el sitio
 
 Desde la máquina de desarrollo, en la carpeta del proyecto. Editar primero
 `SERVIDOR` y `LLAVE` arriba de `despliegue/publicar.sh`, o pasarlos por variable:
@@ -202,6 +200,8 @@ habilita para el usuario actual y se pide una sola vez:
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
+---
+
 ### La contraseña del panel
 
 Si la base es nueva, en el primer arranque se genera una contraseña al azar que
@@ -216,7 +216,7 @@ Hay que anotarla en ese momento. Si se pierde: borrar la fila de la tabla
 
 ---
 
-## 7. Cerrar
+## 6. Cerrar
 
 Con el sitio andando por el dominio, dos ajustes finales en
 `/etc/enricci/enricci.env`:

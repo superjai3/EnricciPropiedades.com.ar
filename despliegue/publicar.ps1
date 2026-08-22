@@ -25,49 +25,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-
-# --- Encontrar el bash de Git -------------------------------------------------
-# Ojo con el bash.exe de System32: ese abre WSL, que es otra máquina virtual
-# donde no están ni el proyecto ni la llave. Se descarta a propósito.
-function Buscar-Bash {
-    $candidatos = @(
-        "$env:ProgramFiles\Git\bin\bash.exe",
-        "${env:ProgramFiles(x86)}\Git\bin\bash.exe",
-        "$env:LOCALAPPDATA\Programs\Git\bin\bash.exe"
-    )
-
-    # Si Git está en el PATH, su bash está al lado: .../cmd/git.exe -> .../bin/bash.exe
-    $git = Get-Command git -ErrorAction SilentlyContinue
-    if ($git) {
-        $raizGit = Split-Path (Split-Path $git.Source -Parent) -Parent
-        $candidatos += (Join-Path $raizGit "bin\bash.exe")
-    }
-
-    foreach ($ruta in $candidatos) {
-        if ($ruta -and (Test-Path $ruta)) {
-            return (Resolve-Path $ruta).Path
-        }
-    }
-
-    return $null
-}
-
-# Una ruta puesta a mano gana siempre: si alguien la configuró es porque la
-# búsqueda automática no le sirvió.
-$bash = if ($env:BASH_ENRICCI -and (Test-Path $env:BASH_ENRICCI)) {
-    $env:BASH_ENRICCI
-} else {
-    Buscar-Bash
-}
-
-if (-not $bash) {
-    Write-Host ""
-    Write-Host "No encontré el bash de Git." -ForegroundColor Red
-    Write-Host "Se instala con Git para Windows: https://git-scm.com/download/win"
-    Write-Host "Si Git ya está instalado en otra carpeta, pasame la ruta del bash asi:"
-    Write-Host '  $env:BASH_ENRICCI = "D:\Git\bin\bash.exe"'
-    exit 1
-}
+. "$PSScriptRoot\comun.ps1"
 
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     Write-Host ""
@@ -76,31 +34,15 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-# --- Correr el despliegue -----------------------------------------------------
-# publicar.sh usa rutas relativas al proyecto, así que hay que pararse ahí.
-$raiz = Split-Path $PSScriptRoot -Parent
-$anterior = Get-Location
-$codigo = 1
+# Las variables de entorno son cómo publicar.sh recibe la configuración.
+# Se ponen sólo si se pidieron: si no, mandan las de adentro del script.
+if ($Servidor) { $env:SERVIDOR = $Servidor }
+if ($Llave)    { $env:LLAVE    = Ruta-Para-Bash $Llave }
 
-try {
-    Set-Location $raiz
+$argumentos = @()
+if ($PrimeraVez) { $argumentos += "--primera-vez" }
 
-    # Las variables de entorno son cómo publicar.sh recibe la configuración.
-    # Se ponen sólo si se pidieron: si no, mandan las de adentro del script.
-    if ($Servidor) { $env:SERVIDOR = $Servidor }
-    # El bash de Git entiende C:/Users/... pero se confunde con las barras
-    # invertidas de Windows, que para él son escapes. Se dan vuelta.
-    if ($Llave)    { $env:LLAVE    = $Llave -replace '\\', '/' }
-
-    $argumentos = @("despliegue/publicar.sh")
-    if ($PrimeraVez) { $argumentos += "--primera-vez" }
-
-    & $bash @argumentos
-    $codigo = $LASTEXITCODE
-}
-finally {
-    Set-Location $anterior
-}
+$codigo = Invocar-Bash "despliegue/publicar.sh" $argumentos
 
 if ($codigo -ne 0) {
     Write-Host ""

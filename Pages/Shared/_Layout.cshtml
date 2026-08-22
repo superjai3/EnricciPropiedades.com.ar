@@ -9,13 +9,12 @@
     var urlCanonica = urlBase + Context.Request.Path;
 
     // Imagen para redes: cada página puede poner la suya (la ficha manda la
-    // foto de la propiedad). Sin eso, compartir un aviso mostraría el logo.
+    // foto de la propiedad). Sin eso se usa la tarjeta de marca, dibujada a
+    // 1200x630 —la medida que esperan WhatsApp, Facebook y LinkedIn— con el
+    // isotipo, el nombre y el dominio.
     var imagenSocial = ViewData["OgImagen"] as string;
-    var urlImagen = urlBase + (imagenSocial ?? "/imagenes/isologo.png");
-
-    // Con una foto de verdad conviene la tarjeta grande; con el logo, la chica:
-    // el isologo estirado a todo el ancho se ve mal.
-    var tipoTarjeta = imagenSocial is null ? "summary" : "summary_large_image";
+    var esTarjetaDeMarca = imagenSocial is null;
+    var urlImagen = urlBase + (imagenSocial ?? "/imagenes/compartir.jpg");
     var tipoOg = ViewData["OgTipo"] as string ?? "website";
     var descripcion = ViewData["Descripcion"] as string
         ?? "Inmobiliaria en la Ciudad de Buenos Aires desde 1932. Venta y alquiler de propiedades, tasaciones, administración de cobranzas y asesoría legal en Monserrat, Constitución, San Cristóbal y alrededores.";
@@ -37,12 +36,36 @@
     <meta property="og:locale" content="es_AR" />
     <meta property="og:url" content="@urlCanonica" />
     <meta property="og:image" content="@urlImagen" />
-    <meta name="twitter:card" content="@tipoTarjeta" />
+    <meta property="og:image:alt" content="@SitioInfo.Nombre — inmobiliaria en la Ciudad de Buenos Aires desde @SitioInfo.AnioFundacion" />
+@if (esTarjetaDeMarca)
+{
+    @* Declarar la medida evita que WhatsApp muestre el enlace sin imagen
+       mientras la descarga: con el tamaño a la vista la reserva de entrada. *@
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
+}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    @* Permite a Google usar la miniatura grande y el texto completo en los
+       resultados y en los resúmenes con IA. Sin esto recorta ambos. *@
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <link rel="canonical" href="@urlCanonica" />
 
-    <link rel="icon" href="~/favicon.ico" />
-    <link rel="apple-touch-icon" href="~/imagenes/isologo.png" />
+    @* El isotipo es lo que se ve en la pestaña, al lado del dominio, y al
+       guardar el sitio en la pantalla de inicio del teléfono. *@
+    <link rel="icon" href="~/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32.png" />
+    <link rel="apple-touch-icon" href="~/apple-touch-icon.png" />
+    <link rel="manifest" href="~/site.webmanifest" />
+
+    @* Las dos variantes con las que se pinta casi todo el texto. Se piden antes
+       de que el navegador termine de leer el CSS, que es donde recién se
+       enteraría de que las necesita. *@
+    <link rel="preload" href="~/fonts/web/vietnam-regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="~/fonts/web/vietnam-extrabold.woff2" as="font" type="font/woff2" crossorigin />
+
     <link rel="stylesheet" href="~/css/enricci.css" asp-append-version="true" />
 
     <script nonce="@Context.Nonce()">

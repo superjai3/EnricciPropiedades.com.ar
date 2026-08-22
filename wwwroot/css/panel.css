@@ -390,6 +390,12 @@
 }
 .panel-volver:hover { color: var(--rojo); }
 
+/* En pantallas táctiles el enlace de vuelta mide 21 px de alto: se le agranda
+   el área sensible sin cambiar cómo se ve. */
+@media (pointer: coarse) {
+    .panel-volver { display: inline-flex; align-items: center; min-height: 40px; }
+}
+
 /* --- Avisos -------------------------------------------------------------- */
 .panel-aviso {
     padding: .85rem 1.1rem;

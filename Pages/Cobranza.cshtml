@@ -1,7 +1,142 @@
-﻿@page
+@page
+@model CobranzaModel
 @{
-    ViewData["Title"] = "Cobranza";
+    ViewData["Title"] = "Administración y cobranza de alquileres";
+    ViewData["Descripcion"] = "Administramos tu alquiler en CABA: cobranza mensual, actualización por índice, control de expensas e impuestos y rendición en tiempo y forma.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>R. H. Enricci Propiedades nace en 1.932 en el barrio de Monserrat..... Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis quidem explicabo harum ab iusto nesciunt sint veritatis enim quos adipisci voluptatum unde ducimus, sit, quasi similique, eum odit deleniti delectus.</p>
+
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Servicios">Servicios</a> <span aria-hidden="true">/</span>
+            <span>Administración y cobranza</span>
+        </nav>
+        <p class="eyebrow">Renta tranquila</p>
+        <h1>Tu alquiler cobrado a término,<br />todos los meses</h1>
+        <p class="plomo">
+            Administrar una propiedad en alquiler es un trabajo mensual: recordatorios, recibos,
+            actualizaciones por índice, expensas, ABL, reparaciones y, cuando hace falta, reclamos.
+            Nosotros lo hacemos por vos.
+        </p>
+        <div class="acciones mt-5">
+            <a class="btn btn--lg" asp-page="/Contacto">
+                Quiero que administren mi propiedad
+                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="prosa revelar">
+                <h2>Qué incluye la administración</h2>
+                <p>
+                    Nos ocupamos del ciclo completo del contrato, desde la selección del inquilino
+                    hasta la restitución de la unidad al finalizar. El propietario recibe una
+                    rendición clara todos los meses y una sola persona a quien preguntarle.
+                </p>
+                <ul class="lista-chequeo" style="padding-left:0">
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Cobranza mensual del alquiler</strong> y emisión de recibos, con recordatorio automático al inquilino antes del vencimiento.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Actualización del canon</strong> según el índice y la periodicidad pactados en el contrato, calculada y notificada por escrito.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Control de expensas, ABL, aguas y servicios</strong>, verificando que el inquilino esté al día.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Rendición mensual al propietario</strong> con el detalle de lo cobrado, lo retenido y lo transferido.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Coordinación de reparaciones</strong> con gremios de confianza, previa autorización del propietario.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Gestión de mora</strong>: intimación, negociación y, si no queda alternativa, derivación al estudio jurídico.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Renovación o restitución</strong> al vencimiento, con inspección del estado de la unidad e inventario comparado.</span></li>
+                </ul>
+
+                <h2>Cobranza de deudas y alquileres atrasados</h2>
+                <p>
+                    También tomamos casos puntuales de cobranza: alquileres atrasados, expensas
+                    adeudadas o contratos que quedaron a la deriva. Primero intentamos siempre el
+                    acuerdo de pago: es más rápido, más barato y suele conservar al inquilino.
+                    Si no hay voluntad de pago, avanzamos con la vía legal junto al estudio
+                    jurídico que nos acompaña hace años.
+                </p>
+
+                <div class="destacado">
+                    En administración, la diferencia no está en el mes que todo funciona:
+                    está en cómo se resuelve el mes que algo falla.
+                </div>
+            </div>
+
+            <aside class="pegajoso revelar revelar-2">
+                <div class="ficha__panel" style="position:static">
+                    <h2 style="font-size:var(--t-lg);margin-bottom:0">Para el propietario</h2>
+                    <ul class="lista-chequeo" style="font-size:.92rem">
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Un interlocutor único, con nombre y teléfono directo</li>
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Rendición mensual por escrito</li>
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Seguro de caución para cubrir la falta de pago</li>
+                        <li><svg aria-hidden="true"><use href="#i-check" /></svg>Sin permanencia mínima obligatoria</li>
+                    </ul>
+                    <a class="btn btn--bloque" asp-page="/Contacto">
+                        Pedir una propuesta
+                        <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                    </a>
+                    <a class="btn btn--wsp btn--bloque" href="@SitioInfo.Whatsapp("Hola, quiero información sobre la administración de alquileres.")" target="_blank" rel="noopener">
+                        <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                        Consultar por WhatsApp
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--tono">
+    <div class="contenedor">
+        <div class="cabecera-seccion revelar">
+            <div>
+                <p class="eyebrow">Paso a paso</p>
+                <h2 class="titulo-seccion">Cómo empezamos a <em>administrar</em></h2>
+            </div>
+        </div>
+        <div class="pasos revelar">
+            <div class="paso">
+                <h3>Revisamos el contrato</h3>
+                <p>Leemos el contrato vigente, los índices pactados y el estado de la cuenta.</p>
+            </div>
+            <div class="paso">
+                <h3>Inspeccionamos la unidad</h3>
+                <p>Dejamos registro fotográfico e inventario del estado actual de la propiedad.</p>
+            </div>
+            <div class="paso">
+                <h3>Notificamos al inquilino</h3>
+                <p>Le informamos el nuevo canal de pago y de contacto, por escrito.</p>
+            </div>
+            <div class="paso">
+                <h3>Rendimos todos los meses</h3>
+                <p>Cobramos, controlamos servicios y te transferimos con el detalle a la vista.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="franja-cta revelar">
+            <p class="eyebrow">Sin costo de análisis</p>
+            <h2>¿Querés dejar de correr atrás del alquiler?</h2>
+            <p class="plomo" style="color:inherit;opacity:.8">
+                Contanos la situación de tu propiedad y te preparamos una propuesta con
+                honorarios y alcance por escrito.
+            </p>
+            <div class="acciones mt-5">
+                <a class="btn btn--claro btn--lg" asp-page="/Contacto">Pedir propuesta</a>
+                <a class="btn btn--wsp btn--lg" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

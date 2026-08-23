@@ -1,0 +1,56 @@
+[Unit]
+Description=Sitio de R. H. Enricci Propiedades
+After=network.target
+
+[Service]
+Type=notify
+WorkingDirectory=/var/www/enricci
+ExecStart=/usr/bin/dotnet "/var/www/enricci/Enricci Propiedades.dll"
+
+# Si el proceso se cae, systemd lo vuelve a levantar. Sin esto, un error no
+# controlado a las tres de la mañana deja el sitio abajo hasta que alguien mire.
+Restart=always
+RestartSec=10
+
+# SIGINT es la señal que ASP.NET Core entiende como "apagate ordenadamente":
+# termina de responder lo que tiene en curso antes de cortar.
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+User=enricci
+Group=enricci
+SyslogIdentifier=enricci
+
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+# Escucha sólo en loopback: quien atiende de cara a internet es nginx. Si
+# escuchara en 0.0.0.0 se podría llegar al sitio por el puerto 5000 salteando
+# el proxy, y con él el certificado y las cabeceras.
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+
+Environment=DOTNET_NOLOGO=true
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+# Las contraseñas y la configuración propia del servidor viven acá, con permisos
+# 600 y fuera del repositorio.
+EnvironmentFile=/etc/enricci/enricci.env
+
+# --- Acotar lo que el proceso puede hacer -------------------------------------
+# Si algún día se encuentra una vulnerabilidad en el sitio, esto limita hasta
+# dónde se puede llegar desde adentro.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+# Las dos únicas carpetas donde el sitio necesita escribir: la de los datos
+# (base, fotos y respaldos) y la de las claves de protección de datos que
+# ASP.NET Core usa para firmar las cookies.
+ReadWritePaths=/var/lib/enricci
+
+[Install]
+WantedBy=multi-user.target

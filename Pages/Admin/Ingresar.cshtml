@@ -1,0 +1,45 @@
+@page
+@model Enricci_Propiedades.Pages.Admin.IngresarModel
+@{
+    ViewData["Title"] = "Ingresar";
+}
+
+<div class="panel-ingreso">
+    <div class="panel-ingreso__caja">
+        <div class="panel-ingreso__marca">
+            <img src="~/imagenes/isologo.png" alt="" width="40" height="40" />
+            <span>
+                R. H. Enricci Propiedades
+                <small>Panel de administración</small>
+            </span>
+        </div>
+
+        <h1>Ingresar</h1>
+        <p class="panel-ayuda">Acceso exclusivo para la administración de las publicaciones.</p>
+
+        @if (!string.IsNullOrEmpty(Model.Error))
+        {
+            <div class="panel-aviso panel-aviso--error" role="alert">@Model.Error</div>
+        }
+
+        <form method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="campo">
+                <label asp-for="Datos.Email">Correo electrónico</label>
+                <input class="control" asp-for="Datos.Email" type="email" autocomplete="username" autofocus />
+                <span class="error-campo" asp-validation-for="Datos.Email"></span>
+            </div>
+
+            <div class="campo">
+                <label asp-for="Datos.Clave">Contraseña</label>
+                <input class="control" asp-for="Datos.Clave" type="password" autocomplete="current-password" />
+                <span class="error-campo" asp-validation-for="Datos.Clave"></span>
+            </div>
+
+            <button class="btn btn--bloque" type="submit">Entrar</button>
+        </form>
+
+        <a class="panel-volver" asp-page="/Index">← Volver al sitio</a>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+@inject Enricci_Propiedades.Services.FotosService Fotos
+@inject Enricci_Propiedades.Services.CotizacionService Cotizacion
+@model Enricci_Propiedades.Models.Propiedad
+
+<article class="prop" data-tarjeta-propiedad="@Model.Id">
+    <a class="prop__media" asp-page="/Ficha" asp-route-id="@Model.Id" aria-label="Ver @Model.Titulo">
+        @if (Model.Fotos.Count > 0)
+        {
+            <img src="@Fotos.Miniatura(Model.Fotos[0])" alt="Fachada de @Model.Direccion, @Model.Barrio" loading="lazy" decoding="async" width="400" height="300" />
+        }
+        else
+        {
+            @ArteFachada.Dibujar(Model)
+        }
+        <div class="prop__etiquetas">
+            <span class="etiqueta etiqueta--rojo">@Model.OperacionTexto</span>
+            @if (Model.Estado == EstadoPublicacion.Reservada)
+            {
+                <span class="etiqueta etiqueta--ambar">Reservada</span>
+            }
+            @if (Model.AptoCredito && Model.Estado == EstadoPublicacion.Disponible)
+            {
+                <span class="etiqueta etiqueta--verde">Apto crédito</span>
+            }
+        </div>
+
+        @if (Model.Fotos.Count > 1)
+        {
+            <span class="prop__fotos" aria-label="@Model.Fotos.Count fotografías">
+                <svg aria-hidden="true"><use href="#i-camara" /></svg>@Model.Fotos.Count
+            </span>
+        }
+    </a>
+
+    @* Fuera del enlace de la foto: un botón dentro de un enlace no es válido y
+       los lectores de pantalla lo anuncian mal. *@
+    <button class="prop__favorito" type="button" data-favorito="@Model.Id" data-titulo="@Model.Titulo" aria-pressed="false"
+            aria-label="Guardar «@Model.Titulo» en favoritos">
+        <svg aria-hidden="true"><use href="#i-corazon" /></svg>
+    </button>
+
+    <div class="prop__cuerpo">
+        <p class="prop__precio">
+            @Model.PrecioTexto
+            @if (!string.IsNullOrEmpty(Model.PrecioSufijo))
+            {
+                <small>@Model.PrecioSufijo</small>
+            }
+        </p>
+        @if (Model.Moneda == "USD" && Cotizacion.APesos(Model.Precio) is { } enPesos)
+        {
+            <p class="prop__precio-pesos">≈ $ @enPesos.ToString("N0")</p>
+        }
+
+        <h3 class="prop__titulo">
+            <a asp-page="/Ficha" asp-route-id="@Model.Id">@Model.Titulo</a>
+        </h3>
+        <p class="prop__barrio">
+            <svg aria-hidden="true"><use href="#i-pin" /></svg>
+            @Model.Direccion · @Model.Barrio
+        </p>
+        <ul class="prop__specs">
+            @if (Model.Ambientes > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-edificio" /></svg>@Model.Ambientes amb.</li>
+            }
+            @if (Model.Dormitorios > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-cama" /></svg>@Model.Dormitorios dorm.</li>
+            }
+            @if (Model.Banios > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-banio" /></svg>@Model.Banios baño@(Model.Banios > 1 ? "s" : "")</li>
+            }
+            @if (Model.SuperficieTotal > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-superficie" /></svg>@Model.SuperficieTotal m²</li>
+            }
+            else if (Model.SuperficieCubierta > 0)
+            {
+                <li><svg aria-hidden="true"><use href="#i-superficie" /></svg>@Model.SuperficieCubierta m²</li>
+            }
+            @if (Model.Cochera)
+            {
+                <li><svg aria-hidden="true"><use href="#i-auto" /></svg>Cochera</li>
+            }
+        </ul>
+    </div>
+</article>

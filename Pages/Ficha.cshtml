@@ -1,0 +1,399 @@
+@page "/propiedad/{id:int}"
+@inject Enricci_Propiedades.Services.CotizacionService Cotizacion
+@inject Microsoft.Extensions.Options.IOptions<Enricci_Propiedades.Models.OpcionesEscritura> Escritura
+@model FichaModel
+@inject Enricci_Propiedades.Services.FotosService Fotos
+@{
+    var p = Model.Ficha;
+    ViewData["Title"] = $"{p.Titulo} · {p.Barrio}";
+    var resumen = p.ResumenParaBuscadores;
+    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}."
+        + (resumen.Length > 0 ? $" {resumen}." : "")
+        + $" {p.PrecioTexto}.";
+    var mensajeWsp = $"Hola, me interesa la propiedad de {p.Direccion} ({p.Barrio}) publicada en la web. ¿Podemos coordinar una visita?";
+
+    // La foto de portada es lo que se ve al compartir el aviso por WhatsApp o
+    // por redes. Sin esto se mostraba siempre el isologo de la inmobiliaria.
+    ViewData["OgImagen"] = Model.FotoDePortada;
+    ViewData["OgTipo"] = "article";
+}
+
+@section Head {
+    @* Dentro de un @@section el Context no está en alcance: el nonce se toma
+       del ViewContext. Sin nonce, la política de contenido bloquea el bloque. *@
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructurados)
+    </script>
+}
+
+<section class="encabezado-pagina" style="padding-bottom:1.5rem">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Propiedades">Propiedades</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Barrio" asp-route-barrio="@Slug.De(p.Barrio)">@p.Barrio</a> <span aria-hidden="true">/</span>
+            <span>@p.Direccion</span>
+        </nav>
+        <div class="chips mt-4" style="margin-bottom:1rem">
+            <span class="chip activo">@p.OperacionTexto</span>
+            <span class="chip">@p.TipoTexto</span>
+            @if (p.AptoCredito)
+            {
+                <span class="chip">Apto crédito</span>
+            }
+            @if (p.Estado == EstadoPublicacion.Reservada)
+            {
+                <span class="chip">Reservada</span>
+            }
+        </div>
+        <h1 style="font-size:var(--t-3xl)">@p.Titulo</h1>
+        <p class="plomo mb-0">
+            <svg aria-hidden="true" style="width:18px;height:18px;vertical-align:-3px"><use href="#i-pin" /></svg>
+            @p.Direccion · @p.Barrio, Ciudad Autónoma de Buenos Aires
+        </p>
+    </div>
+</section>
+
+<section class="seccion--compacta" style="padding-top:0">
+    <div class="contenedor">
+        @if (p.Fotos.Count > 0)
+        {
+            @* Visor: una foto grande, flechas, contador y tira de miniaturas.
+               Sin JavaScript se ve la primera foto y las miniaturas quedan como
+               enlaces inertes, así que la página nunca depende del script. *@
+            <div class="visor revelar" data-visor>
+                <div class="visor__escenario">
+                    <img class="visor__foto" data-visor-foto
+                         src="@p.Fotos[0]" alt="Foto 1 de @p.Direccion, @p.Barrio"
+                         width="1024" height="768" decoding="async" />
+
+                    <button class="visor__lupa" type="button" data-visor-ampliar
+                            aria-label="Ver la foto en pantalla completa">
+                        <svg aria-hidden="true"><use href="#i-lupa" /></svg>
+                    </button>
+
+                    @if (p.Fotos.Count > 1)
+                    {
+                        <button class="visor__paso visor__paso--atras" type="button"
+                                data-visor-paso="-1" aria-label="Foto anterior">
+                            <svg aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </button>
+                        <button class="visor__paso visor__paso--adelante" type="button"
+                                data-visor-paso="1" aria-label="Foto siguiente">
+                            <svg aria-hidden="true"><use href="#i-chevron" /></svg>
+                        </button>
+                        <p class="visor__contador" data-visor-contador aria-live="polite">
+                            1 / @p.Fotos.Count
+                        </p>
+                    }
+                </div>
+
+                @if (p.Fotos.Count > 1)
+                {
+                    <div class="visor__tira" role="group" aria-label="Miniaturas de la propiedad">
+                        @for (var i = 0; i < p.Fotos.Count; i++)
+                        {
+                            <button class="visor__mini @(i == 0 ? "activo" : "")" type="button"
+                                    data-visor-ir="@i" aria-label="Ver la foto @(i + 1) de @p.Fotos.Count">
+                                <img src="@Fotos.Miniatura(p.Fotos[i])" alt="" loading="lazy" decoding="async" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+
+            <p class="texto-suave mt-4" style="font-size:.82rem">
+                @p.Fotos.Count @(p.Fotos.Count == 1 ? "fotografía" : "fotografías") de la propiedad.
+                Escribinos y te enviamos el reportaje completo y el plano por WhatsApp.
+            </p>
+        }
+        else
+        {
+            <div class="visor visor--ilustrado revelar">
+                <div class="visor__escenario">
+                    @ArteFachada.Dibujar(p)
+                    <p class="visor__aviso">
+                        <svg aria-hidden="true"><use href="#i-camara" /></svg>
+                        Ilustración: esta publicación todavía no tiene fotografías cargadas
+                    </p>
+                </div>
+            </div>
+
+            <p class="texto-suave mt-4" style="font-size:.82rem">
+                Escribinos y te enviamos las fotos y el plano por WhatsApp.
+            </p>
+        }
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="ficha">
+            <div>
+                <div class="datos revelar">
+                    @* Una cochera o un lote sin medir no tienen todos estos datos:
+                       mostrar "0 m²" queda peor que no mostrar el dato. *@
+                    @if (p.SuperficieTotal > 0)
+                    {
+                        <div class="dato">
+                            <dt>Superficie total</dt>
+                            <dd>@p.SuperficieTotal m²</dd>
+                        </div>
+                    }
+                    @if (p.SuperficieCubierta > 0)
+                    {
+                        <div class="dato">
+                            <dt>Cubierta</dt>
+                            <dd>@p.SuperficieCubierta m²</dd>
+                        </div>
+                    }
+                    @if (p.Ambientes > 0)
+                    {
+                        <div class="dato">
+                            <dt>Ambientes</dt>
+                            <dd>@p.Ambientes</dd>
+                        </div>
+                    }
+                    @if (p.Dormitorios > 0)
+                    {
+                        <div class="dato">
+                            <dt>Dormitorios</dt>
+                            <dd>@p.Dormitorios</dd>
+                        </div>
+                    }
+                    @if (p.Banios > 0)
+                    {
+                        <div class="dato">
+                            <dt>Baños</dt>
+                            <dd>@p.Banios</dd>
+                        </div>
+                    }
+                    <div class="dato">
+                        <dt>Antigüedad</dt>
+                        <dd>@p.AntiguedadTexto</dd>
+                    </div>
+                </div>
+
+                <div class="prosa mt-7 revelar">
+                    <h2>Sobre la propiedad</h2>
+                    <p>@p.Descripcion</p>
+
+                    @if (p.Comodidades.Count > 0)
+                    {
+                        <h3>Comodidades</h3>
+                        <ul class="lista-chequeo" style="padding-left:0">
+                            @foreach (var comodidad in p.Comodidades)
+                            {
+                                <li>
+                                    <svg aria-hidden="true"><use href="#i-check" /></svg>
+                                    @comodidad
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <h3>Ubicación</h3>
+                    <p>
+                        La propiedad está en @p.Direccion, barrio de @p.Barrio. Es una zona con
+                        transporte público a pocas cuadras, comercios de cercanía y acceso rápido
+                        al centro. Coordinamos la visita en el horario que te quede cómodo,
+                        incluidos sábados por la mañana.
+                    </p>
+                </div>
+
+                @* Preguntar sin irse de la página. El formulario de /Contacto
+                   sigue existiendo para lo general; este es sólo por esta
+                   propiedad, y por eso ya viene con el mensaje escrito. *@
+                <div class="consulta-ficha mt-7 revelar" id="consultar">
+                    @if (Model.Enviado)
+                    {
+                        <h2 style="font-size:var(--t-xl);margin-bottom:.5rem">Recibimos tu consulta</h2>
+                        @if (Model.CorreoEnviado)
+                        {
+                            <p>
+                                Gracias por escribirnos: tu consulta por @p.Direccion ya llegó a la
+                                oficina y te vamos a responder a la brevedad.
+                            </p>
+                        }
+                        else
+                        {
+                            <p>
+                                Gracias por escribirnos. Tu consulta por @p.Direccion quedó registrada
+                                y te vamos a responder a la brevedad.
+                            </p>
+                        }
+                        <div class="acciones mt-5">
+                            <a class="btn btn--wsp" href="@Model.MensajeWhatsapp" target="_blank" rel="noopener">
+                                <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                Enviar lo mismo por WhatsApp
+                            </a>
+                            <a class="btn btn--fantasma" asp-page="/Propiedades">Seguir viendo propiedades</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <h2 style="font-size:var(--t-xl);margin-bottom:.35rem">Consultá por esta propiedad</h2>
+                        <p class="texto-suave" style="font-size:.9rem">
+                            Te respondemos por correo o por teléfono, como prefieras.
+                        </p>
+
+                        <form method="post" novalidate>
+                            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                            <div class="dos-columnas" style="gap:1rem 1.5rem">
+                                <div class="campo">
+                                    <label asp-for="Datos.Nombre"></label>
+                                    <input class="control" asp-for="Datos.Nombre" autocomplete="name" placeholder="Ej.: María González" required />
+                                    <span class="error-campo" asp-validation-for="Datos.Nombre"></span>
+                                </div>
+                                <div class="campo">
+                                    <label asp-for="Datos.Email"></label>
+                                    <input class="control" asp-for="Datos.Email" type="email" autocomplete="email" placeholder="nombre@@ejemplo.com" required />
+                                    <span class="error-campo" asp-validation-for="Datos.Email"></span>
+                                </div>
+                                <div class="campo campo--ancho">
+                                    <label asp-for="Datos.Telefono"></label>
+                                    <input class="control" asp-for="Datos.Telefono" type="tel" autocomplete="tel" placeholder="11 5555-5555" />
+                                    <span class="error-campo" asp-validation-for="Datos.Telefono"></span>
+                                </div>
+                            </div>
+
+                            <div class="campo mt-5">
+                                <label asp-for="Datos.Mensaje"></label>
+                                <textarea class="control" asp-for="Datos.Mensaje" rows="4" required></textarea>
+                                <span class="error-campo" asp-validation-for="Datos.Mensaje"></span>
+                            </div>
+
+                            @* Campo trampa: invisible para personas, tentador para robots. *@
+                            <div class="solo-lectores" aria-hidden="true">
+                                <label asp-for="Datos.Sitio">No completar</label>
+                                <input asp-for="Datos.Sitio" tabindex="-1" autocomplete="off" />
+                            </div>
+
+                            <div class="acciones mt-5">
+                                <button class="btn btn--lg" type="submit">
+                                    Enviar consulta
+                                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                                </button>
+                                <a class="btn btn--wsp btn--lg" href="@SitioInfo.Whatsapp(mensajeWsp)" target="_blank" rel="noopener">
+                                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                    Prefiero WhatsApp
+                                </a>
+                            </div>
+
+                            <p class="texto-suave mt-5 mb-0" style="font-size:.82rem">
+                                Usamos tus datos únicamente para responder esta consulta. No los compartimos con terceros.
+                            </p>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <aside class="ficha__panel">
+                <div>
+                    <p class="prop__precio" style="font-size:2rem">@p.PrecioTexto</p>
+                    @if (!string.IsNullOrEmpty(p.PrecioSufijo))
+                    {
+                        <p class="texto-suave mb-0" style="font-size:.85rem">@p.PrecioSufijo</p>
+                    }
+                    @* Cuánto es en pesos, para quien no piensa en dólares. Se
+                       muestra sólo si hay cotización: un número inventado o viejo
+                       sin fecha sería peor que no ponerlo. *@
+                    @if (p.Moneda == "USD" && Cotizacion.Actual is { } tipoDeCambio)
+                    {
+                        var enPesos = Cotizacion.APesos(p.Precio);
+
+                        if (enPesos is { } importe)
+                        {
+                            <p class="texto-suave mb-0" style="font-size:.9rem">
+                                ≈ $ @importe.ToString("N0")
+                                <span style="display:block;font-size:.76rem;opacity:.85">
+                                    Según @Cotizacion.Fuente al @tipoDeCambio.FechaTexto · valor orientativo
+                                </span>
+                            </p>
+                        }
+                    }
+
+                    @if (p.Expensas > 0)
+                    {
+                        <p class="texto-suave mb-0" style="font-size:.85rem">
+                            Expensas aproximadas: $ @p.Expensas.ToString("N0")
+                        </p>
+                    }
+                </div>
+
+                <p class="texto-suave mb-0" style="font-size:.88rem">
+                    Publicación @p.Slug · Atiende Horacio Enricci, corredor inmobiliario.
+                </p>
+
+                <a class="btn btn--wsp btn--bloque" href="@SitioInfo.Whatsapp(mensajeWsp)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    Consultar por WhatsApp
+                </a>
+                @* Baja al formulario de esta misma ficha en lugar de mandar a
+                   /Contacto: un salto de página menos entre el interés y la
+                   consulta. Como es un ancla, funciona igual sin JavaScript. *@
+                <a class="btn btn--bloque" href="#consultar">
+                    Coordinar una visita
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+                @* La calculadora sólo se ofrece si los porcentajes están cargados
+                   y confirmados: ver OpcionesEscritura. *@
+                @if (Escritura.Value.Lista && p.Moneda == "USD" && p.Precio > 0)
+                {
+                    <a class="btn btn--fantasma btn--bloque" asp-page="/Escrituracion" asp-route-propiedad="@p.Id">
+                        <svg aria-hidden="true"><use href="#i-calculadora" /></svg>
+                        Calcular gastos de escrituración
+                    </a>
+                }
+                <a class="btn btn--fantasma btn--bloque" href="@SitioInfo.TelefonoLink">
+                    <svg aria-hidden="true"><use href="#i-telefono" /></svg>
+                    @SitioInfo.Telefono
+                </a>
+
+                @* Compartir la publicación con otra persona, que es distinto de
+                   consultarle a la inmobiliaria. En el teléfono abre el menú del
+                   sistema; en la computadora copia el enlace. *@
+                <button class="btn btn--fantasma btn--bloque" type="button"
+                        data-compartir
+                        data-titulo="@p.Titulo"
+                        data-texto="@p.Titulo — @p.Direccion, @p.Barrio. @p.PrecioTexto"
+                        data-url="@Model.UrlPublica">
+                    <svg aria-hidden="true"><use href="#i-compartir" /></svg>
+                    <span data-compartir-texto>Compartir</span>
+                </button>
+
+                <p class="texto-suave mb-0" style="font-size:.8rem;border-top:1px solid var(--linea);padding-top:1rem">
+                    Los valores son orientativos y pueden variar sin previo aviso.
+                    Consultá la disponibilidad antes de coordinar la visita.
+                </p>
+            </aside>
+        </div>
+    </div>
+</section>
+
+@if (Model.Similares.Count > 0)
+{
+    <section class="seccion seccion--tono">
+        <div class="contenedor">
+            <div class="cabecera-seccion revelar">
+                <div>
+                    <p class="eyebrow">También te puede interesar</p>
+                    <h2 class="titulo-seccion">Propiedades <em>similares</em></h2>
+                </div>
+                <a class="btn btn--fantasma" asp-page="/Barrio" asp-route-barrio="@Slug.De(p.Barrio)">
+                    Ver todo en @p.Barrio
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+            <div class="grilla-props">
+                @foreach (var similar in Model.Similares)
+                {
+                    <div class="revelar">
+                        <partial name="_TarjetaPropiedad" model="similar" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}

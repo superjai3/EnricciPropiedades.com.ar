@@ -1,0 +1,192 @@
+@page
+@model Enricci_Propiedades.Pages.Admin.ConsultasModel
+@{
+    ViewData["Title"] = "Consultas";
+
+    string? Elegido(string valor) =>
+        string.Equals(Model.Ver, valor, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+}
+
+<div class="panel-cabecera">
+    <div>
+        <h1>Consultas</h1>
+        <p>Lo que llega por los formularios de contacto y de tasación del sitio.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="panel-aviso panel-aviso--ok" role="status">@Model.Mensaje</div>
+}
+
+@if (Model.HayConsultasSinAvisar)
+{
+    <div class="panel-aviso" role="status">
+        Hay consultas que no se pudieron avisar por correo, así que este panel es el
+        único lugar donde se ven. Para recibirlas también por mail hay que completar
+        la sección <strong>Correo</strong> de la configuración del servidor.
+    </div>
+}
+
+<div class="panel-metricas">
+    <div class="panel-metrica">
+        <strong>@Model.TotalPendientes</strong>
+        <span>Sin atender</span>
+    </div>
+    <div class="panel-metrica">
+        <strong>@Model.TotalAtendidas</strong>
+        <span>Atendidas</span>
+    </div>
+</div>
+
+<div class="panel-tarjeta">
+    <div class="panel-filtros">
+        <nav class="panel-pestanias" aria-label="Filtrar consultas">
+            <a asp-page="/Admin/Consultas" asp-route-ver="pendientes" asp-route-buscar="@Model.Buscar"
+               aria-current="@Elegido("pendientes")">Sin atender</a>
+            <a asp-page="/Admin/Consultas" asp-route-ver="atendidas" asp-route-buscar="@Model.Buscar"
+               aria-current="@Elegido("atendidas")">Atendidas</a>
+            <a asp-page="/Admin/Consultas" asp-route-ver="todas" asp-route-buscar="@Model.Buscar"
+               aria-current="@Elegido("todas")">Todas</a>
+        </nav>
+
+        <form class="panel-buscador" method="get">
+            <input type="hidden" name="ver" value="@Model.Ver" />
+            <input class="control" asp-for="Buscar" type="search" placeholder="Buscar por nombre, correo o texto…" />
+            <button class="btn btn--sm btn--fantasma" type="submit">Buscar</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Buscar))
+            {
+                <a class="btn btn--sm btn--fantasma" asp-page="/Admin/Consultas" asp-route-ver="@Model.Ver">Limpiar</a>
+            }
+        </form>
+    </div>
+
+    @if (Model.Listado.Count == 0)
+    {
+        <div class="panel-vacio">
+            @if (!string.IsNullOrWhiteSpace(Model.Buscar))
+            {
+                <p>No hay consultas que coincidan con «@Model.Buscar».</p>
+                <a class="btn btn--fantasma" asp-page="/Admin/Consultas" asp-route-ver="@Model.Ver">Ver todas</a>
+            }
+            else if (Model.Ver == "pendientes")
+            {
+                <p>No hay consultas sin atender. Todo al día.</p>
+            }
+            else
+            {
+                <p>Todavía no llegó ninguna consulta por el sitio.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <ul class="consultas">
+            @foreach (var c in Model.Listado)
+            {
+                var telefonoLimpio = (c.Telefono ?? "").Replace(" ", "").Replace("-", "");
+                var saludo = $"Hola {c.Nombre}, te escribimos de {SitioInfo.NombreCorto} por tu consulta desde la web.";
+                var tieneNotas = !string.IsNullOrWhiteSpace(c.Notas);
+
+                <li class="consulta @(c.Atendida ? "consulta--atendida" : "")">
+                    <div class="consulta__cabecera">
+                        <div>
+                            <h2 class="consulta__nombre">@c.Nombre</h2>
+                            <p class="consulta__meta">
+                                <span class="consulta__etiqueta">@c.OrigenTexto</span>
+                                <span>@c.FechaLocal.ToString("dddd d 'de' MMMM, HH:mm")</span>
+                                @if (!c.CorreoEnviado)
+                                {
+                                    <span class="consulta__etiqueta consulta__etiqueta--aviso"
+                                          title="La consulta quedó registrada acá, pero no se pudo mandar el aviso por correo.">
+                                        Sin aviso por correo
+                                    </span>
+                                }
+                            </p>
+                        </div>
+
+                        <form method="post" asp-page-handler="Atender" asp-route-id="@c.Id">
+                            <input type="hidden" name="ver" value="@Model.Ver" />
+                            <input type="hidden" name="buscar" value="@Model.Buscar" />
+                            <button class="btn btn--sm @(c.Atendida ? "btn--fantasma" : "")" type="submit">
+                                @(c.Atendida ? "Volver a pendientes" : "Marcar como atendida")
+                            </button>
+                        </form>
+                    </div>
+
+                    <dl class="consulta__datos">
+                        <div>
+                            <dt>Correo</dt>
+                            <dd><a href="mailto:@c.Email">@c.Email</a></dd>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(c.Telefono))
+                        {
+                            <div>
+                                <dt>Teléfono</dt>
+                                <dd>
+                                    <a href="tel:@telefonoLimpio">@c.Telefono</a>
+                                    <a class="consulta__wsp" href="@SitioInfo.Whatsapp(saludo)"
+                                       target="_blank" rel="noopener">WhatsApp</a>
+                                </dd>
+                            </div>
+                        }
+                        <div>
+                            <dt>Motivo</dt>
+                            <dd>@c.Motivo</dd>
+                        </div>
+                        @if (c.PropiedadId is > 0)
+                        {
+                            <div>
+                                <dt>Propiedad</dt>
+                                <dd>
+                                    <a asp-page="/Ficha" asp-route-id="@c.PropiedadId" target="_blank" rel="noopener">
+                                        @(c.PropiedadTitulo ?? $"Publicación {c.PropiedadId}")
+                                    </a>
+                                </dd>
+                            </div>
+                        }
+                    </dl>
+
+                    @if (!string.IsNullOrWhiteSpace(c.Detalle))
+                    {
+                        <pre class="consulta__detalle">@c.Detalle</pre>
+                    }
+
+                    <blockquote class="consulta__mensaje">@c.Mensaje</blockquote>
+
+                    <details class="consulta__notas" open="@(tieneNotas ? "open" : null)">
+                        <summary>
+                            Notas internas
+                            @if (tieneNotas)
+                            {
+                                <span class="consulta__punto" aria-label="tiene notas">●</span>
+                            }
+                        </summary>
+
+                        <form method="post" asp-page-handler="Notas" asp-route-id="@c.Id">
+                            <input type="hidden" name="ver" value="@Model.Ver" />
+                            <input type="hidden" name="buscar" value="@Model.Buscar" />
+                            <label class="visualmente-oculto" for="notas-@c.Id">Notas sobre esta consulta</label>
+                            <textarea class="control" id="notas-@c.Id" name="notas" rows="3"
+                                      placeholder="Qué se respondió, cómo siguió…">@c.Notas</textarea>
+                            <button class="btn btn--sm btn--fantasma" type="submit">Guardar notas</button>
+                        </form>
+
+                        @* Va en un formulario aparte y no como otro botón del de arriba:
+                           la confirmación de enricci.js se engancha al submit del <form>,
+                           y los formularios no se pueden anidar. *@
+                        <form method="post" asp-page-handler="Eliminar" asp-route-id="@c.Id"
+                              class="consulta__borrar"
+                              data-confirmar="¿Eliminar la consulta de @c.Nombre? No se puede deshacer.">
+                            <input type="hidden" name="ver" value="@Model.Ver" />
+                            <input type="hidden" name="buscar" value="@Model.Buscar" />
+                            <button class="panel-btn-icono panel-btn-icono--peligro" type="submit">
+                                Eliminar consulta
+                            </button>
+                        </form>
+                    </details>
+                </li>
+            }
+        </ul>
+    }
+</div>

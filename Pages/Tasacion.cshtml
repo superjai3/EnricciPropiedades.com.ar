@@ -1,7 +1,213 @@
-﻿@page
+@page
+@model TasacionModel
 @{
-    ViewData["Title"] = "Tasación";
+    ViewData["Title"] = "Tasación de propiedades";
+    ViewData["Descripcion"] = "Tasación sin cargo de departamentos, casas, PH y locales en CABA. Informe escrito en 48 horas hábiles, con operaciones comparables de la zona.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>R. H. Enricci Propiedades nace en 1.932 en el barrio de Monserrat..... Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis quidem explicabo harum ab iusto nesciunt sint veritatis enim quos adipisci voluptatum unde ducimus, sit, quasi similique, eum odit deleniti delectus.</p>
+
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Servicios">Servicios</a> <span aria-hidden="true">/</span>
+            <span>Tasación</span>
+        </nav>
+        <p class="eyebrow">Servicio sin cargo</p>
+        <h1>¿Cuánto vale realmente tu propiedad?</h1>
+        <p class="plomo">
+            Una tasación no es un número al azar ni el promedio de los avisos del portal.
+            Es el precio al que tu propiedad se vende en un plazo razonable, hoy, en tu cuadra.
+        </p>
+        <div class="acciones mt-5">
+            <a class="btn btn--lg" href="#formulario">
+                Pedir mi tasación
+                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+            </a>
+            <a class="btn btn--fantasma btn--lg" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                Consultar por WhatsApp
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="pasos revelar">
+            <div class="paso">
+                <h3>Nos contás</h3>
+                <p>Dirección, tipo, superficie y estado general. Cinco minutos, sin compromiso.</p>
+            </div>
+            <div class="paso">
+                <h3>Visitamos</h3>
+                <p>Vamos a la propiedad, la recorremos y sacamos las fotos de referencia.</p>
+            </div>
+            <div class="paso">
+                <h3>Comparamos</h3>
+                <p>Cruzamos operaciones reales cerradas en la zona, no precios de publicación.</p>
+            </div>
+            <div class="paso">
+                <h3>Te entregamos</h3>
+                <p>Informe escrito en 48 horas hábiles, con rango de valor y estrategia sugerida.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion" id="formulario">
+    <div class="contenedor">
+        <div class="ficha">
+            <div>
+                @if (Model.Enviado)
+                {
+                    <div class="aviso aviso--ok">
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        <div>
+                            <h2 style="font-size:var(--t-xl);margin-bottom:.5rem">Pedido registrado</h2>
+                            @if (Model.CorreoEnviado)
+                            {
+                                <p class="mb-0">
+                                    Recibimos los datos de la propiedad y ya llegaron a la oficina.
+                                    Te vamos a contactar para coordinar la visita, normalmente dentro
+                                    del mismo día hábil. Si querés acelerarlo, escribinos por WhatsApp:
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">
+                                    Recibimos los datos de la propiedad. Te vamos a contactar para coordinar
+                                    la visita, normalmente dentro del mismo día hábil. Si querés acelerarlo,
+                                    mandanos el resumen por WhatsApp:
+                                </p>
+                            }
+                            <div class="acciones mt-5">
+                                <a class="btn btn--wsp" href="@Model.MensajeWhatsapp" target="_blank" rel="noopener">
+                                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                                    Enviar resumen por WhatsApp
+                                </a>
+                                <a class="btn btn--fantasma" asp-page="/Propiedades">Ver propiedades publicadas</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="eyebrow">Formulario</p>
+                    <h2 class="titulo-seccion">Datos de la propiedad</h2>
+
+                    <form method="post" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                        <div class="dos-columnas" style="gap:1rem 1.5rem">
+                            <div class="campo">
+                                <label asp-for="Datos.Direccion"></label>
+                                <input class="control" asp-for="Datos.Direccion" placeholder="Calle y altura" required />
+                                <span class="error-campo" asp-validation-for="Datos.Direccion"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Barrio"></label>
+                                <select class="control" asp-for="Datos.Barrio" required>
+                                    <option value="">Elegí el barrio</option>
+                                    @foreach (var barrio in TasacionModel.Barrios)
+                                    {
+                                        <option value="@barrio">@barrio</option>
+                                    }
+                                </select>
+                                <span class="error-campo" asp-validation-for="Datos.Barrio"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Tipo"></label>
+                                <select class="control" asp-for="Datos.Tipo">
+                                    @foreach (var tipo in TasacionModel.Tipos)
+                                    {
+                                        <option value="@tipo">@tipo</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Objetivo"></label>
+                                <select class="control" asp-for="Datos.Objetivo">
+                                    @foreach (var objetivo in TasacionModel.Objetivos)
+                                    {
+                                        <option value="@objetivo">@objetivo</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Ambientes"></label>
+                                <input class="control" asp-for="Datos.Ambientes" type="number" min="0" max="20" inputmode="numeric" placeholder="Ej.: 3" />
+                                <span class="error-campo" asp-validation-for="Datos.Ambientes"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Superficie"></label>
+                                <input class="control" asp-for="Datos.Superficie" type="number" min="0" max="10000" inputmode="numeric" placeholder="Ej.: 68" />
+                                <span class="error-campo" asp-validation-for="Datos.Superficie"></span>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size:var(--t-lg);margin-top:2.5rem">Tus datos de contacto</h3>
+                        <div class="dos-columnas" style="gap:1rem 1.5rem">
+                            <div class="campo">
+                                <label asp-for="Datos.Nombre"></label>
+                                <input class="control" asp-for="Datos.Nombre" autocomplete="name" required />
+                                <span class="error-campo" asp-validation-for="Datos.Nombre"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Email"></label>
+                                <input class="control" asp-for="Datos.Email" type="email" autocomplete="email" required />
+                                <span class="error-campo" asp-validation-for="Datos.Email"></span>
+                            </div>
+                            <div class="campo">
+                                <label asp-for="Datos.Telefono"></label>
+                                <input class="control" asp-for="Datos.Telefono" type="tel" autocomplete="tel" required />
+                                <span class="error-campo" asp-validation-for="Datos.Telefono"></span>
+                            </div>
+                        </div>
+
+                        <div class="campo mt-5">
+                            <label asp-for="Datos.Comentario"></label>
+                            <textarea class="control" asp-for="Datos.Comentario" rows="4" placeholder="Estado general, refacciones recientes, si está ocupada o libre, plazos que manejás."></textarea>
+                        </div>
+
+                        <div class="solo-lectores" aria-hidden="true">
+                            <label asp-for="Datos.Sitio">No completar</label>
+                            <input asp-for="Datos.Sitio" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        <div class="acciones mt-6">
+                            <button class="btn btn--lg" type="submit">
+                                Solicitar tasación sin cargo
+                                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                            </button>
+                        </div>
+
+                        <p class="texto-suave mt-5" style="font-size:.82rem">
+                            La tasación no tiene costo ni te obliga a firmar exclusividad con nosotros.
+                        </p>
+                    </form>
+                }
+            </div>
+
+            <aside class="ficha__panel">
+                <h2 style="font-size:var(--t-lg);margin-bottom:0">Qué incluye el informe</h2>
+                <ul class="lista-chequeo" style="font-size:.92rem">
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Rango de valor de venta y de alquiler</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Operaciones comparables cerradas en la zona</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Estimación del tiempo de venta</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Mejoras que suben el precio y cuáles no</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Documentación necesaria para escriturar</li>
+                </ul>
+                <p class="texto-suave mb-0" style="font-size:.85rem;border-top:1px solid var(--linea);padding-top:1rem">
+                    Tasamos en Monserrat, Constitución, San Cristóbal, San Telmo, Balvanera, Boedo
+                    y barrios linderos. Fuera de esa zona, consultanos igual.
+                </p>
+            </aside>
+        </div>
+    </div>
+</section>

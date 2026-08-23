@@ -1,0 +1,21 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = Model.Titulo;
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor-angosto">
+        <p class="eyebrow">Error @(Model.Codigo?.ToString() ?? "")</p>
+        <h1>@Model.Titulo</h1>
+        <p class="plomo">@Model.Detalle</p>
+        <div class="acciones mt-6">
+            <a class="btn btn--lg" asp-page="/Index">
+                Volver al inicio
+                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+            </a>
+            <a class="btn btn--fantasma btn--lg" asp-page="/Propiedades">Ver propiedades</a>
+            <a class="btn btn--fantasma btn--lg" asp-page="/Contacto">Contacto</a>
+        </div>
+    </div>
+</section>

@@ -1,7 +1,65 @@
-﻿@page
+@page
+@model MisionModel
 @{
     ViewData["Title"] = "Misión";
+    ViewData["Descripcion"] = "La misión de R. H. Enricci Propiedades: que cada operación inmobiliaria en CABA se cierre con información clara, precio real y papeles en orden.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>R. H. Enricci Propiedades nace en 1.932 en el barrio de Monserrat..... Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis quidem explicabo harum ab iusto nesciunt sint veritatis enim quos adipisci voluptatum unde ducimus, sit, quasi similique, eum odit deleniti delectus.</p>
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Quienes_Somos">La empresa</a> <span aria-hidden="true">/</span>
+            <span>Misión</span>
+        </nav>
+        <p class="eyebrow">Para qué trabajamos</p>
+        <h1>Misión</h1>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="prosa revelar">
+                <p class="plomo" style="color:var(--texto)">
+                    Hacer que comprar, vender o alquilar una propiedad en la Ciudad de Buenos Aires
+                    sea una decisión informada y no un salto al vacío.
+                </p>
+                <p>
+                    Trabajamos para que cada cliente entienda, antes de firmar, qué está comprando,
+                    cuánto vale realmente, qué gastos va a tener y qué riesgos existen. Nuestro
+                    trabajo no termina cuando se acuerda un precio: termina cuando la escritura
+                    está firmada y las llaves entregadas.
+                </p>
+
+                <div class="destacado">
+                    Que ninguna persona firme algo que no entiende.
+                </div>
+
+                <h2>En la práctica, eso significa</h2>
+                <ul class="lista-chequeo" style="padding-left:0">
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Tasar con honestidad.</strong> El valor sale de operaciones cerradas comparables, no de lo que el propietario espera escuchar.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Explicar los costos completos.</strong> Honorarios, sellos, certificaciones y gastos de escrituración, por escrito y antes de firmar.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Revisar la documentación al inicio.</strong> Detectar el problema antes de publicar, no cuando el comprador ya puso la seña.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Cuidar las dos puntas.</strong> Un contrato que perjudica a una parte termina siendo un problema para todos.</span></li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Responder siempre.</strong> Incluso para decir que todavía no hay novedades.</span></li>
+                </ul>
+            </div>
+
+            <aside class="pegajoso revelar revelar-2">
+                <div class="ficha__panel" style="position:static">
+                    <h2 style="font-size:var(--t-lg);margin-bottom:0">¿Empezamos?</h2>
+                    <p class="texto-suave mb-0" style="font-size:.92rem">
+                        Contanos tu caso y te decimos con franqueza si podemos ayudarte
+                        y de qué manera.
+                    </p>
+                    <a class="btn btn--bloque" asp-page="/Contacto">
+                        Escribirnos
+                        <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                    </a>
+                    <a class="btn btn--fantasma btn--bloque" asp-page="/Vision">Leer nuestra visión</a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>

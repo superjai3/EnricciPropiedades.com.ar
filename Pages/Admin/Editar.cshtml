@@ -1,0 +1,293 @@
+@page "{id:int?}"
+@model Enricci_Propiedades.Pages.Admin.EditarModel
+@{
+    ViewData["Title"] = Model.EsAlta ? "Publicar una propiedad" : "Editar publicación";
+    // Dentro de @@section el Context no está en alcance: se toma acá.
+    var nonce = ViewContext.HttpContext.Nonce();
+}
+
+<div class="panel-cabecera">
+    <div>
+        <h1>@(Model.EsAlta ? "Publicar una propiedad" : "Editar publicación")</h1>
+        <p>
+            @if (Model.EsAlta)
+            {
+                <text>Los datos que cargues acá se ven en el sitio apenas guardás.</text>
+            }
+            else
+            {
+                <text>@Model.Datos.Direccion · @Model.Datos.Barrio</text>
+            }
+        </p>
+    </div>
+    <a class="btn btn--fantasma btn--sm" asp-page="/Admin/Index">← Volver al listado</a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Datos.Id" />
+
+    <div asp-validation-summary="ModelOnly" class="panel-aviso panel-aviso--error"></div>
+
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="panel-aviso panel-aviso--ok" role="status">@Model.Mensaje</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Advertencia))
+    {
+        <div class="panel-aviso panel-aviso--error" role="alert">@Model.Advertencia</div>
+    }
+
+    @if (Model.ErroresDeFotos.Count > 0)
+    {
+        <div class="panel-aviso panel-aviso--error" role="alert">
+            Algunas fotos no se pudieron cargar:
+            <ul>
+                @foreach (var error in Model.ErroresDeFotos)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="panel-tarjeta">
+        <h2>Publicación</h2>
+
+        <div class="panel-grilla panel-grilla--ancho">
+            <div class="campo">
+                <label asp-for="Datos.Titulo">Título</label>
+                <input class="control" asp-for="Datos.Titulo" placeholder="Piso alto con vista abierta sobre Av. Entre Ríos" />
+                <span class="error-campo" asp-validation-for="Datos.Titulo"></span>
+            </div>
+        </div>
+
+        <div class="panel-grilla" style="margin-top:1rem">
+            <div class="campo">
+                <label asp-for="Datos.Direccion">Dirección</label>
+                <input class="control" asp-for="Datos.Direccion" placeholder="Av. Entre Ríos 500" />
+                <span class="error-campo" asp-validation-for="Datos.Direccion"></span>
+            </div>
+
+            @* Lista cerrada y no texto libre: así se coló un «Río de Janeiro»,
+               que en la Ciudad es una avenida y no un barrio. La provincia se
+               deduce del barrio elegido, no se carga aparte. *@
+            <div class="campo">
+                <label asp-for="Datos.Barrio">Barrio o partido</label>
+                <select class="control" asp-for="Datos.Barrio">
+                    <option value="">Elegí uno…</option>
+
+                    @* Si la publicación traía un barrio que no está en la lista
+                       —pasa con las importadas— se ofrece igual, marcado, para
+                       no perderlo en silencio al abrir el formulario. *@
+                    @if (Model.Datos.BarrioFueraDeLista && !string.IsNullOrWhiteSpace(Model.Datos.Barrio))
+                    {
+                        <optgroup label="Fuera de la lista — conviene corregirlo">
+                            <option value="@Model.Datos.Barrio" selected>@Model.Datos.Barrio</option>
+                        </optgroup>
+                    }
+
+                    @foreach (var grupo in Enricci_Propiedades.Models.BarriosDeBuenosAires.PorGrupo)
+                    {
+                        <optgroup label="@grupo.Key">
+                            @foreach (var zona in grupo)
+                            {
+                                <option value="@zona.Nombre">@zona.Nombre</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+                <span class="error-campo" asp-validation-for="Datos.Barrio"></span>
+            </div>
+            <div class="campo">
+                <label asp-for="Datos.Operacion">Operación</label>
+                <select class="control" asp-for="Datos.Operacion" asp-items="Model.Operaciones"></select>
+            </div>
+
+            <div class="campo">
+                <label asp-for="Datos.Tipo">Tipo de propiedad</label>
+                <select class="control" asp-for="Datos.Tipo" asp-items="Model.Tipos"></select>
+            </div>
+
+            <div class="campo">
+                <label asp-for="Datos.Estado">Estado</label>
+                <select class="control" asp-for="Datos.Estado" asp-items="Model.Estados"></select>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-tarjeta">
+        <h2>Precio</h2>
+
+        <div class="panel-grilla">
+            <div class="campo">
+                <label asp-for="Datos.Moneda">Moneda</label>
+                <select class="control" asp-for="Datos.Moneda">
+                    <option value="USD">USD — dólares</option>
+                    <option value="ARS">ARS — pesos</option>
+                </select>
+                <p class="panel-ayuda">Venta en dólares, alquiler en pesos.</p>
+            </div>
+
+            <div class="campo">
+                <label asp-for="Datos.Precio">Precio</label>
+                <input class="control" asp-for="Datos.Precio" type="number" step="1" min="0" />
+                <p class="panel-ayuda">Dejalo en 0 para que diga «Consultar».</p>
+                <span class="error-campo" asp-validation-for="Datos.Precio"></span>
+            </div>
+
+            <div class="campo">
+                <label asp-for="Datos.Expensas">Expensas</label>
+                <input class="control" asp-for="Datos.Expensas" type="number" step="1" min="0" />
+                <p class="panel-ayuda">En pesos. 0 si no tiene.</p>
+                <span class="error-campo" asp-validation-for="Datos.Expensas"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-tarjeta">
+        <h2>Características</h2>
+
+        <div class="panel-grilla">
+            <div class="campo">
+                <label asp-for="Datos.Ambientes">Ambientes</label>
+                <input class="control" asp-for="Datos.Ambientes" type="number" min="0" max="40" />
+            </div>
+            <div class="campo">
+                <label asp-for="Datos.Dormitorios">Dormitorios</label>
+                <input class="control" asp-for="Datos.Dormitorios" type="number" min="0" max="40" />
+            </div>
+            <div class="campo">
+                <label asp-for="Datos.Banios">Baños</label>
+                <input class="control" asp-for="Datos.Banios" type="number" min="0" max="40" />
+            </div>
+            <div class="campo">
+                <label asp-for="Datos.SuperficieCubierta">Superficie cubierta (m²)</label>
+                <input class="control" asp-for="Datos.SuperficieCubierta" type="number" min="0" />
+            </div>
+            <div class="campo">
+                <label asp-for="Datos.SuperficieTotal">Superficie total (m²)</label>
+                <input class="control" asp-for="Datos.SuperficieTotal" type="number" min="0" />
+            </div>
+            <div class="campo">
+                <label asp-for="Datos.Antiguedad">Antigüedad (años)</label>
+                <input class="control" asp-for="Datos.Antiguedad" type="number" min="0" max="300" />
+            </div>
+        </div>
+
+        <div class="panel-casillas" style="margin-top:1.2rem">
+            <label class="panel-casilla">
+                <input asp-for="Datos.Cochera" /> Cochera
+            </label>
+            <label class="panel-casilla">
+                <input asp-for="Datos.Balcon" /> Balcón
+            </label>
+            <label class="panel-casilla">
+                <input asp-for="Datos.AptoCredito" /> Apto crédito
+            </label>
+            <label class="panel-casilla">
+                <input asp-for="Datos.Destacada" /> Mostrar en la portada
+            </label>
+        </div>
+    </div>
+
+    <div class="panel-tarjeta">
+        <h2>Texto de la publicación</h2>
+
+        <div class="campo">
+            <label asp-for="Datos.Descripcion">Descripción</label>
+            <textarea class="control" asp-for="Datos.Descripcion" rows="7"
+                      placeholder="Contá cómo es la propiedad: distribución, estado, luminosidad, el edificio y el barrio."></textarea>
+            <span class="error-campo" asp-validation-for="Datos.Descripcion"></span>
+        </div>
+
+        <div class="campo" style="margin-top:1.2rem">
+            <label asp-for="ComodidadesTexto">Comodidades</label>
+            <textarea class="control" asp-for="ComodidadesTexto" rows="6"
+                      placeholder="Balcón corrido&#10;Piso alto&#10;Luminoso&#10;Portero"></textarea>
+            <p class="panel-ayuda">Una por línea, o separadas por comas. Se muestran como etiquetas en la ficha.</p>
+        </div>
+    </div>
+
+    <div class="panel-tarjeta">
+        <h2>Fotos</h2>
+
+        @if (Model.EsAlta)
+        {
+            <p class="panel-ayuda" style="margin-bottom:1rem">
+                Podés subir las fotos ahora o cargarlas después de publicar.
+            </p>
+        }
+        else if (Model.Datos.Fotos.Count > 0)
+        {
+            <div class="panel-fotos" style="margin-bottom:1.2rem">
+                @for (var i = 0; i < Model.Datos.Fotos.Count; i++)
+                {
+                    var foto = Model.Datos.Fotos[i];
+                    <div class="panel-foto" data-foto>
+                        <img src="@foto" alt="Foto @(i + 1) de @Model.Datos.Direccion" loading="lazy" />
+                        @if (i == 0)
+                        {
+                            <span class="panel-foto__portada">Portada</span>
+                        }
+                        <button class="panel-foto__quitar" type="button" data-quitar-foto="@foto"
+                                aria-label="Quitar esta foto" title="Quitar esta foto">×</button>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="panel-ayuda" style="margin-bottom:1rem">
+                Esta publicación todavía no tiene fotos: el sitio le dibuja una portada ilustrada.
+            </p>
+        }
+
+        <div id="fotos-a-quitar"></div>
+
+        <div class="panel-soltar">
+            <strong>La primera foto es la que se usa como portada.</strong><br />
+            JPG, PNG o WEBP · hasta @FotosService.TamanioMaximoTexto cada una · máximo @FotosService.Maximo por propiedad.
+            <input type="file" name="Archivos" accept="image/jpeg,image/png,image/webp" multiple />
+            <p class="panel-ayuda" style="margin-top:.8rem">
+                Si sacás las fotos con un iPhone, puede que salgan en formato HEIC, que los navegadores
+                no muestran. Se arregla en <em>Ajustes → Cámara → Formatos → Más compatible</em>, o
+                convirtiéndolas a JPG antes de subirlas.
+            </p>
+        </div>
+    </div>
+
+    <div class="panel-pie-form">
+        <button class="btn" type="submit">
+            @(Model.EsAlta ? "Publicar" : "Guardar cambios")
+        </button>
+        <a class="btn btn--fantasma" asp-page="/Admin/Index">Cancelar</a>
+
+        @if (!Model.EsAlta)
+        {
+            <a class="panel-btn-icono panel-espaciador" asp-page="/Ficha" asp-route-id="@Model.Datos.Id"
+               target="_blank" rel="noopener">Ver en el sitio</a>
+        }
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+    <script nonce="@nonce">
+        // Quitar una foto: se saca de la vista y se manda su ruta al guardar.
+        document.addEventListener('click', function (ev) {
+            var boton = ev.target.closest('[data-quitar-foto]');
+            if (!boton) { return; }
+
+            var contenedor = document.getElementById('fotos-a-quitar');
+            var oculto = document.createElement('input');
+            oculto.type = 'hidden';
+            oculto.name = 'FotosAQuitar';
+            oculto.value = boton.getAttribute('data-quitar-foto');
+            contenedor.appendChild(oculto);
+
+            var tarjeta = boton.closest('[data-foto]');
+            if (tarjeta) { tarjeta.remove(); }
+        });
+    </script>
+}

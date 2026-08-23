@@ -1,8 +1,135 @@
-﻿@page
+@page
+@model AsesoriaLegalModel
 @{
-    ViewData["Title"] = "Asesoria Legal";
+    ViewData["Title"] = "Asesoría legal inmobiliaria";
+    ViewData["Descripcion"] = "Contratos, boletos de compraventa, sucesiones, regularización de títulos y desalojos, con estudio jurídico y escribanía de confianza en CABA.";
 }
-<h1>@ViewData["Title"]</h1>
-<br>
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti, enim illum rerum impedit officia porro magnam fuga est culpa dignissimos atque. Molestias voluptates vero necessitatibus! Culpa deserunt consequuntur magni hic. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Suscipit, ab. Reiciendis ipsa ullam beatae tempore, praesentium necessitatibus voluptate a possimus ea modi repudiandae quidem dolorem consequuntur quam id non exercitationem?Lorem ipsum dolor, sit amet consectetur adipisicing elit. Totam sequi odio soluta veritatis tenetur, unde ratione doloribus doloremque veniam sunt, possimus, est velit. Non temporibus perferendis est eos distinctio. Vitae</p>
 
+@section Head {
+    <script type="application/ld+json" nonce="@ViewContext.HttpContext.Nonce()">
+        @Html.Raw(Model.DatosEstructuradosJson)
+    </script>
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <a asp-page="/Servicios">Servicios</a> <span aria-hidden="true">/</span>
+            <span>Asesoría legal</span>
+        </nav>
+        <p class="eyebrow">Papeles en orden</p>
+        <h1>La operación se cae por los papeles,<br />casi nunca por el precio</h1>
+        <p class="plomo">
+            Un título con una observación, una sucesión sin terminar o un contrato mal redactado
+            pueden frenar una venta durante meses. Revisamos todo antes de publicar, no después
+            de que aparezca el comprador.
+        </p>
+        <div class="acciones mt-5">
+            <a class="btn btn--lg" asp-page="/Contacto">
+                Consultar mi caso
+                <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:1rem">
+    <div class="contenedor">
+        <div class="bento">
+            <div class="bento__celda bento__celda--ancha revelar">
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-documento" /></svg></div>
+                <h3>Contratos y boletos</h3>
+                <p class="texto-suave">
+                    Redacción y revisión de contratos de locación de vivienda y comercial,
+                    boletos de compraventa, reservas y cesiones. Cláusulas ajustadas a la
+                    normativa vigente y explicadas en castellano, no en jerga.
+                </p>
+            </div>
+            <div class="bento__celda bento__celda--ancha revelar revelar-1">
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-balanza" /></svg></div>
+                <h3>Sucesiones</h3>
+                <p class="texto-suave">
+                    Acompañamos a las familias que heredaron una propiedad: qué hace falta para
+                    poder venderla, en qué orden, cuánto demora cada instancia y cómo se reparte
+                    el producido entre los herederos.
+                </p>
+            </div>
+            <div class="bento__celda bento__celda--ancha revelar revelar-2">
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-escudo" /></svg></div>
+                <h3>Regularización de títulos</h3>
+                <p class="texto-suave">
+                    Planos sin registrar, ampliaciones no declaradas, hipotecas canceladas pero
+                    no levantadas, usucapión. Ordenamos el expediente y estimamos plazos.
+                </p>
+            </div>
+            <div class="bento__celda bento__celda--ancha revelar revelar-3">
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-llave" /></svg></div>
+                <h3>Desalojos y conflictos</h3>
+                <p class="texto-suave">
+                    Intimaciones, acuerdos de desocupación y, cuando no hay otro camino,
+                    la vía judicial con el estudio jurídico que nos acompaña.
+                </p>
+            </div>
+            <div class="bento__celda bento__celda--destacada bento__celda--full revelar revelar-4">
+                <div class="icono-caja"><svg aria-hidden="true"><use href="#i-check" /></svg></div>
+                <h3>Escrituración</h3>
+                <p class="texto-suave">
+                    Coordinamos con la escribanía interviniente: informes de dominio e
+                    inhibición, certificados, cálculo de sellos y gastos, y acompañamiento
+                    el día de la firma.
+                </p>
+                <a class="enlace-flecha" asp-page="/Contacto">
+                    Hablar con nosotros
+                    <svg aria-hidden="true"><use href="#i-flecha" /></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion seccion--inversa">
+    <div class="contenedor">
+        <div class="dos-columnas">
+            <div class="revelar">
+                <p class="eyebrow">Antes de publicar</p>
+                <h2 class="titulo-seccion">La lista que revisamos <em>siempre</em></h2>
+                <p class="texto-suave">
+                    Antes de sacar una propiedad al mercado pedimos y verificamos esta
+                    documentación. Es la forma más simple de evitar sorpresas cuando aparece
+                    el comprador con el dinero listo.
+                </p>
+            </div>
+            <div class="revelar revelar-2">
+                <ul class="lista-chequeo">
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Título de propiedad y antecedentes de dominio</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Reglamento de copropiedad y plano de la unidad</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Libre deuda de expensas, ABL y aguas</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Situación de hipotecas, embargos e inhibiciones</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Declaratoria de herederos, si corresponde</li>
+                    <li><svg aria-hidden="true"><use href="#i-check" /></svg>Identidad y estado civil de los titulares</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seccion--compacta">
+    <div class="contenedor">
+        <div class="franja-cta revelar">
+            <p class="eyebrow">Primera consulta orientativa</p>
+            <h2>Contanos qué te trabó la operación</h2>
+            <p class="plomo" style="color:inherit;opacity:.8">
+                Te decimos si es un trámite simple, cuánto suele demorar y qué profesional
+                necesitás. Si no es nuestro terreno, te derivamos.
+            </p>
+            <div class="acciones mt-5">
+                <a class="btn btn--claro btn--lg" asp-page="/Contacto">Consultar</a>
+                <a class="btn btn--wsp btn--lg" href="@SitioInfo.Whatsapp("Hola, tengo una consulta legal sobre una propiedad.")" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                    WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

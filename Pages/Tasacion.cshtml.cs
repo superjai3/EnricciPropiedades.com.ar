@@ -95,12 +95,13 @@ public class TasacionModel : PageModel
     public string MensajeWhatsapp { get; private set; } = SitioInfo.Whatsapp("Hola, quisiera pedir una tasación.");
 
     /// <summary>
-    /// Los barrios donde la inmobiliaria trabaja, más una salida para el resto.
+    /// Los barrios donde la inmobiliaria trabaja —los 48 de la Ciudad—, más una
+    /// salida para lo que quede fuera: el Gran Buenos Aires, o un campo.
     /// Sale de SitioInfo y no de una lista propia: es el mismo dato que se les
     /// declara a los buscadores, y repetido se desincroniza.
     /// </summary>
     public static readonly string[] Barrios =
-        SitioInfo.BarriosQueAtiende.Append("Otro barrio de CABA").ToArray();
+        SitioInfo.BarriosQueAtiende.Append("Otra zona").ToArray();
 
     public static readonly string[] Tipos =
     {

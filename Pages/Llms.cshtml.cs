@@ -68,7 +68,9 @@ public class LlmsModel : PageModel
         texto.AppendLine($"- **WhatsApp**: +{SitioInfo.WhatsappNumero}");
         texto.AppendLine($"- **Correo**: {SitioInfo.Email}");
         texto.AppendLine($"- **Horario**: {SitioInfo.Horario}");
-        texto.AppendLine($"- **Barrios donde opera**: {string.Join(", ", SitioInfo.BarriosQueAtiende)}");
+        texto.AppendLine(
+            "- **Barrios donde opera**: todos los de la Ciudad Autónoma de Buenos Aires — " +
+            string.Join(", ", SitioInfo.BarriosQueAtiende));
         texto.AppendLine($"- **Idioma**: español (es-AR)");
         texto.AppendLine();
 

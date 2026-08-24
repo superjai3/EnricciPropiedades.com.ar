@@ -57,21 +57,16 @@ public static class SitioInfo
     public const string Matricula = $"{Titular} · Corredor inmobiliario · CUCICBA {MatriculaNumero}";
 
     /// <summary>
-    /// Barrios donde la inmobiliaria trabaja. Es el área que se declara en los
-    /// datos estructurados y la lista que ofrece el formulario de tasación: una
-    /// sola fuente para las dos cosas, que antes estaban repetidas.
+    /// Barrios donde la inmobiliaria trabaja: los 48 de la Ciudad. Es el área
+    /// que se declara en los datos estructurados y la lista que ofrece el
+    /// formulario de tasación: una sola fuente para las dos cosas, que antes
+    /// estaban repetidas.
+    ///
+    /// Sale de BarriosDeBuenosAires y no de una lista propia para que no haya
+    /// dos listas de barrios que puedan discrepar.
     /// </summary>
     public static readonly string[] BarriosQueAtiende =
-    {
-        "Monserrat",
-        "Constitución",
-        "San Cristóbal",
-        "San Telmo",
-        "Balvanera",
-        "Boedo",
-        "Almagro",
-        "Parque Patricios"
-    };
+        BarriosDeBuenosAires.Oficiales.ToArray();
 
     /// <summary>Dirección con la unidad, para la página de contacto y el pie.</summary>
     public const string DireccionCompleta = $"{Direccion}, {Unidad}";

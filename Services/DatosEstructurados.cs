@@ -29,14 +29,14 @@ public static class DatosEstructurados
     /// este sitio. Se emite como @graph —dos entidades enlazadas— en vez de dos
     /// bloques sueltos.
     /// </summary>
-    public static string Grafo(string urlBase, string descripcion)
+    public static string Grafo(string urlBase, string descripcion, bool hayRetrato = false)
     {
         var grafo = new Dictionary<string, object?>
         {
             ["@context"] = "https://schema.org",
             ["@graph"] = new object[]
             {
-                Inmobiliaria(urlBase, descripcion),
+                Inmobiliaria(urlBase, descripcion, hayRetrato),
                 Sitio(urlBase, descripcion)
             }
         };
@@ -44,7 +44,7 @@ public static class DatosEstructurados
         return Serializar(grafo);
     }
 
-    private static Dictionary<string, object?> Inmobiliaria(string urlBase, string descripcion)
+    private static Dictionary<string, object?> Inmobiliaria(string urlBase, string descripcion, bool hayRetrato)
     {
         var entidad = new Dictionary<string, object?>
         {
@@ -64,11 +64,12 @@ public static class DatosEstructurados
 
             // El titular es quien tiene la matrícula: en una inmobiliaria eso no
             // es un dato de color, es lo que la habilita a operar.
-            ["founder"] = new Dictionary<string, object?>
-            {
-                ["@type"] = "Person",
-                ["name"] = SitioInfo.Titular
-            },
+            ["founder"] = Titular(urlBase, hayRetrato),
+
+            // Declarado además como empleado: "founder" dice quién la fundó,
+            // "employee" dice quién atiende hoy, y es lo segundo lo que le
+            // sirve a alguien que está por escribir.
+            ["employee"] = Titular(urlBase, hayRetrato),
             ["hasCredential"] = new Dictionary<string, object?>
             {
                 ["@type"] = "EducationalOccupationalCredential",
@@ -142,6 +143,36 @@ public static class DatosEstructurados
         return entidad;
     }
 
+    /// <summary>
+    /// El titular, como persona. Se declara con foto cuando la hay: para un
+    /// buscador —y para un asistente que resume el sitio— no es lo mismo una
+    /// empresa anónima que una con un profesional matriculado con nombre,
+    /// cargo y cara.
+    /// </summary>
+    private static Dictionary<string, object?> Titular(string urlBase, bool hayRetrato)
+    {
+        var persona = new Dictionary<string, object?>
+        {
+            ["@type"] = "Person",
+            ["name"] = SitioInfo.Titular,
+            ["jobTitle"] = "Corredor inmobiliario",
+            ["worksFor"] = new Dictionary<string, object?>
+            {
+                ["@id"] = IdInmobiliaria(urlBase)
+            }
+        };
+
+        if (hayRetrato)
+        {
+            persona["image"] = urlBase + RutaRetrato;
+        }
+
+        return persona;
+    }
+
+    /// <summary>Dónde vive la foto del titular. Tiene que coincidir con RetratoTitular.</summary>
+    private const string RutaRetrato = "/imagenes/horacio.jpg";
+
     private static Dictionary<string, object?> Sitio(string urlBase, string descripcion) => new()
     {
         ["@type"] = "WebSite",
@@ -153,6 +184,23 @@ public static class DatosEstructurados
         ["publisher"] = new Dictionary<string, object?>
         {
             ["@id"] = IdInmobiliaria(urlBase)
+        },
+
+        // El buscador del sitio, declarado para que Google pueda ofrecer una
+        // caja de búsqueda propia en el resultado. Se declara recién ahora
+        // porque hasta que existió la búsqueda por texto habría sido anunciar
+        // algo que no funcionaba, que es peor que no anunciar nada.
+        ["potentialAction"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "SearchAction",
+            ["target"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "EntryPoint",
+                ["urlTemplate"] = urlBase + "/Propiedades?texto={search_term_string}"
+            },
+            // schema.org lo pide como un texto suelto y no como un arreglo:
+            // nombra el hueco de la plantilla de arriba.
+            ["query-input"] = "required name=search_term_string"
         }
     };
 

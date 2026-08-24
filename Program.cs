@@ -62,6 +62,9 @@ builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ConsultasService>();
 builder.Services.AddSingleton<FotosService>();
 
+// La foto del titular: se mira una sola vez si el archivo está.
+builder.Services.AddSingleton<RetratoTitular>();
+
 // Freno de envíos de los formularios públicos. Singleton porque la cuenta por
 // IP tiene que sobrevivir a los pedidos, no morir con cada uno.
 builder.Services.AddSingleton<LimiteEnvios>();

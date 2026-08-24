@@ -1,0 +1,23 @@
+@inject Enricci_Propiedades.Services.RetratoTitular Retrato
+@*
+    Quién atiende, en chico. Va donde alguien está por decidir si escribe o no:
+    saber que del otro lado hay una persona con nombre y cara, y no una casilla
+    genérica, es la diferencia entre consultar y cerrar la pestaña.
+*@
+<div class="firma">
+    <span class="firma__foto">
+        @if (Retrato.Hay)
+        {
+            <img src="@Retrato.Url" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
+                 width="46" height="46" loading="lazy" decoding="async" />
+        }
+        else
+        {
+            @Enricci_Propiedades.Services.RetratoTitular.Iniciales
+        }
+    </span>
+    <span class="firma__texto">
+        <strong>@SitioInfo.Titular</strong><br />
+        <span class="texto-suave">Corredor inmobiliario · CUCICBA @SitioInfo.MatriculaNumero</span>
+    </span>
+</div>

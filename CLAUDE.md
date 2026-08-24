@@ -40,5 +40,9 @@ va a ser `enricci-propiedades.com.ar`, todavía sin comprar.
 
 No publicar números ni afirmaciones que no vengan de la inmobiliaria. Quedan
 pendientes de confirmación: los porcentajes de la calculadora de gastos de
-escrituración (por eso nace apagada), los tres testimonios de la portada (son
-inventados) y las cifras institucionales de "Quiénes somos".
+escrituración (por eso nace apagada) y las cifras institucionales de "Quiénes
+somos" —el año 1932, los hitos de la línea de tiempo y el contador de 1.400
+operaciones—.
+
+Los tres testimonios inventados de la portada ya se sacaron: en su lugar va
+Horacio, con su foto y su matrícula, que es información verificable.

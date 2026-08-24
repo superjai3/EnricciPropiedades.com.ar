@@ -1,5 +1,6 @@
 @page
 @model IndexModel
+@inject Enricci_Propiedades.Services.RetratoTitular Retrato
 @{
     ViewData["Title"] = null;
     ViewData["Descripcion"] = "R. H. Enricci Propiedades: inmobiliaria en Monserrat, CABA, desde 1932. Venta y alquiler de departamentos, casas, PH, locales y cocheras. Tasaciones sin cargo, administración de alquileres y asesoría legal.";
@@ -356,46 +357,55 @@
 
 <section class="seccion">
     <div class="contenedor">
-        <div class="cabecera-seccion revelar">
+        @* Acá había tres testimonios inventados. Una persona real, con nombre,
+           cara y matrícula verificable, dice más que tres reseñas que nadie
+           firmó, y no obliga a inventar nada. *@
+        <div class="titular revelar">
+            <figure class="titular__retrato">
+                @if (Retrato.Hay)
+                {
+                    <img src="@Retrato.Url" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
+                         width="640" height="440" loading="lazy" decoding="async" />
+                }
+                else
+                {
+                    <span class="titular__iniciales" aria-hidden="true">@Enricci_Propiedades.Services.RetratoTitular.Iniciales</span>
+                }
+            </figure>
+
             <div>
-                <p class="eyebrow">Clientes</p>
-                <h2 class="titulo-seccion">Lo que dicen quienes ya <em>firmaron</em></h2>
+                <p class="eyebrow">Quién te atiende</p>
+                <h2 class="titulo-seccion">Te atiende <em>Horacio</em>, no un formulario</h2>
+                <p class="plomo">
+                    @SitioInfo.Titular es corredor inmobiliario matriculado en CUCICBA con el
+                    número @SitioInfo.MatriculaNumero. Atiende en la oficina de
+                    @SitioInfo.Direccion, en @SitioInfo.BarrioOficina. @SitioInfo.Horario.
+                </p>
+                <ul class="lista-chequeo" style="padding-left:0">
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        Matrícula CUCICBA @SitioInfo.MatriculaNumero, verificable en el colegio
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        Oficina a la calle en @SitioInfo.BarrioOficina, con turno previo
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        Trabaja @SitioInfo.BarriosQueAtiende.Length barrios del sur de la Ciudad
+                    </li>
+                </ul>
+                <div class="acciones mt-5">
+                    <a class="btn btn--wsp" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                        <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                        Escribirle por WhatsApp
+                    </a>
+                    <a class="btn btn--fantasma" href="@SitioInfo.TelefonoLink">
+                        <svg aria-hidden="true"><use href="#i-telefono" /></svg>
+                        @SitioInfo.Telefono
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="testimonios revelar">
-            <figure class="testimonio">
-                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
-                <blockquote>
-                    “Vendimos el departamento de mi mamá después de la sucesión. Nos explicaron cada
-                    paso, consiguieron comprador en dos meses y no tuvimos que ocuparnos de nada.”
-                </blockquote>
-                <figcaption>
-                    <span class="avatar">MG</span>
-                    <span><strong>Marcela G.</strong><br /><span class="texto-suave">Venta en Monserrat</span></span>
-                </figcaption>
-            </figure>
-            <figure class="testimonio">
-                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
-                <blockquote>
-                    “Alquilo mi local por Enricci hace once años. Nunca tuve un mes sin cobrar
-                    y siempre me avisaron antes de cada actualización.”
-                </blockquote>
-                <figcaption>
-                    <span class="avatar">RD</span>
-                    <span><strong>Rubén D.</strong><br /><span class="texto-suave">Administración en San Cristóbal</span></span>
-                </figcaption>
-            </figure>
-            <figure class="testimonio">
-                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
-                <blockquote>
-                    “Era mi primera compra y estaba perdida. Me acompañaron hasta la escritura
-                    y me señalaron cosas del edificio que yo no había visto.”
-                </blockquote>
-                <figcaption>
-                    <span class="avatar">FL</span>
-                    <span><strong>Florencia L.</strong><br /><span class="texto-suave">Compra en Constitución</span></span>
-                </figcaption>
-            </figure>
         </div>
     </div>
 </section>

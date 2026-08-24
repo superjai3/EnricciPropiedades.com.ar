@@ -1541,6 +1541,68 @@ select.control {
     display: grid;
     gap: var(--sp-4);
 }
+/* Quién atiende: la foto del titular junto a lo que lo respalda. La foto va
+   primero en el HTML porque es lo que ancla la sección, pero en pantallas
+   angostas se apila arriba y el texto queda debajo, que es el orden de lectura. */
+.titular {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+}
+@media (max-width: 860px) { .titular { grid-template-columns: 1fr; } }
+
+.titular__retrato {
+    margin: 0;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--hueso-2);
+    box-shadow: var(--sombra-md);
+    /* La proporción se fija acá y no en la imagen: así el hueco ya está
+       reservado antes de que la foto cargue y la página no da un salto. */
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.titular__retrato img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Respaldo para cuando todavía no se cargó la foto. */
+.titular__iniciales {
+    font-family: var(--f-display);
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 800;
+    color: var(--texto-suave);
+    opacity: .45;
+    letter-spacing: -.03em;
+}
+
+/* La misma persona, en chico, donde hace falta ponerle cara a "te atiende X". */
+.firma { display: flex; align-items: center; gap: var(--sp-3); }
+.firma__foto {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--hueso-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: .85rem;
+    color: var(--texto-suave);
+}
+.firma__foto img {
+    width: 100%;
+    height: 100%;
+    /* El encuadre sube: en un retrato, recortar por el centro corta la cara. */
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+}
+.firma__texto { font-size: .88rem; line-height: 1.35; }
+
 /* Calculadora de gastos de escrituración: el formulario y la lista de conceptos.
    Se arma con filas de grilla y no con una tabla porque en el teléfono una
    tabla de tres columnas obliga a desplazar a lo ancho. */

@@ -66,6 +66,7 @@ Services/
   RespaldoProgramado.cs Dispara el respaldo una vez por día
   RutaBaseDeDatos.cs    Resuelve dónde está el archivo .db
   CorreoService.cs      Envío por SMTP, a la oficina o a un visitante
+  RetratoTitular.cs     Mira una sola vez si está la foto del titular
   CotizacionService.cs  Dólar del Banco Nación, refrescado en segundo plano
   LimiteEnvios.cs       Freno por IP de los formularios públicos
 Pages/
@@ -436,6 +437,31 @@ El cálculo lo hace el servidor y el navegador sólo lo rehace mientras se
 escribe: **sin JavaScript el botón envía el formulario** y la página vuelve con
 la cuenta hecha.
 
+## Quién atiende
+
+El sitio pone a **Raúl Horacio Enricci** a la vista: en la portada, en *Quiénes
+somos*, en el panel de cada ficha y al lado del formulario de contacto. La idea
+es simple: saber que del otro lado hay una persona con nombre, cara y matrícula
+verificable, y no una casilla genérica, es la diferencia entre consultar y
+cerrar la pestaña. Esa sección de la portada reemplazó a tres testimonios
+inventados.
+
+La foto va en `wwwroot/imagenes/horacio.jpg` y **sí se versiona**, a diferencia
+de las fotos del catálogo. Esas las carga Horacio desde el panel y viven en el
+servidor; ésta es parte del sitio, como el logo, y versionarla hace que viaje
+sola en cada despliegue en lugar de depender de que alguien se acuerde de
+subirla por separado.
+
+`Services/RetratoTitular.cs` mira **una sola vez, al arrancar**, si el archivo
+está. Si no está, las páginas muestran las iniciales en lugar de un ícono roto y
+los datos estructurados omiten el `image`. Preguntarle al disco en cada visita
+sería pagar una consulta de sistema de archivos por página, y el archivo no
+cambia durante la vida del proceso.
+
+En los datos estructurados se declara como `founder` **y** como `employee`: lo
+primero dice quién fundó la inmobiliaria, lo segundo quién atiende hoy, y es lo
+segundo lo que le sirve a alguien que está por escribir.
+
 ## Buscar, guardar y compartir
 
 - **Búsqueda por texto** en la portada y en el listado, además de los filtros.
@@ -697,9 +723,6 @@ un único archivo: `Models/SitioInfo.cs`.
 Estas cosas están escritas en el sitio pero **no vienen de la inmobiliaria**. No
 deberían quedar publicadas así: o las confirma Horacio, o se sacan.
 
-- **Los tres testimonios de la portada** (`Pages/Index.cshtml`) son inventados:
-  se escribieron como relleno de diseño. Son reseñas falsas con nombre y
-  apellido de personas que no existen.
 - **Las cifras institucionales**: "desde 1932", los hitos de 1958, 1984 y 2006 de
   `Quienes_Somos.cshtml` y el contador de 1.400 operaciones de la portada.
 - **Los porcentajes de la calculadora de escrituración**. Por eso nace apagada.

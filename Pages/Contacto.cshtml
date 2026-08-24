@@ -133,6 +133,10 @@
             </div>
 
             <aside class="ficha__panel">
+                @* Antes del formulario conviene que se vea con quién se está
+                   hablando: una casilla sin cara recibe menos consultas. *@
+                <partial name="_Firma" />
+
                 <h2 style="font-size:var(--t-lg);margin-bottom:0">Oficina</h2>
                 <p class="texto-suave mb-0" style="font-size:.92rem">
                     @SitioInfo.DireccionCompleta<br />

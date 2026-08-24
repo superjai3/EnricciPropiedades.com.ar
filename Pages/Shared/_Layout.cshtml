@@ -1,3 +1,4 @@
+@inject Enricci_Propiedades.Services.RetratoTitular Retrato
 @inject Microsoft.Extensions.Options.IOptions<OpcionesSitio> OpcionesDelSitio
 @{
     var paginaActual = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
@@ -86,7 +87,7 @@
        schema.org. Se arma en Services/DatosEstructurados.cs a partir de
        SitioInfo, así lo que se declara y lo que se muestra salen del mismo dato. *@
     <script type="application/ld+json" nonce="@Context.Nonce()">
-        @Html.Raw(Enricci_Propiedades.Services.DatosEstructurados.Grafo(urlBase, descripcion))
+        @Html.Raw(Enricci_Propiedades.Services.DatosEstructurados.Grafo(urlBase, descripcion, Retrato.Hay))
     </script>
     @await RenderSectionAsync("Head", required: false)
 </head>

@@ -8,7 +8,8 @@
     <span class="firma__foto">
         @if (Retrato.Hay)
         {
-            <img src="@Retrato.Url" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
+            @* La chica, no la grande: acá se ve del tamaño de una moneda. *@
+            <img src="@Retrato.UrlChica" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
                  width="46" height="46" loading="lazy" decoding="async" />
         }
         else

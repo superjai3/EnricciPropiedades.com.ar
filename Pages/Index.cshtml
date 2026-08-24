@@ -133,15 +133,19 @@
     </div>
 </section>
 
+@* La Ciudad entera. Las dos pistas llevan lo mismo a propósito: la animación
+   corre la primera hasta que termina y la segunda entra justo detrás, y así el
+   desplazamiento no tiene costura ni salto al volver a empezar. *@
 <div class="marquesina" aria-hidden="true">
-    <div class="marquesina__pista">
-        <span>Monserrat</span><span>Constitución</span><span>San Cristóbal</span><span>San Telmo</span>
-        <span>Balvanera</span><span>Boedo</span><span>Almagro</span><span>Parque Patricios</span>
-    </div>
-    <div class="marquesina__pista">
-        <span>Monserrat</span><span>Constitución</span><span>San Cristóbal</span><span>San Telmo</span>
-        <span>Balvanera</span><span>Boedo</span><span>Almagro</span><span>Parque Patricios</span>
-    </div>
+    @for (var pista = 0; pista < 2; pista++)
+    {
+        <div class="marquesina__pista">
+            @foreach (var barrio in BarriosDeBuenosAires.Oficiales)
+            {
+                <span>@barrio</span>
+            }
+        </div>
+    }
 </div>
 
 <section class="seccion">
@@ -365,7 +369,7 @@
                 @if (Retrato.Hay)
                 {
                     <img src="@Retrato.Url" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
-                         width="640" height="440" loading="lazy" decoding="async" />
+                         width="1000" height="690" loading="lazy" decoding="async" />
                 }
                 else
                 {

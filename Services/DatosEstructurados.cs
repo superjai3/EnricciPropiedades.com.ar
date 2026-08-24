@@ -170,8 +170,8 @@ public static class DatosEstructurados
         return persona;
     }
 
-    /// <summary>Dónde vive la foto del titular. Tiene que coincidir con RetratoTitular.</summary>
-    private const string RutaRetrato = "/imagenes/horacio.jpg";
+    /// <summary>Dónde vive la foto del titular. Una sola fuente: RetratoTitular.</summary>
+    private const string RutaRetrato = RetratoTitular.RutaGrande;
 
     private static Dictionary<string, object?> Sitio(string urlBase, string descripcion) => new()
     {

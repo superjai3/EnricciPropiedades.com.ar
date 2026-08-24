@@ -77,6 +77,12 @@ public static class BarriosDeBuenosAires
     };
 
     /// <summary>Todas las zonas donde se puede publicar, en el orden en que se ofrecen.</summary>
+    /// <summary>
+    /// Los 48 barrios oficiales, sólo los nombres y en orden alfabético. Lo usa
+    /// la cinta de la portada, que muestra la Ciudad entera.
+    /// </summary>
+    public static IReadOnlyList<string> Oficiales => BarriosOficiales;
+
     public static readonly IReadOnlyList<Zona> Todas =
         BarriosOficiales.Select(n => new Zona(n, Jurisdiccion.Ciudad, GrupoCiudad))
             .Concat(ZonasDeUsoCorriente.Select(n => new Zona(n, Jurisdiccion.Ciudad, GrupoZonas)))

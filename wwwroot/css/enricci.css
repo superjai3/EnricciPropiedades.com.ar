@@ -1014,7 +1014,10 @@ select.control {
     gap: 2rem;
     flex: 0 0 auto;
     min-width: 100%;
-    animation: desplazar 38s linear infinite;
+    /* La duración va con la cantidad de barrios: la animación recorre el ancho
+       de la pista, así que con los 48 de la Ciudad una duración pensada para
+       ocho haría pasar los nombres en una borrosidad ilegible. */
+    animation: desplazar 220s linear infinite;
 }
 .marquesina:hover .marquesina__pista { animation-play-state: paused; }
 @keyframes desplazar { to { transform: translateX(calc(-100% - 2rem)); } }

@@ -1555,7 +1555,57 @@ select.control {
 }
 @media (max-width: 860px) { .titular { grid-template-columns: 1fr; } }
 
+/* La versión grande: la foto pesa lo mismo que el texto y el título sube de
+   tamaño. Es la sección que distingue a esta inmobiliaria de un portal. */
+.titular--grande { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 860px) { .titular--grande { grid-template-columns: 1fr; } }
+.titular--grande .titulo-seccion { font-size: var(--t-4xl); }
+.titular--grande .plomo { max-width: 46ch; }
+
+/* Sobre el fondo invertido, el hueco de la foto tiene que ser un tono del
+   propio fondo y no el color claro de siempre, que quedaría como un rectángulo
+   crema pegado en el medio de la banda oscura. */
+.seccion--inversa .titular__retrato {
+    background: color-mix(in srgb, var(--sobre-inverso) 10%, transparent);
+}
+.seccion--inversa .titular__iniciales { color: var(--sobre-inverso); }
+
+/* La chapa de la matrícula, apoyada sobre la foto. La matrícula es lo que
+   habilita a operar: mostrarla junto a la cara es la prueba, no un adorno. */
+.titular__chapa {
+    position: absolute;
+    left: clamp(.75rem, 2vw, 1.25rem);
+    bottom: clamp(.75rem, 2vw, 1.25rem);
+    right: clamp(.75rem, 2vw, 1.25rem);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-md);
+    /* Vidrio esmerilado: deja ver la foto detrás sin que el texto se pierda
+       sobre una zona clara. El color de respaldo va primero por si el navegador
+       no soporta el desenfoque. */
+    background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid color-mix(in srgb, var(--texto) 10%, transparent);
+    box-shadow: var(--sombra-sm);
+    color: var(--texto);
+    font-size: .82rem;
+    line-height: 1.3;
+}
+.titular__chapa svg { width: 22px; height: 22px; flex: 0 0 22px; color: var(--rojo); }
+.titular__chapa strong { display: block; }
+/* La chapa tiene fondo claro aunque la sección sea oscura, así que el gris
+   suave de la banda invertida —pensado para texto claro— la dejaba ilegible.
+   Se recalcula sobre el color de texto normal, que es el que usa la chapa. */
+.titular__chapa .texto-suave {
+    font-size: .76rem;
+    color: color-mix(in srgb, var(--texto) 62%, transparent);
+}
+
 .titular__retrato {
+    position: relative;
     margin: 0;
     border-radius: var(--r-lg);
     overflow: hidden;

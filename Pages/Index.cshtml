@@ -178,6 +178,72 @@
     </div>
 </section>
 
+<section class="seccion seccion--inversa">
+    <div class="contenedor">
+        @* Acá había tres testimonios inventados. Una persona real, con nombre,
+           cara y matrícula verificable, dice más que tres reseñas que nadie
+           firmó, y no obliga a inventar nada.
+
+           Va sobre fondo invertido y arriba en la página a propósito: es lo que
+           distingue a esta inmobiliaria de un portal, y al final de todo no lo
+           veía nadie. *@
+        <div class="titular titular--grande revelar">
+            <figure class="titular__retrato">
+                @if (Retrato.Hay)
+                {
+                    <img src="@Retrato.Url" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
+                         width="1000" height="690" loading="lazy" decoding="async" />
+                }
+                else
+                {
+                    <span class="titular__iniciales" aria-hidden="true">@Enricci_Propiedades.Services.RetratoTitular.Iniciales</span>
+                }
+                <figcaption class="titular__chapa">
+                    <svg aria-hidden="true"><use href="#i-escudo" /></svg>
+                    <span>
+                        <strong>Matrícula CUCICBA @SitioInfo.MatriculaNumero</strong>
+                        <span class="texto-suave">Corredor inmobiliario</span>
+                    </span>
+                </figcaption>
+            </figure>
+
+            <div>
+                <p class="eyebrow">Quién te atiende</p>
+                <h2 class="titulo-seccion">Te atiende <em>Horacio</em>,<br />no un formulario</h2>
+                <p class="plomo">
+                    @SitioInfo.Titular es corredor inmobiliario matriculado en CUCICBA con el
+                    número @SitioInfo.MatriculaNumero. Atiende en la oficina de
+                    @SitioInfo.Direccion, en @SitioInfo.BarrioOficina. @SitioInfo.Horario.
+                </p>
+                <ul class="lista-chequeo" style="padding-left:0">
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        Matrícula CUCICBA @SitioInfo.MatriculaNumero, verificable en el colegio
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        Oficina a la calle en @SitioInfo.BarrioOficina, con turno previo
+                    </li>
+                    <li>
+                        <svg aria-hidden="true"><use href="#i-check" /></svg>
+                        Trabaja en todos los barrios de la Ciudad de Buenos Aires
+                    </li>
+                </ul>
+                <div class="acciones mt-5">
+                    <a class="btn btn--wsp btn--lg" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
+                        <svg aria-hidden="true"><use href="#i-wsp" /></svg>
+                        Escribirle por WhatsApp
+                    </a>
+                    <a class="btn btn--fantasma btn--lg" href="@SitioInfo.TelefonoLink">
+                        <svg aria-hidden="true"><use href="#i-telefono" /></svg>
+                        @SitioInfo.Telefono
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="seccion seccion--tono" id="servicios">
     <div class="contenedor">
         <div class="cabecera-seccion revelar">
@@ -360,60 +426,6 @@
     </div>
 </section>
 
-<section class="seccion">
-    <div class="contenedor">
-        @* Acá había tres testimonios inventados. Una persona real, con nombre,
-           cara y matrícula verificable, dice más que tres reseñas que nadie
-           firmó, y no obliga a inventar nada. *@
-        <div class="titular revelar">
-            <figure class="titular__retrato">
-                @if (Retrato.Hay)
-                {
-                    <img src="@Retrato.Url" alt="@Enricci_Propiedades.Services.RetratoTitular.Alt"
-                         width="1000" height="690" loading="lazy" decoding="async" />
-                }
-                else
-                {
-                    <span class="titular__iniciales" aria-hidden="true">@Enricci_Propiedades.Services.RetratoTitular.Iniciales</span>
-                }
-            </figure>
-
-            <div>
-                <p class="eyebrow">Quién te atiende</p>
-                <h2 class="titulo-seccion">Te atiende <em>Horacio</em>, no un formulario</h2>
-                <p class="plomo">
-                    @SitioInfo.Titular es corredor inmobiliario matriculado en CUCICBA con el
-                    número @SitioInfo.MatriculaNumero. Atiende en la oficina de
-                    @SitioInfo.Direccion, en @SitioInfo.BarrioOficina. @SitioInfo.Horario.
-                </p>
-                <ul class="lista-chequeo" style="padding-left:0">
-                    <li>
-                        <svg aria-hidden="true"><use href="#i-check" /></svg>
-                        Matrícula CUCICBA @SitioInfo.MatriculaNumero, verificable en el colegio
-                    </li>
-                    <li>
-                        <svg aria-hidden="true"><use href="#i-check" /></svg>
-                        Oficina a la calle en @SitioInfo.BarrioOficina, con turno previo
-                    </li>
-                    <li>
-                        <svg aria-hidden="true"><use href="#i-check" /></svg>
-                        Trabaja en todos los barrios de la Ciudad de Buenos Aires
-                    </li>
-                </ul>
-                <div class="acciones mt-5">
-                    <a class="btn btn--wsp" href="@SitioInfo.WhatsappGeneral" target="_blank" rel="noopener">
-                        <svg aria-hidden="true"><use href="#i-wsp" /></svg>
-                        Escribirle por WhatsApp
-                    </a>
-                    <a class="btn btn--fantasma" href="@SitioInfo.TelefonoLink">
-                        <svg aria-hidden="true"><use href="#i-telefono" /></svg>
-                        @SitioInfo.Telefono
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
 <section class="seccion--compacta">
     <div class="contenedor">

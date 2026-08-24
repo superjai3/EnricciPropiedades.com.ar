@@ -153,6 +153,23 @@ public static class DatosEstructurados
         ["publisher"] = new Dictionary<string, object?>
         {
             ["@id"] = IdInmobiliaria(urlBase)
+        },
+
+        // El buscador del sitio, declarado para que Google pueda ofrecer una
+        // caja de búsqueda propia en el resultado. Se declara recién ahora
+        // porque hasta que existió la búsqueda por texto habría sido anunciar
+        // algo que no funcionaba, que es peor que no anunciar nada.
+        ["potentialAction"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "SearchAction",
+            ["target"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "EntryPoint",
+                ["urlTemplate"] = urlBase + "/Propiedades?texto={search_term_string}"
+            },
+            // schema.org lo pide como un texto suelto y no como un arreglo:
+            // nombra el hueco de la plantilla de arriba.
+            ["query-input"] = "required name=search_term_string"
         }
     };
 

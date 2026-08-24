@@ -12,6 +12,11 @@ Del lado del servidor la única dependencia que no es de Microsoft es
 bajo la Six Labors Split License, que es gratuita para organizaciones de menos
 de un millón de dólares de facturación anual.
 
+El sitio está publicado en un servidor propio (Oracle Cloud Free Tier, Ubuntu
+24.04) detrás de nginx. El dominio definitivo va a ser
+`enricci-propiedades.com.ar`; mientras tanto responde en un dominio provisorio
+de DuckDNS. Ver *Publicar en el servidor*.
+
 ## Cómo ejecutarlo
 
 ```bash
@@ -41,6 +46,11 @@ Models/
   OpcionesRespaldo.cs   Configuración del respaldo automático
   ArteFachada.cs        Portada SVG generada para publicaciones sin fotografía
   OpcionesCorreo.cs     Configuración del envío de correo
+  Cotizacion.cs         Tipo de cambio del día, con su fecha y su fuente
+  OpcionesCotizacion.cs De dónde sale el dólar y cada cuánto se consulta
+  OpcionesEscritura.cs  Conceptos de la calculadora de gastos de escrituración
+  Suscripcion.cs        Alguien anotado para que le avisen de propiedades nuevas
+  OpcionesAlertas.cs    Configuración de los avisos de propiedades nuevas
 Data/
   EnricciContexto.cs    DbContext: propiedades, usuarios y consultas
   SembradorInicial.cs   Migración, catálogo de ejemplo y alta del administrador
@@ -55,11 +65,16 @@ Services/
   RespaldoService.cs    Copia la base y las fotos en un .zip, con rotación
   RespaldoProgramado.cs Dispara el respaldo una vez por día
   RutaBaseDeDatos.cs    Resuelve dónde está el archivo .db
-  CorreoService.cs      Envío por SMTP de las consultas de los formularios
+  CorreoService.cs      Envío por SMTP, a la oficina o a un visitante
+  CotizacionService.cs  Dólar del Banco Nación, refrescado en segundo plano
+  LimiteEnvios.cs       Freno por IP de los formularios públicos
 Pages/
   Index                 Portada: hero, buscador, destacadas, servicios, barrios
   Propiedades           Listado con filtros por operación, tipo, barrio, ambientes y precio
-  Ficha                 Detalle de una publicación (ruta /propiedad/{id})
+  Ficha                 Detalle de una publicación (ruta /propiedad/{id}),
+                        con su propio formulario de consulta
+  Escrituracion         Calculadora de gastos de escrituración
+                        (ruta /gastos-de-escrituracion; nace apagada)
   Servicios             Panorama de servicios + preguntas frecuentes
   Tasacion              Formulario de pedido de tasación
   Cobranza              Administración y cobranza de alquileres
@@ -87,11 +102,23 @@ Pages/
 wwwroot/
   css/enricci.css       Sistema de diseño completo (tokens, componentes, utilidades)
   css/panel.css         Lo propio del panel, apoyado en los mismos tokens
-  js/enricci.js         Tema claro/oscuro, menú móvil, acordeones, animaciones
-  fonts/                Tipografías auto-alojadas (Be Vietnam Pro y Manuale)
+  js/enricci.js         Tema claro/oscuro, menú móvil, acordeones, animaciones,
+                        favoritos, compartir y la calculadora
+  fonts/web/            Tipografías propias en WOFF2, recortadas a los caracteres
+                        que el sitio usa: 1,2 MB de TTF quedaron en 197 KB.
+                        En Be_Vietnam_Pro/ y Manuale/ sólo quedan las licencias,
+                        que la OFL exige que viajen con la tipografía
   imagenes/             Logo y fotografías; las cargadas desde el panel van a
                         imagenes/propiedades/{id}/ y no se versionan
 db/                     Scripts SQL sueltos, fuera de wwwroot para que no se sirvan
+despliegue/
+  publicar.sh / .ps1    Compila, sube y reemplaza la aplicación en el servidor
+  dominio.sh / .ps1     Configura nginx y el certificado para un dominio
+  comun.ps1             Lo que comparten los scripts de PowerShell
+  preparar-servidor.sh  Instala y configura una máquina desde cero
+  enricci.service       Unidad de systemd
+  enricci.env.ejemplo   Plantilla de la configuración del servidor
+  INSTALACION.md        El paso a paso completo
 ```
 
 ## Panel de administración
@@ -273,10 +300,26 @@ Las migraciones pendientes se aplican solas al arrancar.
 
 ## Las consultas del sitio
 
-Los formularios de **Contacto** y **Tasación** validan del lado del servidor y
-tienen un campo trampa contra robots. Lo que llega se **guarda en la base** y se
-ve en el panel, en *Consultas*: quién escribió, cuándo, por qué propiedad, y si
-ya se le respondió. Cada una admite notas internas.
+Hay tres formularios: **Contacto**, **Tasación** y el que está **dentro de cada
+ficha**. Los tres validan del lado del servidor y tienen un campo trampa contra
+robots.
+
+El de la ficha es más corto a propósito —nombre, correo, teléfono y mensaje— y
+viene con el mensaje ya escrito: acá ya se sabe por qué propiedad preguntan, y
+cada campo de más es una consulta menos que llega. Al enviarlo la página
+redirige en vez de pintar la respuesta ahí mismo, así el visitante queda frente
+a la confirmación y refrescar no reenvía la consulta.
+
+Sobre el campo trampa hay un **freno de envíos por dirección IP**
+(`Services/LimiteEnvios.cs`): diez envíos cada diez minutos, compartidos por los
+tres formularios. El número es holgado a propósito, porque en redes móviles
+cientos de personas comparten una misma IP y frenar a alguien que quiere
+consultar cuesta más caro que dejar pasar un spam. Va aparte del limitador de
+ASP.NET porque una ficha tiene que poder abrirse mil veces —buscadores
+incluidos— y aun así no aceptar mil consultas.
+
+Lo que llega se **guarda en la base** y se ve en el panel, en *Consultas*: quién
+escribió, cuándo, por qué propiedad, y si ya se le respondió. Cada una admite notas internas.
 
 El orden importa y es a propósito: **primero se guarda, después se avisa por
 correo**. Al revés —que es como estaba— una casilla mal configurada o un
@@ -323,6 +366,87 @@ correo) y tener la verificación en dos pasos activada.
 Si el envío está apagado o el servidor de correo falla, el formulario **no se
 rompe**: la consulta ya quedó guardada, y la pantalla de confirmación le ofrece
 al visitante mandar el mismo mensaje por WhatsApp o por correo con un clic.
+
+## El precio en pesos
+
+Lo que se publica en dólares se muestra además con su equivalente en pesos, con
+la fecha y la fuente a la vista, tanto en la ficha como en las tarjetas del
+listado. Sección `Cotizacion` de `appsettings.json`:
+
+```json
+"Cotizacion": {
+  "Habilitada": true,
+  "Url": "https://dolarapi.com/v1/dolares/oficial",
+  "MinutosEntreConsultas": 60,
+  "Fuente": "Banco Nación",
+  "Punta": "venta"
+}
+```
+
+La de fábrica devuelve el dólar oficial, que es el que publica el Banco de la
+Nación Argentina. `Punta` en `venta` es la que paga quien compra dólares, que es
+la situación de quien está por comprar una propiedad.
+
+El valor se refresca **en segundo plano** y las páginas lo leen ya resuelto: una
+consulta a otro servidor en medio del armado de la página agregaría espera al
+visitante y lo dejaría a merced de que la fuente responda.
+
+Si la fuente se cae **se sigue mostrando el último valor bueno con su fecha**: un
+valor de ayer sirve, ninguno no. Si nunca se pudo consultar, no se muestra nada
+en pesos — un número inventado, o uno viejo sin fecha, es peor que no ponerlo.
+
+## La calculadora de gastos de escrituración
+
+Contesta la primera pregunta de toda consulta: cuánto hay que tener además del
+precio. Muestra el detalle concepto por concepto, quién paga cada uno, los
+subtotales de comprador y vendedor y el total en dólares y en pesos.
+
+**Nace apagada, y es a propósito.** Los porcentajes reales —sellos, honorarios de
+escribano, certificaciones— los fijan la Ciudad, el colegio de escribanos y cada
+operación, cambian con el tiempo y admiten excepciones. Publicar un número
+equivocado en el sitio de una inmobiliaria no es un error de cálculo: es una
+promesa que después hay que sostener frente a un cliente.
+
+Mientras `Habilitada` esté en `false`, la página redirige a *Servicios*, no
+aparece ningún enlace hacia ella y no figura en el mapa del sitio.
+
+```json
+"Escritura": {
+  "Habilitada": false,
+  "Vigencia": "agosto de 2026",
+  "Nota": "Consultanos el caso concreto antes de reservar.",
+  "Conceptos": [
+    {
+      "Nombre": "Impuesto de sellos",
+      "Porcentaje": 0,
+      "Paga": "Ambos",
+      "Detalle": "Tributo de la Ciudad sobre el valor de la operación."
+    }
+  ]
+}
+```
+
+`Porcentaje` va sobre el precio; `Fijo` es para lo que no depende del valor de la
+propiedad —informes, certificaciones—. `Paga` acepta `Comprador`, `Vendedor` o
+`Ambos`, y *Ambos* se muestra repartido por mitades. En el servidor los mismos
+valores se cargan por variables de entorno; está documentado en
+`despliegue/enricci.env.ejemplo`.
+
+El cálculo lo hace el servidor y el navegador sólo lo rehace mientras se
+escribe: **sin JavaScript el botón envía el formulario** y la página vuelve con
+la cuenta hecha.
+
+## Buscar, guardar y compartir
+
+- **Búsqueda por texto** en la portada y en el listado, además de los filtros.
+  Compara sin acentos ni mayúsculas contra título, dirección, barrio, tipo,
+  operación y descripción, y exige que estén *todas* las palabras.
+- **Propiedades guardadas.** El corazón de cada tarjeta las anota en el propio
+  navegador (`localStorage`, clave `enricci-favoritos`); no viajan a ningún lado
+  ni hacen falta datos personales. En el listado hay un filtro para ver sólo esas.
+- **Compartir un aviso.** En el teléfono abre el menú del sistema; en la
+  computadora copia el enlace. Es distinto de consultarle a la inmobiliaria: es
+  para mandarle la propiedad a otra persona.
 
 ## Respaldos
 
@@ -378,7 +502,7 @@ El dominio vive en la configuración y no escrito dentro del código. Sección
 
 ```json
 "Sitio": {
-  "Dominio": "www.enricci-propiedades.com.ar"
+  "Dominio": ""
 }
 ```
 
@@ -389,7 +513,13 @@ buscadores verían la misma página publicada en dos direcciones distintas y
 repartirían el posicionamiento entre las dos.
 
 **Vacío** —que es como viene— las URL absolutas salen del host del pedido, que
-es lo correcto en desarrollo y mientras el dominio no esté dado de alta.
+es lo correcto en desarrollo y mientras el dominio no esté dado de alta. Poner
+acá un dominio que todavía no existe es peor que dejarlo vacío: el sitio arma
+igual todas sus direcciones con él, y un aviso compartido por WhatsApp termina
+apuntando a la nada.
+
+No hace falta escribirlo a mano en el servidor: lo deja puesto
+`despliegue/dominio.sh` cuando configura el dominio y su certificado.
 
 Cuando el dominio esté andando conviene además acotar `AllowedHosts`, que hoy
 está en `*`:
@@ -397,6 +527,46 @@ está en `*`:
 ```json
 "AllowedHosts": "enricci-propiedades.com.ar;www.enricci-propiedades.com.ar"
 ```
+
+## Publicar en el servidor
+
+El paso a paso completo —desde una máquina vacía— está en
+`despliegue/INSTALACION.md`. Para el día a día alcanza con:
+
+```powershell
+git pull origin claude/horacio-real-estate-website-bt6gfo
+.\despliegue\publicar.ps1
+```
+
+```bash
+bash despliegue/publicar.sh
+```
+
+Compila en Release, arma el paquete, lo sube, reemplaza la aplicación, reinicia
+y **comprueba que el sitio responda**. Si no responde, deja el registro a la
+vista y explica cómo volver a la versión anterior, que quedó guardada.
+
+**La base de datos y las fotos no se tocan**: viven en `/var/lib/enricci`, fuera
+de la carpeta de la aplicación, justamente para que un despliegue no pueda
+pisarlas. La carpeta de fotos dentro de `wwwroot` es un enlace que el despliegue
+vuelve a crear cada vez. La opción `--primera-vez` / `-PrimeraVez` sube además la
+base y las fotos de la máquina de desarrollo, y por eso **se usa una sola vez**:
+en un servidor en uso pisaría lo que se cargó desde el panel.
+
+Para ponerle un dominio con HTTPS —uno provisorio de DuckDNS o el definitivo—:
+
+```powershell
+.\despliegue\dominio.ps1 el-dominio-que-sea
+```
+
+Deja nginx atendiendo en ese nombre, saca el certificado de Let's Encrypt, pasa
+todo a HTTPS, le anota el dominio a la aplicación y comprueba que responda. Se
+puede correr las veces que haga falta: si el certificado ya está, lo reutiliza.
+
+Los `.ps1` no reimplementan nada: buscan el bash que viene con Git para Windows
+y le pasan el trabajo. Tener dos programas haciendo lo mismo termina siempre
+igual —uno de los dos queda viejo— y el que queda viejo es el que se usa el día
+que hay un apuro.
 
 Ojo con esto último: si el proxy reenvía otro nombre de host, el sitio responde
 400 a todo. Conviene cambiarlo con el sitio ya publicado y andando, no antes.
@@ -513,11 +683,31 @@ queda fuera por `Disallow`.
   teléfono), que salen de `SitioInfo.cs`.
 - **Google Search Console y Bing Webmaster Tools**: dar de alta el dominio y
   enviar el sitemap cuando esté publicado.
-- El sitio no declara un `SearchAction` porque **no tiene buscador de texto
-  libre**, sólo filtros. Declarar uno que no funciona es peor que no declararlo.
-  Si en algún momento se agrega la búsqueda por texto, ahí sí conviene sumarlo.
+- El sitio **sí** declara un `SearchAction`, apuntado al buscador por texto de
+  `/Propiedades`. Antes no lo hacía, y con razón: hasta que existió la búsqueda
+  habría sido anunciar algo que no funcionaba, que es peor que no anunciar nada.
 
 ## Datos de contacto
 
 Todos los datos (dirección, teléfonos, correo, horarios, Instagram) se editan en
 un único archivo: `Models/SitioInfo.cs`.
+
+## Lo que todavía no está confirmado
+
+Estas cosas están escritas en el sitio pero **no vienen de la inmobiliaria**. No
+deberían quedar publicadas así: o las confirma Horacio, o se sacan.
+
+- **Los tres testimonios de la portada** (`Pages/Index.cshtml`) son inventados:
+  se escribieron como relleno de diseño. Son reseñas falsas con nombre y
+  apellido de personas que no existen.
+- **Las cifras institucionales**: "desde 1932", los hitos de 1958, 1984 y 2006 de
+  `Quienes_Somos.cshtml` y el contador de 1.400 operaciones de la portada.
+- **Los porcentajes de la calculadora de escrituración**. Por eso nace apagada.
+- **Los datos que faltan en el catálogo**: superficies, baños y antigüedades que
+  la ficha de origen no declaraba y quedaron en 0, y tres publicaciones con
+  precio *Consultar*.
+
+Y falta lo que sólo se puede hacer desde afuera del código: comprar el dominio,
+generar la contraseña de aplicación de Gmail para que salgan los avisos de las
+consultas, pasar la IP del servidor a reservada y dar de alta el sitio en Google
+Search Console y en Google Business Profile.

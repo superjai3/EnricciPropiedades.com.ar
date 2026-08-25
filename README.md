@@ -589,8 +589,13 @@ Deja nginx atendiendo en ese nombre, saca el certificado de Let's Encrypt, pasa
 todo a HTTPS, le anota el dominio a la aplicación y comprueba que responda. Se
 puede correr las veces que haga falta: si el certificado ya está, lo reutiliza.
 
-Los `.ps1` no reimplementan nada: buscan el bash que viene con Git para Windows
-y le pasan el trabajo. Tener dos programas haciendo lo mismo termina siempre
+También se publica solo: `.github/workflows/publicar.yml` despliega en cada
+push a la rama. Requiere cargar la llave SSH como secreto del repositorio una
+vez; está explicado en `despliegue/INSTALACION.md`.
+
+Ni el workflow ni los `.ps1` reimplementan el despliegue: el workflow llama a
+`publicar.sh` y los `.ps1` buscan el bash que viene con Git para Windows y le
+pasan el trabajo. Tener dos programas haciendo lo mismo termina siempre
 igual —uno de los dos queda viejo— y el que queda viejo es el que se usa el día
 que hay un apuro.
 

@@ -1,0 +1,94 @@
+# Publica el sitio en el servidor cada vez que entra un cambio en la rama.
+#
+# Hace falta cargar una vez, en Settings → Secrets and variables → Actions:
+#
+#   SSH_LLAVE_PRIVADA   el contenido entero de ~/.ssh/enricci.key
+#
+# Y, si se quiere, estos dos:
+#
+#   SSH_SERVIDOR        ubuntu@LA-IP, si cambia la del servidor
+#   SSH_KNOWN_HOSTS     la salida de `ssh-keyscan LA-IP`, para no confiar a ciegas
+#
+# El despliegue no está escrito acá: lo hace despliegue/publicar.sh, el mismo que
+# se corre a mano desde una máquina. Dos programas que despliegan terminan
+# siempre igual —uno queda viejo— y el que queda viejo es el que se usa el día
+# que hay un apuro.
+
+name: Publicar
+
+on:
+  push:
+    branches:
+      - claude/horacio-real-estate-website-bt6gfo
+    # Un cambio de documentación no cambia el sitio, y cada despliegue para el
+    # servicio unos segundos. No vale la pena bajar el sitio por un README.
+    paths-ignore:
+      - '**.md'
+      - 'originales/**'
+      - '.gitignore'
+  # Y a mano, desde la pestaña Actions, cuando haga falta republicar sin cambios.
+  workflow_dispatch:
+
+# Dos despliegues a la vez sobre el mismo servidor se pisan: uno reemplaza la
+# aplicación mientras el otro la está reemplazando. Se encolan.
+concurrency:
+  group: produccion
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Traer el código
+        uses: actions/checkout@v4
+
+      - name: Instalar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Preparar la llave SSH
+        env:
+          LLAVE: ${{ secrets.SSH_LLAVE_PRIVADA }}
+          CONOCIDOS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$LLAVE" ]; then
+            echo "Falta el secreto SSH_LLAVE_PRIVADA." >&2
+            echo "Se carga en Settings -> Secrets and variables -> Actions." >&2
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          # printf y no echo: la llave tiene saltos de línea y OpenSSH rechaza
+          # una llave a la que le falta el salto final.
+          printf '%s\n' "$LLAVE" > ~/.ssh/enricci.key
+          chmod 600 ~/.ssh/enricci.key
+
+          if [ -n "$CONOCIDOS" ]; then
+            printf '%s\n' "$CONOCIDOS" > ~/.ssh/known_hosts
+            chmod 644 ~/.ssh/known_hosts
+            echo "Servidor verificado contra known_hosts."
+          else
+            echo "Sin SSH_KNOWN_HOSTS: se acepta la huella del servidor en el primer contacto."
+          fi
+
+      - name: Publicar
+        env:
+          SERVIDOR: ${{ secrets.SSH_SERVIDOR }}
+        run: |
+          # La ruta se arma acá y no en env: GitHub no expande $HOME ahí, y
+          # escribirla a mano ata el workflow a la carpeta del runner alojado.
+          export LLAVE="$HOME/.ssh/enricci.key"
+
+          # Vacío deja que mande el servidor que trae publicar.sh.
+          [ -n "$SERVIDOR" ] || unset SERVIDOR
+
+          bash despliegue/publicar.sh
+
+      - name: Borrar la llave
+        # Se corre aunque el despliegue falle: la llave no se queda en el disco
+        # del runner. Es efímero igual, pero no hay razón para dejarla.
+        if: always()
+        run: rm -f ~/.ssh/enricci.key

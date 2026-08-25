@@ -196,6 +196,37 @@ habilita para el usuario actual y se pide una sola vez:
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
+### Que se publique solo
+
+Con GitHub Actions, cada push a la rama publica el sitio sin que nadie corra
+nada. El workflow está en `.github/workflows/publicar.yml` y **no reimplementa
+el despliegue**: llama al mismo `publicar.sh`.
+
+Hay que cargar la llave SSH una sola vez, en **Settings → Secrets and variables
+→ Actions → New repository secret**:
+
+| Secreto | Qué lleva |
+| --- | --- |
+| `SSH_LLAVE_PRIVADA` | El contenido entero de `~/.ssh/enricci.key` |
+| `SSH_SERVIDOR` | *(opcional)* `ubuntu@LA-IP`, si cambia la del servidor |
+| `SSH_KNOWN_HOSTS` | *(opcional)* La salida de `ssh-keyscan LA-IP` |
+
+Para copiar la llave al portapapeles, desde PowerShell:
+
+```powershell
+Get-Content "$env:USERPROFILE\.ssh\enricci.key" -Raw | Set-Clipboard
+```
+
+Va entera, con las líneas `-----BEGIN…` y `-----END…` incluidas.
+
+Sin `SSH_KNOWN_HOSTS` el workflow acepta la huella del servidor en el primer
+contacto. Alcanza para empezar; cargarlo después es mejor, porque deja de
+confiar a ciegas en quien conteste en esa dirección.
+
+Los cambios que sólo tocan documentación no disparan el despliegue: cada uno
+para el servicio unos segundos y no vale la pena bajar el sitio por un README.
+Para publicar sin cambios está el botón **Run workflow** en la pestaña Actions.
+
 ---
 
 ### La contraseña del panel

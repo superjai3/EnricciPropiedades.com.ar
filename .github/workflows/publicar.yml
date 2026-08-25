@@ -61,18 +61,67 @@ jobs:
           fi
 
           mkdir -p ~/.ssh
-          # printf y no echo: la llave tiene saltos de línea y OpenSSH rechaza
-          # una llave a la que le falta el salto final.
-          printf '%s\n' "$LLAVE" > ~/.ssh/enricci.key
+
+          # Dos cuidados con el texto de la llave:
+          #
+          # printf y no echo, porque OpenSSH rechaza una llave a la que le falta
+          # el salto de línea final.
+          #
+          # tr -d '\r' porque la llave se copia desde Windows, donde cada línea
+          # termina en retorno de carro además del salto. OpenSSH no la puede
+          # leer así, y el error que da después no menciona la llave por ningún
+          # lado: dice "Connection closed" al conectar, que no ayuda a nadie.
+          printf '%s\n' "$LLAVE" | tr -d '\r' > ~/.ssh/enricci.key
           chmod 600 ~/.ssh/enricci.key
 
+          # Que ssh no se quede esperando una contraseña que nadie va a escribir.
+          printf 'Host *\n  BatchMode yes\n' > ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
           if [ -n "$CONOCIDOS" ]; then
-            printf '%s\n' "$CONOCIDOS" > ~/.ssh/known_hosts
+            printf '%s\n' "$CONOCIDOS" | tr -d '\r' > ~/.ssh/known_hosts
             chmod 644 ~/.ssh/known_hosts
             echo "Servidor verificado contra known_hosts."
           else
             echo "Sin SSH_KNOWN_HOSTS: se acepta la huella del servidor en el primer contacto."
           fi
+
+          # Comprobar la llave acá, y no descubrirlo veinte segundos después con
+          # un error de scp que no dice qué pasó. ssh-keygen -y deriva la clave
+          # pública, que no es secreta, así que se descarta la salida y sólo
+          # interesa si pudo o no.
+          if ! ssh-keygen -y -f ~/.ssh/enricci.key > /dev/null 2>&1; then
+            echo "La llave no se pudo leer." >&2
+            echo "Suele ser una de estas tres:" >&2
+            echo "  - se pegó incompleta: tiene que ir desde la línea -----BEGIN" >&2
+            echo "    hasta la línea -----END, las dos incluidas" >&2
+            echo "  - se pegó la pública (enricci.key.pub) en vez de la privada" >&2
+            echo "  - la llave tiene contraseña, y acá no hay quien la escriba" >&2
+            exit 1
+          fi
+
+          echo "La llave se lee bien."
+
+      - name: Probar la conexión con el servidor
+        env:
+          SERVIDOR: ${{ secrets.SSH_SERVIDOR }}
+        run: |
+          # El servidor por omisión es el mismo que trae publicar.sh; se lee de
+          # ahí para no repetir la dirección en dos lugares.
+          DESTINO="${SERVIDOR:-$(grep -oP '(?<=SERVIDOR:-)[^}]+' despliegue/publicar.sh | head -1)}"
+          echo "Probando $DESTINO"
+
+          if ssh -i ~/.ssh/enricci.key -o StrictHostKeyChecking=accept-new \
+                 -o ConnectTimeout=15 "$DESTINO" 'echo conectado'; then
+            exit 0
+          fi
+
+          echo "" >&2
+          echo "No se pudo entrar al servidor con esa llave." >&2
+          echo "El paquete compila bien, así que el problema es la llave o el acceso:" >&2
+          echo "  - que sea la misma llave con la que entrás vos desde tu máquina" >&2
+          echo "  - que el servidor esté encendido y con el puerto 22 abierto" >&2
+          exit 1
 
       - name: Publicar
         env:

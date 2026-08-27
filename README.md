@@ -13,9 +13,8 @@ bajo la Six Labors Split License, que es gratuita para organizaciones de menos
 de un millón de dólares de facturación anual.
 
 El sitio está publicado en un servidor propio (Oracle Cloud Free Tier, Ubuntu
-24.04) detrás de nginx. El dominio definitivo va a ser
-`enriccipropiedades.com`; mientras tanto responde en un dominio provisorio
-de DuckDNS. Ver *Publicar en el servidor*.
+24.04) detrás de nginx, en `https://enriccipropiedades.com`.
+`enriccipropiedades.com.ar` redirige al principal. Ver *Publicar en el servidor*.
 
 ## Cómo ejecutarlo
 
@@ -579,7 +578,7 @@ vuelve a crear cada vez. La opción `--primera-vez` / `-PrimeraVez` sube además
 base y las fotos de la máquina de desarrollo, y por eso **se usa una sola vez**:
 en un servidor en uso pisaría lo que se cargó desde el panel.
 
-Para ponerle un dominio con HTTPS —uno provisorio de DuckDNS o el definitivo—:
+Para ponerle un dominio con HTTPS, o para agregar otro que redirija al principal:
 
 ```powershell
 .\despliegue\dominio.ps1 el-dominio-que-sea

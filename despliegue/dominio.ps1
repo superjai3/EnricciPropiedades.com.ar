@@ -2,8 +2,8 @@
 #
 #   .\despliegue\dominio.ps1 enriccipropiedades.com -Mail micorreo@ejemplo.com
 #
-# Antes de correrlo, el dominio tiene que estar apuntando a la IP del servidor.
-# En DuckDNS eso es escribir el nombre y la IP en el panel; tarda un minuto.
+# Antes de correrlo, cada dominio tiene que tener su registro A apuntando a la
+# IP del servidor, y haber propagado.
 
 [CmdletBinding()]
 param(

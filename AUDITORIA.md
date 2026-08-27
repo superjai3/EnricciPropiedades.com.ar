@@ -143,9 +143,13 @@ provisorio: un `default_server` con `server_name _` que proxeaba al sitio
 **cualquier** pedido que llegara por el puerto 80, sin importar el nombre. Por
 eso respondía la IP en claro.
 
-Se eliminó al retirar el dominio provisorio. Ahora un pedido por la IP —o por
-cualquier nombre que no sea de los cuatro— cae en el bloque normal del puerto 80
-y redirige con 301 a `https://enriccipropiedades.com`.
+Se eliminó al retirar el dominio provisorio, y en su lugar `dominio.sh` escribe
+un bloque predeterminado que **cierra la conexión sin contestar** (444 de nginx)
+para cualquier nombre que no sea uno de los cuatro del sitio.
+
+Así, un pedido por la IP —o por una dirección vieja que apunte todavía a este
+servidor— no llega a ningún lado. Antes bastaba con que un nombre resolviera acá
+para que el sitio lo atendiera.
 
 ### C9 · Redes sociales
 Instagram está cargado y enlazado. `SitioInfo.Facebook` está **vacío**: o se completa,

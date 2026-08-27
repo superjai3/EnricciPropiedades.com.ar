@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 #
-# Pone el sitio a responder en un dominio, con HTTPS. Sirve tanto para el
-# provisorio de DuckDNS como para el definitivo cuando esté comprado:
+# Pone el sitio a responder en uno o varios dominios, con HTTPS:
 #
 #   bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar
 #
-# Antes de correrlo, el dominio tiene que estar apuntando a la IP del servidor.
-# En DuckDNS eso es escribir el nombre y la IP en el panel; tarda un minuto.
+# Antes de correrlo, cada dominio tiene que tener su registro A apuntando a la
+# IP del servidor, y haber propagado. El script lo comprueba y para si falta uno.
 #
 # Qué hace, en orden: deja nginx atendiendo por HTTP en ese nombre, saca el
 # certificado de Let's Encrypt, pasa nginx a HTTPS, le avisa a la aplicación
@@ -157,8 +156,8 @@ for n in $NOMBRES; do D_ARGS="$D_ARGS -d $n"; done
 
 # --cert-name fija cómo se llama la carpeta en /etc/letsencrypt/live/, que es la
 # ruta que después escribe nginx. Sin esto, certbot le pone el nombre del PRIMER
-# dominio que tuvo el certificado —acá, el provisorio de DuckDNS— y nginx se
-# queda buscando una carpeta que no existe.
+# dominio que tuvo el certificado, que no tiene por qué ser el principal de hoy,
+# y nginx se queda buscando una carpeta que no existe.
 #
 # --expand es para cuando ya hay un certificado que cubre parte de los nombres
 # pedidos: sin la bandera, certbot para y pregunta si querés ampliarlo, y en un
@@ -196,6 +195,26 @@ sudo certbot certonly --webroot -w /var/www/certbot \
 # --- Paso 3: nginx por HTTPS --------------------------------------------------
 echo "  - pasando nginx a HTTPS"
 sudo tee /etc/nginx/sites-available/enricci > /dev/null <<'NGINX'
+# Lo que no sea uno de los nombres del sitio, no se atiende.
+#
+# Sin este bloque, el primero del archivo hace de predeterminado y responde a
+# CUALQUIER nombre que apunte a esta IP: una dirección vieja que se dejó de
+# usar, un dominio provisorio retirado, o el que apunte un tercero a este
+# servidor. Todos seguirían llevando al sitio, y el que retiró una dirección
+# descubre que sigue funcionando.
+#
+# 444 es de nginx: cierra la conexión sin contestar nada. No es un error que se
+# pueda leer, es el servidor diciendo que ese nombre no es suyo.
+#
+# Va PRIMERO a propósito: nginx toma como predeterminado el primer bloque que
+# escucha en ese puerto, salvo que otro lo reclame con default_server.
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 444;
+}
+
 # HTTP: sólo para renovar el certificado y mandar todo a HTTPS.
 #
 # Atiende TODOS los nombres —el principal, los alias y sus www— y los manda al

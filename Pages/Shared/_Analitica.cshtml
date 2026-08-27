@@ -1,0 +1,106 @@
+@inject Microsoft.Extensions.Options.IOptions<OpcionesAnalitica> OpcionesDeAnalitica
+@{
+    var analitica = OpcionesDeAnalitica.Value;
+}
+@* ---------------------------------------------------------------------------
+   Medición y aviso de cookies.
+
+   Sin identificador cargado en appsettings no se escribe nada: ni script de
+   Google, ni aviso, ni cookie. La página queda exactamente como estaba.
+
+   Con identificador se cargan las dos cosas a la vez, y en este orden:
+
+   1. Se declara el consentimiento como DENEGADO. Es el modo consentimiento de
+      Google, y es la red de seguridad, no la puerta.
+   2. **gtag.js no se descarga.** El modo consentimiento por sí solo permitiría
+      cargarlo y que no midiera, pero eso ya es un pedido a un servidor de
+      Google con la IP del visitante antes de que decida nada. Acá el script
+      recién se pide cuando alguien acepta, y no antes.
+   3. Se muestra el aviso. Aceptar y rechazar son el mismo botón, del mismo
+      tamaño y a la misma distancia: rechazar no puede costar más que aceptar.
+   4. La decisión se guarda en localStorage, no en una cookie: guardar la
+      negativa en una cookie sería dejar justo lo que el visitante rechazó.
+
+   Efecto lateral bienvenido: quien rechaza o todavía no decidió no baja los
+   ~90 KB de gtag.js, así que la página le carga más rápido.
+   --------------------------------------------------------------------------- *@
+@if (analitica.Habilitada)
+{
+    <script nonce="@Context.Nonce()">
+        (function () {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            window.gtag = gtag;
+
+            // Todo denegado de entrada. Esto tiene que ejecutarse antes de que
+            // gtag.js llegue, o el primer envío se va sin consentimiento.
+            gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'functionality_storage': 'granted',
+                'security_storage': 'granted'
+            });
+
+            var ID = '@analitica.IdSeguro';
+            var CLAVE = 'enricci-cookies';
+            var decision = null;
+            try { decision = localStorage.getItem(CLAVE); } catch (e) { }
+
+            var cargado = false;
+
+            function conceder() {
+                gtag('consent', 'update', { 'analytics_storage': 'granted' });
+
+                // Recién ahora se pide el script a Google. Una sola vez.
+                if (cargado) { return; }
+                cargado = true;
+
+                gtag('js', new Date());
+                gtag('config', ID, { 'anonymize_ip': true });
+
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ID;
+                document.head.appendChild(s);
+            }
+
+            if (decision === 'si') {
+                conceder();
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var aviso = document.querySelector('[data-cookies]');
+                if (!aviso) { return; }
+
+                // Ya decidió en otra visita: el aviso no vuelve a aparecer.
+                if (decision === 'si' || decision === 'no') { return; }
+
+                aviso.hidden = false;
+
+                aviso.addEventListener('click', function (evento) {
+                    var boton = evento.target.closest('[data-cookies-respuesta]');
+                    if (!boton) { return; }
+
+                    var respuesta = boton.getAttribute('data-cookies-respuesta');
+                    try { localStorage.setItem(CLAVE, respuesta); } catch (e) { }
+                    if (respuesta === 'si') { conceder(); }
+                    aviso.hidden = true;
+                });
+            });
+        })();
+    </script>
+
+    <aside class="cookies" data-cookies hidden aria-label="Aviso de cookies">
+        <p class="cookies__texto">
+            Usamos cookies propias para que el sitio funcione y, si nos das permiso,
+            de Google Analytics para saber qué páginas se leen. Nada de publicidad.
+            <a asp-page="/Privacidad">Cómo tratamos tus datos</a>.
+        </p>
+        <div class="cookies__botones">
+            <button class="btn btn--sm btn--fantasma" type="button" data-cookies-respuesta="no">Rechazar</button>
+            <button class="btn btn--sm" type="button" data-cookies-respuesta="si">Aceptar</button>
+        </div>
+    </aside>
+}

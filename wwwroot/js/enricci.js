@@ -557,4 +557,53 @@
     /* ---------- Año dinámico en el pie ---------- */
     var anio = document.querySelector('[data-anio]');
     if (anio) { anio.textContent = String(new Date().getFullYear()); }
+
+    /* ---------- Eventos de conversión ----------
+
+       Las tres cosas que en esta inmobiliaria significan "alguien quiere hablar":
+       mandar el formulario, escribir por WhatsApp y llamar por teléfono.
+
+       Si no hay analítica configurada, `window.gtag` no existe y todo esto no
+       hace nada: ni error en consola, ni pedido de red. Los disparadores quedan
+       puestos para el día en que Horacio cargue el identificador. */
+    function medir(evento, datos) {
+        if (typeof window.gtag !== 'function') { return; }
+        window.gtag('event', evento, datos || {});
+    }
+
+    var formularioContacto = document.querySelector('[data-form-contacto]');
+    if (formularioContacto) {
+        formularioContacto.addEventListener('submit', function () {
+            // En el submit y no en la respuesta: si la página navega, el evento
+            // ya salió. GA4 los manda con sendBeacon, que sobrevive a la
+            // descarga de la página.
+            var motivo = formularioContacto.querySelector('[name$="Motivo"]');
+            medir('generate_lead', {
+                metodo: 'formulario',
+                motivo: motivo ? motivo.value : ''
+            });
+        });
+    }
+
+    document.addEventListener('click', function (evento) {
+        var enlace = evento.target.closest('a[href]');
+        if (!enlace) { return; }
+
+        var destino = enlace.getAttribute('href') || '';
+
+        if (destino.indexOf('wa.me/') !== -1) {
+            medir('generate_lead', { metodo: 'whatsapp', desde: ubicacion(enlace) });
+        } else if (destino.indexOf('tel:') === 0) {
+            medir('generate_lead', { metodo: 'telefono', desde: ubicacion(enlace) });
+        }
+    });
+
+    /* Desde dónde se tocó: sirve para saber si convierte más el botón flotante,
+       el del pie o el de la ficha de una propiedad. */
+    function ubicacion(enlace) {
+        if (enlace.closest('.wsp-flotante')) { return 'boton-flotante'; }
+        if (enlace.closest('footer')) { return 'pie'; }
+        if (enlace.closest('.ficha')) { return 'ficha'; }
+        return 'pagina';
+    }
 })();

@@ -82,9 +82,11 @@
   },
   "resumen": {
     "aplicables": 50,
-    "ok": 45,
-    "arreglados": 4,
-    "pendientes": 5
+    "ok": 32,
+    "parcial": 6,
+    "cliente": 8,
+    "falta": 4,
+    "arreglados": 4
   },
   "rama": "mejoras/auditoria-web-2026-08-27",
   "publicado": {

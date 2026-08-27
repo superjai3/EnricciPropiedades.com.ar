@@ -5,9 +5,22 @@ Rama `mejoras/auditoria-web-2026-08-27`
 
 ## Resumen
 
-**41 de 50 puntos aplicables cumplidos al empezar. 4 arreglados en esta pasada**
-(C7, C8, M1 y M3, más limpieza de R2). Quedan **2 críticos pendientes**, los dos
-por falta de datos que sólo tiene Horacio.
+De los **50 puntos aplicables** al modelo «servicios»:
+
+| Estado | Puntos |
+|---|---|
+| **`ok`** — cumplido y verificado | **32** |
+| `parcial` — está pero a medias | 6 |
+| `cliente` — depende de datos de Horacio | 8 |
+| `falta` — no está y se puede hacer | 4 |
+
+**4 arreglados en esta pasada** (C7, C8, M1 y M3, más limpieza de R2). Quedan
+**2 críticos pendientes**, los dos por falta de datos que sólo tiene Horacio.
+
+> **Corrección.** Una versión anterior de este informe decía «45 de 50 cumplidos».
+> Ese número no salía del detalle punto por punto, salía de sumar mal: contaba como
+> cumplidos los `parcial` y los `cliente`. El número real de `ok` es **32**. Los
+> puntos individuales de más abajo nunca cambiaron; lo que estaba mal era el total.
 
 El sitio ya estaba muy por encima de la media técnica: canonical, Open Graph
 completo, JSON-LD, sitemap y robots generados desde el dominio configurado, fuentes

@@ -157,8 +157,19 @@ echo "  - pidiendo el certificado a Let's Encrypt"
 D_ARGS=""
 for n in $NOMBRES; do D_ARGS="$D_ARGS -d $n"; done
 
+# --cert-name fija cómo se llama la carpeta en /etc/letsencrypt/live/, que es la
+# ruta que después escribe nginx. Sin esto, certbot le pone el nombre del PRIMER
+# dominio que tuvo el certificado —acá, el provisorio de DuckDNS— y nginx se
+# queda buscando una carpeta que no existe.
+#
+# --expand es para cuando ya hay un certificado que cubre parte de los nombres
+# pedidos: sin la bandera, certbot para y pregunta si querés ampliarlo, y en un
+# script sin nadie mirando eso es un cuelgue. Es el caso al mudarse de un
+# dominio provisorio a uno definitivo.
 sudo certbot certonly --webroot -w /var/www/certbot \
+    --cert-name "$DOMINIO" \
     $D_ARGS \
+    --expand \
     --non-interactive --agree-tos --email "$MAIL" \
     --keep-until-expiring
 

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "fecha": "2026-08-27",
+  "stack": "aspnet-core-razor-pages",
+  "modelo": "servicios",
+  "commit": "2565e14",
+  "puntos": {
+    "T1": "parcial", "T2": "ok", "T3": "ok", "T4": "ok", "T5": "ok",
+    "T6": "ok", "T7": "na", "T8": "na", "T9": "ok", "T10": "cliente",
+    "R1": "cliente", "R2": "parcial", "R3": "parcial", "R4": "na", "R5": "ok",
+    "R6": "ok", "R7": "ok", "R8": "ok",
+    "S1": "ok", "S2": "ok", "S3": "ok", "S4": "ok", "S5": "ok",
+    "S6": "ok", "S7": "falta", "S8": "na", "S9": "na", "S10": "parcial",
+    "C1": "parcial", "C2": "ok", "C3": "parcial", "C4": "ok", "C5": "cliente",
+    "C6": "na", "C7": "falta", "C8": "na", "C9": "parcial", "C10": "cliente",
+    "C11": "na", "C12": "na",
+    "V1": "ok", "V2": "ok", "V3": "ok", "V4": "ok", "V5": "cliente",
+    "V6": "na", "V7": "falta", "V8": "cliente", "V9": "falta", "V10": "cliente",
+    "V11": "na", "V12": "na", "V13": "na", "V14": "na", "V15": "na",
+    "V16": "na", "V17": "na", "V18": "cliente", "V19": "na", "V20": "na",
+    "U1": "ok", "U2": "ok", "U3": "na", "U4": "ok", "U5": "na",
+    "U6": "na", "U7": "ok",
+    "M1": "falta", "M2": "cliente", "M3": "falta", "M4": "falta",
+    "M5": "na", "M6": "na", "M7": "na"
+  },
+  "resumen": {
+    "aplicables": 50,
+    "ok": 41,
+    "arreglados": 0,
+    "pendientes": 9
+  }
+}

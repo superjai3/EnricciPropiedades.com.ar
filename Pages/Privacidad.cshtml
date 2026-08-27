@@ -1,0 +1,169 @@
+@page
+@model PrivacidadModel
+@inject Microsoft.Extensions.Options.IOptions<OpcionesAnalitica> OpcionesDeAnalitica
+@{
+    ViewData["Title"] = "Política de privacidad";
+    ViewData["Descripcion"] = "Qué datos personales pide este sitio, para qué se usan, cuánto tiempo se guardan y cómo pedir que se corrijan o se borren.";
+}
+
+@*
+    ============================================================================
+    BORRADOR: revisar con asesoría legal antes de publicar.
+
+    Este texto describe con exactitud lo que la aplicación hace hoy —qué campos
+    guarda el formulario, en qué tabla, qué cookies deja y cuánto duran los
+    respaldos—, así que es correcto como descripción técnica. Lo que NO está
+    validado es la parte jurídica: la Ley 25.326 y su reglamentación, la
+    inscripción de la base de datos ante la AAIP y la redacción de los derechos
+    del titular. Eso lo tiene que revisar el asesor de la inmobiliaria antes de
+    darlo por definitivo.
+
+    Pendiente de completar con datos que sólo tiene Horacio:
+      · CUIT de la inmobiliaria.
+      · Si la base de datos de clientes está inscripta ante la AAIP y con qué número.
+      · Casilla de correo a la que llegan los reclamos de datos personales
+        (hoy se apunta a la de contacto general).
+
+    Ojo con el plazo de conservación: el texto dice dos años desde el último
+    contacto, pero HOY NO HAY PURGA AUTOMÁTICA. Las consultas se borran a mano
+    desde el panel. O se implementa la purga, o el plazo se cumple a mano.
+    ============================================================================
+*@
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <span>Política de privacidad</span>
+        </nav>
+        <p class="eyebrow">Tus datos</p>
+        <h1>Política de privacidad</h1>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor">
+        <div class="prosa revelar" style="max-width:var(--ancho-angosto)">
+
+            <p class="plomo" style="color:var(--texto)">
+                Este sitio pide pocos datos y los usa para una sola cosa: responderte.
+                Acá está, en criollo, qué se guarda, dónde y por cuánto tiempo.
+            </p>
+
+            <h2>Quién es responsable</h2>
+            <p>
+                @SitioInfo.Matricula, con domicilio en
+                @SitioInfo.DireccionCompleta, @SitioInfo.Localidad.
+                Consultas sobre datos personales: <a href="@SitioInfo.MailA("Datos personales")">@SitioInfo.Email</a>,
+                teléfono <a href="@SitioInfo.TelefonoLink">@SitioInfo.Telefono</a>.
+            </p>
+
+            <h2>Qué datos se piden</h2>
+            <p>
+                Sólo los del formulario de contacto y los de las consultas por una
+                propiedad: <strong>nombre, correo electrónico, teléfono, el motivo
+                de la consulta y el mensaje</strong> que escribas. Nada más. No se
+                piden datos de documento, ni bancarios, ni de salud, ni ningún otro
+                dato sensible, y no hace falta crear una cuenta para navegar el sitio.
+            </p>
+            <p>
+                Los campos son los mínimos para poder devolverte el llamado. El
+                teléfono es opcional si preferís que te escribamos por mail.
+            </p>
+
+            <h2>Para qué se usan</h2>
+            <p>
+                Para responder tu consulta y, si el tema sigue, para seguir la
+                conversación sobre esa operación. <strong>No se venden, no se ceden
+                ni se comparten con terceros</strong>, y no se usan para mandarte
+                publicidad ni para agregarte a ninguna lista de correo.
+            </p>
+
+            <h2>Dónde se guardan y por cuánto tiempo</h2>
+            <p>
+                Las consultas quedan en la base de datos del sitio, en un servidor
+                propio, y sólo las ve la inmobiliaria desde un panel con usuario y
+                contraseña. Se hace un respaldo automático por día y se conservan
+                las últimas catorce copias.
+            </p>
+            <p>
+                Las consultas se conservan mientras la operación siga abierta y
+                hasta dos años después del último contacto, por si volvés a escribir
+                sobre lo mismo; cumplido ese plazo se eliminan. Si querés que se
+                borre la tuya antes, alcanza con pedirlo.
+            </p>
+
+            <h2>Cookies</h2>
+@if (OpcionesDeAnalitica.Value.Habilitada)
+{
+            <p>
+                El sitio usa dos clases de cookies:
+            </p>
+            <ul>
+                <li>
+                    <strong>Las necesarias para que funcione.</strong> Mantienen la
+                    sesión del panel de administración y protegen los formularios de
+                    envíos falsificados. Sin ellas el sitio no anda, así que no se
+                    pueden desactivar. No sirven para seguirte por otros sitios.
+                </li>
+                <li>
+                    <strong>Las de medición.</strong> Google Analytics, para saber
+                    qué páginas se leen y desde qué tipo de dispositivo.
+                    <strong>Sólo se activan si las aceptás</strong> en el aviso que
+                    aparece la primera vez: hasta que decidas, no se manda nada. Si
+                    rechazás, el sitio funciona igual. Nada de publicidad ni de
+                    perfiles comerciales.
+                </li>
+            </ul>
+            <p>
+                Tu decisión se guarda en el propio navegador. Para cambiarla, borrá
+                los datos del sitio desde el navegador y el aviso vuelve a aparecer.
+            </p>
+}
+else
+{
+            <p>
+                El sitio usa <strong>únicamente cookies técnicas</strong>: las que
+                mantienen la sesión del panel de administración y las que protegen
+                los formularios de envíos falsificados. No hay cookies de
+                publicidad, ni de medición, ni de terceros, y por eso no hace falta
+                pedirte permiso para dejarlas.
+            </p>
+            <p>
+                Aparte de eso, el navegador recuerda en tu propio equipo dos
+                preferencias que no salen de ahí ni llegan a ningún servidor: si
+                elegiste el modo claro u oscuro, y qué propiedades marcaste como
+                favoritas.
+            </p>
+}
+
+            <h2>Tus derechos</h2>
+            <p>
+                Podés pedir en cualquier momento acceder a los datos que tenemos
+                tuyos, corregirlos si están mal, actualizarlos o pedir que se
+                borren. Se hace escribiendo a
+                <a href="@SitioInfo.MailA("Datos personales")">@SitioInfo.Email</a>,
+                y no tiene costo.
+            </p>
+            <p>
+                Si considerás que no se respetaron tus derechos, podés reclamar ante
+                la <strong>Agencia de Acceso a la Información Pública</strong>, el
+                organismo de control de la Ley 25.326 de Protección de los Datos
+                Personales.
+            </p>
+
+            <h2>Enlaces a otros sitios</h2>
+            <p>
+                Algunos botones te llevan afuera —WhatsApp, Instagram, Google Maps—.
+                Una vez ahí valen las políticas de esos servicios, no ésta.
+            </p>
+
+            <h2>Cambios</h2>
+            <p>
+                Si esta política cambia, la versión nueva queda publicada en esta
+                misma página.
+            </p>
+
+        </div>
+    </div>
+</section>

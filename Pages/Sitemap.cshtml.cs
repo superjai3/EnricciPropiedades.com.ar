@@ -25,7 +25,8 @@ public class SitemapModel : PageModel
         ("/Quienes_Somos", "0.6", "yearly"),
         ("/Mision", "0.4", "yearly"),
         ("/Vision", "0.4", "yearly"),
-        ("/Contacto", "0.7", "monthly")
+        ("/Contacto", "0.7", "monthly"),
+        ("/Privacidad", "0.2", "yearly")
     };
 
     private readonly PropiedadesService _propiedades;

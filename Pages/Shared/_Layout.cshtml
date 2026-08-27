@@ -331,6 +331,7 @@
                 <span>&copy; <span data-anio>2026</span> @SitioInfo.Nombre. Todos los derechos reservados.</span>
                 <span>
                     @SitioInfo.Matricula
+                    <a asp-page="/Privacidad">Política de privacidad</a>
                     <a class="pie__panel" asp-page="/Admin/Index" rel="nofollow">Administrar</a>
                 </span>
             </div>
@@ -343,6 +344,7 @@
     </a>
 
     <script src="~/js/enricci.js" asp-append-version="true"></script>
+    <partial name="_Analitica" />
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

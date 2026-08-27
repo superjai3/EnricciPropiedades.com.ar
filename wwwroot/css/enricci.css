@@ -1939,3 +1939,44 @@ select.control {
     .panel-movil { padding-block: var(--sp-4); }
     .panel-movil__cabeza { font-size: 1.05rem; padding-block: .7rem; }
 }
+
+/* 5.17 Aviso de cookies
+   Sólo aparece si hay analítica configurada y el visitante todavía no decidió.
+   Se apoya abajo a la izquierda para no taparse con el botón de WhatsApp. */
+.cookies {
+    position: fixed;
+    left: clamp(1rem, 3vw, 2rem);
+    bottom: clamp(1rem, 3vw, 2rem);
+    z-index: 95;
+    max-width: 27rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    border: 1px solid var(--linea);
+    border-radius: var(--r-lg);
+    background: var(--bg-elev);
+    box-shadow: var(--sombra-lg);
+}
+.cookies[hidden] { display: none; }
+.cookies__texto {
+    margin: 0;
+    font-size: .88rem;
+    line-height: 1.55;
+    color: var(--gris);
+}
+.cookies__texto a { color: inherit; text-decoration: underline; }
+/* Los dos botones miden lo mismo a propósito: rechazar no puede costar más
+   trabajo que aceptar. */
+.cookies__botones { display: flex; gap: var(--sp-2); }
+.cookies__botones .btn { flex: 1 1 0; justify-content: center; }
+
+@media (max-width: 640px) {
+    .cookies {
+        left: clamp(.75rem, 3vw, 1rem);
+        right: clamp(.75rem, 3vw, 1rem);
+        max-width: none;
+        /* Por encima del botón flotante de WhatsApp, no encima de él. */
+        bottom: calc(clamp(1rem, 3vw, 2rem) + 3.6rem);
+    }
+}

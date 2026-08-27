@@ -1,4 +1,6 @@
 using System.Security.Cryptography;
+using Enricci_Propiedades.Models;
+using Microsoft.Extensions.Options;
 
 namespace Enricci_Propiedades.Services;
 
@@ -19,6 +21,12 @@ public static class CabecerasSeguridad
     public static IApplicationBuilder UseCabecerasSeguridad(this WebApplication app)
     {
         var enProduccion = !app.Environment.IsDevelopment();
+
+        // Los permisos que necesita Google Analytics sólo se conceden si hay un
+        // identificador cargado. Sin él la política queda igual de cerrada que
+        // antes: no se abre un hueco para algo que no se está usando.
+        var conAnalitica = app.Services
+            .GetRequiredService<IOptions<OpcionesAnalitica>>().Value.Habilitada;
 
         return app.Use(async (contexto, siguiente) =>
         {
@@ -58,6 +66,26 @@ public static class CabecerasSeguridad
                 "style-src 'self' 'unsafe-inline'",
                 $"script-src 'self' 'nonce-{nonce}'"
             };
+
+            if (conAnalitica)
+            {
+                // gtag.js se sirve desde googletagmanager.com; las mediciones se
+                // mandan a google-analytics.com, unas veces por fetch y otras por
+                // una imagen de un píxel, así que hacen falta las tres listas.
+                politica[politica.Count - 1] +=
+                    " https://www.googletagmanager.com";
+
+                var indiceConnect = politica.IndexOf("connect-src 'self'");
+                politica[indiceConnect] =
+                    "connect-src 'self' https://www.google-analytics.com " +
+                    "https://analytics.google.com https://*.analytics.google.com " +
+                    "https://www.googletagmanager.com";
+
+                var indiceImg = politica.IndexOf("img-src 'self' data:");
+                politica[indiceImg] =
+                    "img-src 'self' data: https://www.google-analytics.com " +
+                    "https://www.googletagmanager.com";
+            }
 
             if (enProduccion)
             {

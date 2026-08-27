@@ -179,7 +179,7 @@ public static class SembradorInicial
                           "corrido, dos dormitorios con placard y cocina independiente. Excelente " +
                           "luminosidad durante todo el día y frente despejado hacia el este.",
             Comodidades = new() { "Balcón corrido", "Piso alto", "Luminoso", "Cocina independiente", "Portero", "Apto crédito" },
-            Fotos = new() { "/imagenes/Av%20Entre%20Rios%20500/Frente.jpg" }
+            Fotos = new() { "/imagenes/Av%20Entre%20Rios%20500/Frente.webp" }
         },
         new Propiedad
         {
@@ -204,7 +204,7 @@ public static class SembradorInicial
                           "dormitorio con placard, cocina completa y baño con bañera. Edificio " +
                           "con expensas contenidas y a cuadras de la estación Constitución.",
             Comodidades = new() { "Apto crédito", "Expensas bajas", "Cerca del subte", "Placard", "Contrafrente" },
-            Fotos = new() { "/imagenes/Cochabamba%201700/Frente.jpg" }
+            Fotos = new() { "/imagenes/Cochabamba%201700/Frente.webp" }
         },
         new Propiedad
         {
@@ -228,7 +228,7 @@ public static class SembradorInicial
                           "y terminaciones de primera. Entrepiso con altura, patio propio con " +
                           "parrilla y sin expensas. Una tipología difícil de conseguir en la zona.",
             Comodidades = new() { "Sin expensas", "Patio propio", "Parrilla", "Entrepiso", "Reciclado a nuevo", "Apto crédito" },
-            Fotos = new() { "/imagenes/Solis%20700/Frente.jpg" }
+            Fotos = new() { "/imagenes/Solis%20700/Frente.webp" }
         },
         new Propiedad
         {

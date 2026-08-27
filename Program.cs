@@ -76,6 +76,10 @@ builder.Services.AddSingleton<CorreoService>();
 // Dominio del sitio, para las URL absolutas (canónicas, Open Graph, sitemap).
 builder.Services.Configure<OpcionesSitio>(builder.Configuration.GetSection(OpcionesSitio.Seccion));
 
+// Medición. Nace apagada: sin el identificador de Google Analytics del cliente
+// no se carga ningún script de terceros ni se deja ninguna cookie que consentir.
+builder.Services.Configure<OpcionesAnalitica>(builder.Configuration.GetSection(OpcionesAnalitica.Seccion));
+
 // Respaldo diario de la base y de las fotos.
 // Cotización del Banco Nación, para mostrar en pesos lo que se publica en dólares.
 builder.Services.AddHttpClient();

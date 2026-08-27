@@ -108,22 +108,14 @@ que nadie se entere y se descubre el día del apuro.
 Sirve igual para un dominio provisorio —para mostrarle el sitio a alguien antes
 de comprar el definitivo— que para el real cuando esté comprado.
 
-### Un dominio provisorio y gratuito, con DuckDNS
-
-1. Entrar a <https://www.duckdns.org>, iniciar sesión con Google o GitHub.
-2. En **domains**, escribir el nombre que se quiera (por ejemplo `enricci`) y
-   crearlo. Queda `enricci.duckdns.org`.
-3. En la fila del dominio, poner en **current ip** la IP del servidor y
-   **update ip**. Tarda alrededor de un minuto en propagarse.
-
 ### Aplicarlo
 
 ```powershell
-.\despliegue\dominio.ps1 enricci.duckdns.org
+.\despliegue\dominio.ps1 enriccipropiedades.com enriccipropiedades.com.ar
 ```
 
 ```bash
-bash despliegue/dominio.sh enricci.duckdns.org
+bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar
 ```
 
 Deja nginx atendiendo en ese nombre, saca el certificado de Let's Encrypt, pasa

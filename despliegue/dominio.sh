@@ -3,7 +3,6 @@
 # Pone el sitio a responder en un dominio, con HTTPS. Sirve tanto para el
 # provisorio de DuckDNS como para el definitivo cuando esté comprado:
 #
-#   bash despliegue/dominio.sh enricci.duckdns.org
 #   bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar
 #
 # Antes de correrlo, el dominio tiene que estar apuntando a la IP del servidor.
@@ -54,7 +53,6 @@ LLAVE="${LLAVE:-$HOME/.ssh/enricci.key}"
 
 if [[ ${#DOMINIOS[@]} -eq 0 ]]; then
     echo "Falta el dominio. Ejemplos:" >&2
-    echo "  bash despliegue/dominio.sh enricci.duckdns.org" >&2
     echo "  bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar" >&2
     exit 1
 fi
@@ -166,10 +164,32 @@ for n in $NOMBRES; do D_ARGS="$D_ARGS -d $n"; done
 # pedidos: sin la bandera, certbot para y pregunta si querés ampliarlo, y en un
 # script sin nadie mirando eso es un cuelgue. Es el caso al mudarse de un
 # dominio provisorio a uno definitivo.
+#
+# Y al revés: si el certificado que ya existe cubre nombres que esta vez NO se
+# piden, hay que forzar la reemisión. Con --keep-until-expiring certbot lo daría
+# por bueno —cubre todo lo pedido— y los nombres de más se quedarían adentro.
+#
+# Eso importa más de lo que parece: un nombre que sobra es un nombre que certbot
+# valida en cada renovación. El día que se deje de usar y deje de resolver, la
+# renovación falla y se cae el certificado ENTERO, incluidos los dominios que sí
+# se usan.
+FORZAR=""
+if sudo test -f "/etc/letsencrypt/renewal/$DOMINIO.conf"; then
+    ACTUALES=$(sudo certbot certificates --cert-name "$DOMINIO" 2>/dev/null \
+        | sed -n 's/^ *Domains: //p')
+    for viejo in $ACTUALES; do
+        if ! echo " $NOMBRES " | grep -q " $viejo "; then
+            echo "    el certificado tenía $viejo y ya no se pide: se reemite"
+            FORZAR="--force-renewal"
+            break
+        fi
+    done
+fi
+
 sudo certbot certonly --webroot -w /var/www/certbot \
     --cert-name "$DOMINIO" \
     $D_ARGS \
-    --expand \
+    --expand $FORZAR \
     --non-interactive --agree-tos --email "$MAIL" \
     --keep-until-expiring
 

@@ -1,6 +1,5 @@
 # Pone el sitio a responder en un dominio, con HTTPS, desde PowerShell.
 #
-#   .\despliegue\dominio.ps1 enricci.duckdns.org
 #   .\despliegue\dominio.ps1 enriccipropiedades.com -Mail micorreo@ejemplo.com
 #
 # Antes de correrlo, el dominio tiene que estar apuntando a la IP del servidor.

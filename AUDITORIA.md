@@ -9,17 +9,17 @@ De los **50 puntos aplicables** al modelo «servicios»:
 
 | Estado | Puntos |
 |---|---|
-| **`ok`** — cumplido y verificado | **32** |
-| `parcial` — está pero a medias | 6 |
+| **`ok`** — cumplido y verificado | **33** |
+| `parcial` — está pero a medias | 5 |
 | `cliente` — depende de datos de Horacio | 8 |
 | `falta` — no está y se puede hacer | 4 |
 
-**4 arreglados en esta pasada** (C7, C8, M1 y M3, más limpieza de R2). Quedan
+**5 arreglados en esta pasada** (C7, C8, M1, M3 y T1, más limpieza de R2). Quedan
 **2 críticos pendientes**, los dos por falta de datos que sólo tiene Horacio.
 
 > **Corrección.** Una versión anterior de este informe decía «45 de 50 cumplidos».
 > Ese número no salía del detalle punto por punto, salía de sumar mal: contaba como
-> cumplidos los `parcial` y los `cliente`. El número real de `ok` es **32**. Los
+> cumplidos los `parcial` y los `cliente`. El número real de `ok` era **32**; tras resolver T1 son **33**. Los
 > puntos individuales de más abajo nunca cambiaron; lo que estaba mal era el total.
 
 El sitio ya estaba muy por encima de la media técnica: canonical, Open Graph
@@ -37,10 +37,13 @@ La primera versión de este informe decía que el sitio no estaba publicado. **E
 publicado y funcionando**, verificado el 2026-08-27:
 
 - Sirve desde `168.138.128.137` detrás de **nginx**, con la aplicación por detrás.
-- Dominio provisorio **`enricci-propiedades.duckdns.org`**, con certificado de
-  Let's Encrypt válido hasta el 2026-11-20.
-- `http://` redirige a `https://` con **301** en el dominio. Compresión **brotli**
-  activa. HSTS con `max-age=2592000` (30 días). La CSP llega intacta.
+- **Dominios definitivos**, comprados en DonWeb y vigentes hasta el 01/12/2026:
+  `enriccipropiedades.com` es el principal, y `enriccipropiedades.com.ar` y los
+  dos `www` redirigen a él con 301. Un solo certificado de Let's Encrypt cubre
+  los cuatro nombres y vence el 2026-11-25.
+- `http://` redirige a `https://` con **301**, **también cuando se entra por la
+  IP**. Compresión **brotli** activa. HSTS con `max-age=2592000` (30 días). La
+  CSP llega intacta.
 - Primer byte en **0,68 s** y home completa en **1,33 s** con 123 KB. Es un buen
   número; no reemplaza a Lighthouse, pero descarta que haya un problema grueso.
 
@@ -103,9 +106,9 @@ sin haber ninguna etiqueta de script de terceros en el HTML inicial.
 ## Pendiente: crítico
 
 ### M2 · Search Console verificado
-Sin verificar. Es lo que avisa si Google deja de indexar el sitio. Ahora que el sitio
-responde en `enricci-propiedades.duckdns.org` **ya se puede dar de alta**, sin esperar
-al dominio definitivo.
+Sin verificar. Es lo que avisa si Google deja de indexar el sitio. El dominio
+definitivo ya responde, así que se da de alta `enriccipropiedades.com` — el
+principal, no el `.com.ar`, que redirige.
 **Qué hace falta:** acceso a la cuenta de Google de Horacio.
 
 ### M1 · Analítica: falta el identificador
@@ -134,17 +137,15 @@ las respuestas son información del negocio. Una FAQ con respuestas inventadas s
 comisiones es peor que no tener FAQ. En cuanto Horacio conteste las preguntas, la
 página se arma en una tarde.
 
-### T1 · HTTPS: la IP responde por HTTP sin redirigir
-En el dominio, `http://` devuelve **301** a `https://` — correcto. Pero
-`http://168.138.128.137/` devuelve **200** y sirve el sitio en claro.
-**Qué hace falta:** un bloque en nginx que redirija también cuando el `Host` es la IP,
-o que directamente rechace los pedidos que no traigan el dominio.
+### ~~T1 · HTTPS: la IP responde por HTTP sin redirigir~~ — resuelto
+La causa era un `enricci-provisorio` en nginx, de cuando se montó el dominio
+provisorio: un `default_server` con `server_name _` que proxeaba al sitio
+**cualquier** pedido que llegara por el puerto 80, sin importar el nombre. Por
+eso respondía la IP en claro.
 
-### Canónicas apuntando al dominio provisorio
-En producción, `<link rel="canonical">` dice `enricci-propiedades.duckdns.org`, que es
-lo correcto hoy. **Pero el día que resuelva `enriccipropiedades.com` hay que
-cargarlo en `Sitio:Dominio`** o Google va a seguir indexando el dominio viejo. Es una
-línea de configuración; lo importante es no olvidarla.
+Se eliminó al retirar el dominio provisorio. Ahora un pedido por la IP —o por
+cualquier nombre que no sea de los cuatro— cae en el bloque normal del puerto 80
+y redirige con 301 a `https://enriccipropiedades.com`.
 
 ### C9 · Redes sociales
 Instagram está cargado y enlazado. `SitioInfo.Facebook` está **vacío**: o se completa,

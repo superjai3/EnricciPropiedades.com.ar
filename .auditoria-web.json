@@ -5,7 +5,7 @@
   "modelo": "servicios",
   "commit": "9ae2bdc",
   "puntos": {
-    "T1": "parcial",
+    "T1": "ok",
     "T2": "ok",
     "T3": "ok",
     "T4": "ok",
@@ -82,18 +82,21 @@
   },
   "resumen": {
     "aplicables": 50,
-    "ok": 32,
-    "parcial": 6,
+    "ok": 33,
+    "parcial": 5,
     "cliente": 8,
     "falta": 4,
-    "arreglados": 4
+    "arreglados": 5
   },
   "rama": "mejoras/auditoria-web-2026-08-27",
   "publicado": {
-    "url": "https://enricci-propiedades.duckdns.org",
+    "url": "https://enriccipropiedades.com",
+    "alias": [
+      "enriccipropiedades.com.ar"
+    ],
     "ip": "168.138.128.137",
     "servidor": "nginx",
-    "certificado": "Lets Encrypt hasta 2026-11-20",
+    "certificado": "Lets Encrypt hasta 2026-11-25",
     "verificado": "2026-08-27"
   }
 }

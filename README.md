@@ -14,7 +14,7 @@ de un millón de dólares de facturación anual.
 
 El sitio está publicado en un servidor propio (Oracle Cloud Free Tier, Ubuntu
 24.04) detrás de nginx. El dominio definitivo va a ser
-`enricci-propiedades.com.ar`; mientras tanto responde en un dominio provisorio
+`enriccipropiedades.com`; mientras tanto responde en un dominio provisorio
 de DuckDNS. Ver *Publicar en el servidor*.
 
 ## Cómo ejecutarlo
@@ -551,7 +551,7 @@ Cuando el dominio esté andando conviene además acotar `AllowedHosts`, que hoy
 está en `*`:
 
 ```json
-"AllowedHosts": "enricci-propiedades.com.ar;www.enricci-propiedades.com.ar"
+"AllowedHosts": "enriccipropiedades.com;www.enriccipropiedades.com"
 ```
 
 ## Publicar en el servidor

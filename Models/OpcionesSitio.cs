@@ -13,7 +13,7 @@ public class OpcionesSitio
 
     /// <summary>
     /// Dominio definitivo, sin esquema ni barra final (por ejemplo
-    /// "www.enricci-propiedades.com.ar"). Vacío mientras no esté dado de alta:
+    /// "www.enriccipropiedades.com"). Vacío mientras no esté dado de alta:
     /// en ese caso las URL absolutas salen del host del pedido, que es lo
     /// correcto en desarrollo y con un túnel de pruebas.
     /// </summary>

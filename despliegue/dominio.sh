@@ -4,7 +4,7 @@
 # provisorio de DuckDNS como para el definitivo cuando esté comprado:
 #
 #   bash despliegue/dominio.sh enricci.duckdns.org
-#   bash despliegue/dominio.sh enricci-propiedades.com.ar micorreo@ejemplo.com
+#   bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar
 #
 # Antes de correrlo, el dominio tiene que estar apuntando a la IP del servidor.
 # En DuckDNS eso es escribir el nombre y la IP en el panel; tarda un minuto.
@@ -16,41 +16,89 @@
 
 set -euo pipefail
 
-DOMINIO="${1:-}"
-# Let's Encrypt usa este correo para avisar si un certificado está por vencer
-# sin haberse renovado. Nunca manda publicidad.
-MAIL="${2:-horacioenricci@gmail.com}"
+# El primero es el dominio principal —el que ve el visitante y el que declaran
+# las URL canónicas— y los demás son alias que redirigen a él.
+#
+# Enricci tiene dos comprados: enriccipropiedades.com y enriccipropiedades.com.ar.
+# Sirviendo el mismo sitio en los dos, un buscador ve el contenido duplicado en
+# dos direcciones y reparte el posicionamiento; con uno principal y el otro
+# redirigiendo, todo el peso queda en uno solo.
+#
+#   bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar
+#
+# El correo se reconoce por la arroba, vaya en la posición que vaya, así que la
+# forma vieja —dominio y después correo— sigue funcionando igual.
+# Let's Encrypt lo usa sólo para avisar si un certificado está por vencer sin
+# haberse renovado. Nunca manda publicidad.
+MAIL="horacioenricci@gmail.com"
+DOMINIOS=()
+
+for arg in "$@"; do
+    if [[ "$arg" == *"@"* ]]; then
+        MAIL="$arg"
+        continue
+    fi
+    # Un dominio con "http://" adelante o con barra al final es el error más
+    # probable al copiar y pegar. Se limpia en vez de fallar más adelante.
+    limpio="${arg#http://}"
+    limpio="${limpio#https://}"
+    limpio="${limpio%%/*}"
+    # El www lo agrega el script solo; si viene escrito, se quita para no
+    # terminar pidiendo un certificado para www.www.dominio.
+    limpio="${limpio#www.}"
+    [[ -n "$limpio" ]] && DOMINIOS+=("$limpio")
+done
 
 SERVIDOR="${SERVIDOR:-ubuntu@168.138.128.137}"
 LLAVE="${LLAVE:-$HOME/.ssh/enricci.key}"
 
-if [[ -z "$DOMINIO" ]]; then
-    echo "Falta el dominio. Ejemplo:" >&2
+if [[ ${#DOMINIOS[@]} -eq 0 ]]; then
+    echo "Falta el dominio. Ejemplos:" >&2
     echo "  bash despliegue/dominio.sh enricci.duckdns.org" >&2
+    echo "  bash despliegue/dominio.sh enriccipropiedades.com enriccipropiedades.com.ar" >&2
     exit 1
 fi
 
-# Un dominio con "http://" adelante o con barra al final es el error más
-# probable al copiar y pegar. Se limpia en vez de fallar más adelante.
-DOMINIO="${DOMINIO#http://}"
-DOMINIO="${DOMINIO#https://}"
-DOMINIO="${DOMINIO%%/*}"
+DOMINIO="${DOMINIOS[0]}"
+ALIAS="${DOMINIOS[*]:1}"
 
 echo "==> Configurando $DOMINIO en $SERVIDOR"
+[[ -n "$ALIAS" ]] && echo "    redirigen a él: $ALIAS"
 
 ssh -i "$LLAVE" -o StrictHostKeyChecking=accept-new "$SERVIDOR" \
-    "DOMINIO='$DOMINIO' MAIL='$MAIL' bash -s" <<'REMOTO'
+    "DOMINIO='$DOMINIO' ALIAS='$ALIAS' MAIL='$MAIL' bash -s" <<'REMOTO'
 set -euo pipefail
 
-echo "  - comprobando que el dominio resuelva"
-if ! getent hosts "$DOMINIO" > /dev/null; then
-    echo "  ERROR: $DOMINIO todavía no resuelve a ninguna dirección." >&2
-    echo "  Revisá que esté dado de alta y apuntando a la IP de este servidor," >&2
-    echo "  esperá un minuto y volvé a intentar." >&2
+# Todos los nombres que va a atender el sitio: cada dominio y su www. El www se
+# agrega siempre porque medio mundo lo escribe, y un certificado que no lo cubre
+# da un aviso de seguridad en el navegador, que es peor que un 404.
+NOMBRES=""
+for d in $DOMINIO $ALIAS; do
+    NOMBRES="$NOMBRES $d www.$d"
+done
+NOMBRES="${NOMBRES# }"
+
+echo "  - comprobando que los dominios resuelvan"
+# Se comprueban todos antes de pedir el certificado. Let's Encrypt limita a
+# cinco fallos por hora: si uno de los nombres no resuelve, el pedido entero
+# falla y se gasta un intento por un dominio que ni siquiera es el principal.
+FALTAN=""
+for n in $NOMBRES; do
+    if getent hosts "$n" > /dev/null; then
+        echo "    $n -> $(getent hosts "$n" | awk '{print $1}' | head -1)"
+    else
+        echo "    $n -> NO RESUELVE"
+        FALTAN="$FALTAN $n"
+    fi
+done
+
+if [[ -n "$FALTAN" ]]; then
+    echo >&2
+    echo "  ERROR: estos nombres no resuelven:$FALTAN" >&2
+    echo "  Revisá que cada uno tenga su registro A apuntando a este servidor," >&2
+    echo "  esperá a que propague y volvé a intentar." >&2
     exit 1
 fi
-
-echo "    $DOMINIO -> $(getent hosts "$DOMINIO" | awk '{print $1}' | tr '\n' ' ')"
 
 sudo mkdir -p /var/www/certbot
 
@@ -62,7 +110,7 @@ sudo tee /etc/nginx/sites-available/enricci > /dev/null <<'NGINX'
 server {
     listen 80;
     listen [::]:80;
-    server_name DOMINIO_AQUI;
+    server_name NOMBRES_AQUI;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -84,6 +132,17 @@ server {
 }
 NGINX
 
+# Todos los nombres MENOS el principal: son los que redirigen. El www del
+# propio dominio principal entra acá también, para que haya una sola
+# direccion que sirva contenido.
+REDIRIGEN=""
+for n in $NOMBRES; do
+    [ "$n" = "$DOMINIO" ] || REDIRIGEN="$REDIRIGEN $n"
+done
+REDIRIGEN="${REDIRIGEN# }"
+
+sudo sed -i "s/NOMBRES_AQUI/$NOMBRES/g" /etc/nginx/sites-available/enricci
+sudo sed -i "s/ALIAS_AQUI/$REDIRIGEN/g" /etc/nginx/sites-available/enricci
 sudo sed -i "s/DOMINIO_AQUI/$DOMINIO/g" /etc/nginx/sites-available/enricci
 sudo ln -sf /etc/nginx/sites-available/enricci /etc/nginx/sites-enabled/enricci
 sudo rm -f /etc/nginx/sites-enabled/default
@@ -92,8 +151,14 @@ sudo systemctl reload nginx
 
 # --- Paso 2: el certificado ---------------------------------------------------
 echo "  - pidiendo el certificado a Let's Encrypt"
+# Un -d por cada nombre, todos en el MISMO certificado. Pedir uno por dominio
+# multiplica los intentos contra el límite de Let's Encrypt —cinco fallos por
+# hora— y después hay que vigilar varias renovaciones en vez de una.
+D_ARGS=""
+for n in $NOMBRES; do D_ARGS="$D_ARGS -d $n"; done
+
 sudo certbot certonly --webroot -w /var/www/certbot \
-    -d "$DOMINIO" \
+    $D_ARGS \
     --non-interactive --agree-tos --email "$MAIL" \
     --keep-until-expiring
 
@@ -101,10 +166,15 @@ sudo certbot certonly --webroot -w /var/www/certbot \
 echo "  - pasando nginx a HTTPS"
 sudo tee /etc/nginx/sites-available/enricci > /dev/null <<'NGINX'
 # HTTP: sólo para renovar el certificado y mandar todo a HTTPS.
+#
+# Atiende TODOS los nombres —el principal, los alias y sus www— y los manda al
+# principal por HTTPS. Así cualquier forma de escribir la dirección termina en
+# la misma, que es lo que necesita un buscador para no repartir el
+# posicionamiento entre varias.
 server {
     listen 80;
     listen [::]:80;
-    server_name DOMINIO_AQUI;
+    server_name NOMBRES_AQUI;
 
     # Tiene que seguir accesible por HTTP: si se redirige también esto, la
     # renovación automática falla y el certificado vence en noventa días.
@@ -117,10 +187,30 @@ server {
     }
 }
 
+# HTTPS de los alias: mismo certificado, y de acá también al principal.
+# Va antes del bloque principal a propósito: nginx elige por nombre exacto, así
+# que el orden no cambia nada, pero leerlo en este orden deja claro que los
+# alias no sirven contenido.
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
 HTTP2_AQUI
+    server_name ALIAS_AQUI;
+
+    ssl_certificate     /etc/letsencrypt/live/DOMINIO_AQUI/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/DOMINIO_AQUI/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    return 301 https://DOMINIO_AQUI$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+HTTP2_AQUI
+    # Sólo el dominio pelado. El www y los alias entran por el bloque de arriba
+    # y redirigen acá: si www sirviera contenido, volverían a ser dos
+    # direcciones con lo mismo, que es justo lo que se quiere evitar.
     server_name DOMINIO_AQUI;
 
     ssl_certificate     /etc/letsencrypt/live/DOMINIO_AQUI/fullchain.pem;
@@ -170,6 +260,17 @@ HTTP2_AQUI
 }
 NGINX
 
+# Todos los nombres MENOS el principal: son los que redirigen. El www del
+# propio dominio principal entra acá también, para que haya una sola
+# direccion que sirva contenido.
+REDIRIGEN=""
+for n in $NOMBRES; do
+    [ "$n" = "$DOMINIO" ] || REDIRIGEN="$REDIRIGEN $n"
+done
+REDIRIGEN="${REDIRIGEN# }"
+
+sudo sed -i "s/NOMBRES_AQUI/$NOMBRES/g" /etc/nginx/sites-available/enricci
+sudo sed -i "s/ALIAS_AQUI/$REDIRIGEN/g" /etc/nginx/sites-available/enricci
 sudo sed -i "s/DOMINIO_AQUI/$DOMINIO/g" /etc/nginx/sites-available/enricci
 
 # HTTP/2 se pide de dos maneras distintas según la versión de nginx, y la que

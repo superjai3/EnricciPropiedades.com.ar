@@ -33,8 +33,24 @@ nombres de clases y variables, y los textos del sitio.
 
 Oracle Cloud Free Tier, Ubuntu 24.04, `168.138.128.137` (IP efímera). La
 aplicación vive en `/var/www/enricci` y los datos —base, fotos, respaldos— en
-`/var/lib/enricci`, fuera del alcance de un despliegue. El dominio definitivo
-va a ser `enricci-propiedades.com.ar`, todavía sin comprar.
+`/var/lib/enricci`, fuera del alcance de un despliegue.
+
+## Los dominios
+
+Comprados los dos en **DonWeb**, vencen el 01/12/2026:
+
+- **`enriccipropiedades.com`** — el principal. Es el que va en `Sitio:Dominio`,
+  el que declaran las canónicas y el que se le muestra al cliente.
+- **`enriccipropiedades.com.ar`** — alias. Redirige con 301 al principal.
+
+Ojo con la costumbre: durante meses el nombre previsto fue
+`enricci-propiedades.com.ar`, **con guion**, y nunca se compró. Ese no existe.
+Los comprados van sin guion.
+
+Sirviendo el mismo sitio en los dos dominios, un buscador ve el contenido
+duplicado y reparte el posicionamiento entre las dos direcciones. Por eso uno
+sirve y el otro redirige, y por eso `dominio.sh` recibe los dos: el primero es
+el principal.
 
 ## Datos que no están confirmados
 

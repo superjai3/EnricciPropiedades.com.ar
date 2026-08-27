@@ -135,7 +135,7 @@ está, lo reutiliza.
 El mismo comando sirve el día que esté el dominio definitivo:
 
 ```powershell
-.\despliegue\dominio.ps1 enricci-propiedades.com.ar
+.\despliegue\dominio.ps1 enriccipropiedades.com
 ```
 
 ### Si el navegador no abre el sitio
@@ -249,8 +249,8 @@ Con el sitio andando por el dominio, dos ajustes finales en
 `/etc/enricci/enricci.env`:
 
 ```bash
-Sitio__Dominio=www.enricci-propiedades.com.ar
-AllowedHosts=enricci-propiedades.com.ar;www.enricci-propiedades.com.ar
+Sitio__Dominio=www.enriccipropiedades.com
+AllowedHosts=enriccipropiedades.com;www.enriccipropiedades.com
 ```
 
 ```bash
@@ -258,7 +258,7 @@ sudo systemctl restart enricci
 ```
 
 Y dar de alta el dominio en **Google Search Console**, enviando
-`https://www.enricci-propiedades.com.ar/sitemap.xml`.
+`https://www.enriccipropiedades.com/sitemap.xml`.
 
 ---
 

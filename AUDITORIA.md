@@ -142,7 +142,7 @@ o que directamente rechace los pedidos que no traigan el dominio.
 
 ### Canónicas apuntando al dominio provisorio
 En producción, `<link rel="canonical">` dice `enricci-propiedades.duckdns.org`, que es
-lo correcto hoy. **Pero el día que resuelva `enricci-propiedades.com.ar` hay que
+lo correcto hoy. **Pero el día que resuelva `enriccipropiedades.com` hay que
 cargarlo en `Sitio:Dominio`** o Google va a seguir indexando el dominio viejo. Es una
 línea de configuración; lo importante es no olvidarla.
 
@@ -198,7 +198,7 @@ Lista concreta para pedirle a Horacio, ordenada por lo que más mueve la aguja:
 10. **Credenciales SMTP** — `Correo:Habilitado` sigue en `false`. Las consultas se
     guardan en la base igual, así que no se pierde ningún contacto, pero no llega el
     aviso por mail.
-11. **El dominio `enricci-propiedades.com.ar`** cuando resuelva, para cargarlo en
+11. **El dominio `enriccipropiedades.com`** cuando resuelva, para cargarlo en
     `Sitio:Dominio` y recién ahí acotar `AllowedHosts`, hoy en `*`.
 
 ## Fuera del checklist, pero conviene
@@ -208,7 +208,7 @@ Lista concreta para pedirle a Horacio, ordenada por lo que más mueve la aguja:
 - **`wwwroot/lib`** — 712 KB de jQuery y jquery-validation. Dos páginas del panel usan
   la validación, así que jQuery se queda; revisar si sobra el resto.
 - **Email de contacto en `@gmail.com`** — con el dominio resuelto conviene pasar a
-  `contacto@enricci-propiedades.com.ar`. Pesa en confianza.
+  `contacto@enriccipropiedades.com`. Pesa en confianza.
 - **Las 9 publicaciones importadas de Argenprop** tienen superficies, baños y
   antigüedades en 0 (= "no figura"); falta completarlas desde el panel. Y queda una con
   el barrio cargado como «Río de Janeiro», que en CABA es una avenida y no un barrio —

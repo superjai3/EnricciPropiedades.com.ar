@@ -52,3 +52,7 @@ Desktop.ini
 
 # Respaldos automáticos (base + fotos). Viven en el servidor, no en el repositorio.
 respaldos/
+
+# Respaldos locales de la base y las fotos. Son datos, y pesan: no van al
+# repositorio. Viven acá al lado para tenerlos a mano al trabajar.
+_respaldos/

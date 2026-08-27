@@ -3,13 +3,13 @@
 ## Cómo publica Jaime
 
 Trabaja en **Windows, con PowerShell** (no con Git Bash). El proyecto está en
-`C:\Users\jaime\source\repos\EnricciPropiedades.com.ar`.
+`E:\Proyectos\EnricciPropiedades.com.ar`.
 
 **Al final de todo mensaje que incluya cambios publicables, hay que pasarle
 estas tres líneas, sin que las pida y siempre en PowerShell:**
 
 ```powershell
-cd C:\Users\jaime\source\repos\EnricciPropiedades.com.ar
+cd E:\Proyectos\EnricciPropiedades.com.ar
 git pull origin claude/horacio-real-estate-website-bt6gfo
 .\despliegue\publicar.ps1
 ```

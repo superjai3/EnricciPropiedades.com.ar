@@ -10,9 +10,18 @@
     <div class="contenedor">
         <div class="hero__grid">
             <div>
+                @* PENDIENTE: confirmar con Horacio lo de "tres generaciones"
+                   (SitioInfo.HitosConfirmados). Mientras tanto, sólo el año. *@
                 <p class="hero__sello">
                     <b>@SitioInfo.AnioFundacion</b>
-                    Tres generaciones operando en el sur porteño
+                    @if (SitioInfo.HitosConfirmados)
+                    {
+                        <text>Tres generaciones operando en el sur porteño</text>
+                    }
+                    else
+                    {
+                        <text>Oficina de barrio en el sur porteño</text>
+                    }
                 </p>
                 <h1 class="hero__titulo">
                     <span class="linea"><span>La inmobiliaria</span></span>
@@ -50,8 +59,16 @@
                          alt="Edificio en Cochabamba 1700, Constitución" width="1200" height="900" loading="lazy" decoding="async" />
                 </div>
                 <div class="collage__pieza collage__pieza--d">
-                    <span class="n"><span data-contador="93" data-sufijo="">0</span> años</span>
-                    <span class="l">Operando en CABA</span>
+                    @if (SitioInfo.AniosDeTrayectoria is { } aniosCollage)
+                    {
+                        <span class="n"><span data-contador="@aniosCollage" data-sufijo="">0</span> años</span>
+                        <span class="l">Operando en CABA</span>
+                    }
+                    else
+                    {
+                        <span class="n">CABA</span>
+                        <span class="l">Oficina de barrio</span>
+                    }
                 </div>
                 <div class="collage__pieza collage__pieza--c">
                     <img src="~/imagenes/Solis 700/Frente.webp"
@@ -276,14 +293,13 @@
             </div>
 
             <div class="metricas revelar revelar-2">
-                <div class="metrica">
-                    <p class="metrica__n"><span data-contador="93">0</span></p>
-                    <p class="metrica__l">años ininterrumpidos operando en la Ciudad de Buenos Aires</p>
-                </div>
-                <div class="metrica">
-                    <p class="metrica__n"><span data-contador="1400" data-sufijo="+">0</span></p>
-                    <p class="metrica__l">operaciones de compraventa y alquiler concretadas</p>
-                </div>
+                @if (SitioInfo.AniosDeTrayectoria is { } anios)
+                {
+                    <div class="metrica">
+                        <p class="metrica__n"><span data-contador="@anios">0</span></p>
+                        <p class="metrica__l">años operando en la Ciudad de Buenos Aires</p>
+                    </div>
+                }
                 <div class="metrica">
                     <p class="metrica__n"><span data-contador="8">0</span></p>
                     <p class="metrica__l">barrios del sur porteño que conocemos calle por calle</p>

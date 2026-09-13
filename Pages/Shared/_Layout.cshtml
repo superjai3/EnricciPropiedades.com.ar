@@ -116,7 +116,7 @@
                         </a>
                         <ul class="submenu">
                             <li>
-                                <a asp-page="/Quienes_Somos">Quiénes somos<small>Tres generaciones en el barrio</small></a>
+                                <a asp-page="/Quienes_Somos">Quiénes somos<small>@(SitioInfo.HitosConfirmados ? "Tres generaciones en el barrio" : "Una oficina de barrio desde " + SitioInfo.AnioFundacion)</small></a>
                             </li>
                             <li>
                                 <a asp-page="/Mision">Misión<small>Para qué trabajamos</small></a>

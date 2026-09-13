@@ -1083,36 +1083,6 @@ select.control {
 .hito p { margin: 0; color: var(--texto-suave); }
 @media (max-width: 640px) { .hito { grid-template-columns: 1fr; gap: var(--sp-2); } }
 
-/* 5.12 Testimonios */
-.testimonios { display: grid; gap: var(--sp-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
-.testimonio {
-    padding: var(--sp-6);
-    border-radius: var(--r-lg);
-    background: var(--bg-elev);
-    border: 1px solid var(--linea);
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-}
-.testimonio blockquote {
-    margin: 0;
-    font-family: var(--f-serif);
-    font-size: 1.12rem;
-    line-height: 1.55;
-    letter-spacing: -.01em;
-}
-.testimonio figcaption { display: flex; align-items: center; gap: .75rem; margin-top: auto; }
-.avatar {
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    background: var(--rojo-100);
-    color: var(--rojo-800);
-    font-weight: 800;
-    font-size: .9rem;
-}
-.estrellas { color: var(--rojo); letter-spacing: .18em; font-size: .85rem; }
-
 /* 5.13 Franja CTA */
 .franja-cta {
     position: relative;

@@ -333,6 +333,29 @@
                     <a class="pie__panel" asp-page="/Admin/Index" rel="nofollow">Administrar</a>
                 </span>
             </div>
+
+            @* Identificación del oferente y enlace a Defensa del Consumidor
+               (Res. 424/2020). Los datos fiscales salen de SitioInfo y sólo se
+               muestran los que están cargados: nunca un dato inventado. *@
+            <div class="pie__cumplimiento">
+                @{
+                    var datosFiscales = new[]
+                    {
+                        string.IsNullOrWhiteSpace(SitioInfo.RazonSocial) ? null : SitioInfo.RazonSocial,
+                        string.IsNullOrWhiteSpace(SitioInfo.Cuit) ? null : $"CUIT {SitioInfo.Cuit}",
+                        string.IsNullOrWhiteSpace(SitioInfo.CondicionIva) ? null : SitioInfo.CondicionIva
+                    }.Where(d => d is not null).ToArray();
+                }
+                @if (datosFiscales.Length > 0)
+                {
+                    <p>@string.Join(" · ", datosFiscales)</p>
+                }
+                <p>
+                    <a href="@SitioInfo.DefensaConsumidorUrl" target="_blank" rel="noopener">
+                        Defensa de las y los consumidores. Para reclamos ingrese aquí
+                    </a>
+                </p>
+            </div>
         </div>
     </footer>
 

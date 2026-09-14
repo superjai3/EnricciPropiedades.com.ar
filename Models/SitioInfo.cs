@@ -70,6 +70,26 @@ public static class SitioInfo
     public const string HoraApertura = "11:00";
     public const string HoraCierre = "18:30";
 
+    // --- Identificación del oferente (Res. 424/2020 de la Secretaría de Comercio) ---
+    // PENDIENTE: completar con los datos fiscales reales. Vacíos, el pie no los
+    // muestra; nunca se inventan.
+
+    /// <summary>Razón social o nombre del titular tal como figura en AFIP. Vacío hasta confirmarlo.</summary>
+    public const string RazonSocial = "";
+
+    /// <summary>CUIT del oferente (formato 20-12345678-9). Vacío hasta confirmarlo.</summary>
+    public const string Cuit = "";
+
+    /// <summary>Condición frente al IVA (por ejemplo "Responsable Inscripto" o "Monotributista"). Vacío hasta confirmarlo.</summary>
+    public const string CondicionIva = "";
+
+    /// <summary>
+    /// Formulario de reclamos de Defensa de las y los Consumidores. El enlace
+    /// en el pie es obligatorio para quien ofrece bienes o servicios por internet.
+    /// </summary>
+    public const string DefensaConsumidorUrl =
+        "https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario";
+
     public const string Titular = "Raúl Horacio Enricci";
     public const string MatriculaNumero = "2377";
     public const string Matricula = $"{Titular} · Corredor inmobiliario · CUCICBA {MatriculaNumero}";

@@ -1139,6 +1139,19 @@ select.control {
     font-size: .78rem;
     opacity: .6;
 }
+/* Identificación fiscal y enlaces obligatorios (Defensa del Consumidor,
+   Política de privacidad). Van debajo de la línea legal, con la misma
+   discreción pero sin bajar del contraste mínimo legible. */
+.pie__cumplimiento {
+    margin-top: var(--sp-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+    font-size: .78rem;
+    opacity: .75;
+}
+.pie__cumplimiento p { margin: 0; }
+.pie__cumplimiento a { font-size: inherit; text-decoration: underline; text-underline-offset: .2em; }
 /* Acceso al panel de administración: discreto, sólo para la inmobiliaria. */
 .pie__panel {
     margin-inline-start: var(--sp-4);

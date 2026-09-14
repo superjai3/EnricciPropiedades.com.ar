@@ -64,8 +64,25 @@ public static class SembradorInicial
         var configuracion = servicios.GetRequiredService<IConfiguration>();
         var usuarios = servicios.GetRequiredService<UsuariosService>();
 
-        var nombre = configuracion["Admin:Nombre"] ?? "Horacio Enricci";
-        var email = configuracion["Admin:Email"] ?? SitioInfo.Email;
+        // El correo del usuario del panel no vive en appsettings.json (que está
+        // en el repositorio) sino en el entorno: /etc/enricci/enricci.env en el
+        // servidor o user-secrets en desarrollo. Sin él no se crea nada.
+        var email = configuracion["Admin:Email"];
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            log.LogWarning(
+                "No se creó el usuario del panel: falta Admin:Email. Definilo en " +
+                "/etc/enricci/enricci.env (Admin__Email=...) o con user-secrets y reiniciá.");
+            return;
+        }
+
+        var nombre = configuracion["Admin:Nombre"];
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            nombre = NombreDesdeEmail(email.Trim().ToLowerInvariant());
+        }
+
         var claveConfigurada = configuracion["Admin:ClaveInicial"];
 
         var clave = string.IsNullOrWhiteSpace(claveConfigurada) ? GenerarClave() : claveConfigurada;

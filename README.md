@@ -105,16 +105,20 @@ llegan por el sitio y se manejan los **respaldos**.
 
 ### El usuario del panel
 
-En el primer arranque se crea un único usuario a partir de la sección `Admin` de
-`appsettings.json`:
+En el primer arranque se crea un único usuario a partir de la sección `Admin`
+de la configuración. **El correo no va en `appsettings.json`**, que está en el
+repositorio: se define por fuera, en el servidor con `/etc/enricci/enricci.env`
+(ver `despliegue/enricci.env.ejemplo`) y en desarrollo con user-secrets:
 
-```json
-"Admin": {
-  "Nombre": "Horacio Enricci",
-  "Email": "horacioenricci@gmail.com",
-  "ClaveInicial": ""
-}
+```bash
+dotnet user-secrets set "Admin:Email" "correo@ejemplo.com"
+dotnet user-secrets set "Admin:Nombre" "Nombre Apellido"
+# o bien, en el servidor:
+export Admin__Email="correo@ejemplo.com"
 ```
+
+Sin `Admin:Email` no se crea ningún usuario y el log lo avisa al arrancar. Si
+falta el nombre, se deduce del correo.
 
 Con `ClaveInicial` vacía —que es lo recomendado— **se genera una contraseña al
 azar y se escribe en el archivo `clave-inicial.txt`**, en la misma carpeta que

@@ -78,7 +78,8 @@ sudo install -m 640 -o root -g enricci /tmp/enricci.env.ejemplo /etc/enricci/enr
 sudo nano /etc/enricci/enricci.env
 ```
 
-Completar la casilla y la contraseña de aplicación de Gmail. **Dejar
+Completar `Admin__Email` (el correo con el que se entra al panel; sin él no se
+crea el usuario), la casilla y la contraseña de aplicación de Gmail. **Dejar
 `Sitio__Dominio` vacío hasta que el dominio resuelva de verdad**, y `AllowedHosts`
 comentado hasta que el sitio esté andando por el dominio.
 

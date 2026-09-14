@@ -68,6 +68,7 @@ Pages/
   Quienes_Somos         Historia, línea de tiempo y valores
   Mision / Vision       Páginas institucionales
   Contacto              Formulario de consulta
+  Privacidad            Política de privacidad (Ley 25.326); enlazada desde el pie y los formularios
   Error                 404 y errores generales
   Sitemap               Mapa del sitio en /sitemap.xml
   Robots                robots.txt generado, con los rastreadores de IA

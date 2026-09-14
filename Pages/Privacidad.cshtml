@@ -1,0 +1,136 @@
+@page
+@model PrivacidadModel
+@{
+    ViewData["Title"] = "Política de privacidad";
+    ViewData["Descripcion"] = $"Cómo trata {SitioInfo.Nombre}, inmobiliaria en Monserrat (CABA), los datos personales que dejás en los formularios de contacto y tasación: finalidad, plazo de conservación y derechos de acceso, rectificación y supresión según la Ley 25.326.";
+}
+
+@* BORRADOR: revisar con asesoría legal antes de darla por definitiva. El texto
+   sigue la Ley 25.326, su decreto reglamentario y la Disposición DNPDP 10/2008,
+   pero lo tiene que validar un profesional. Los datos del responsable salen de
+   SitioInfo; el CUIT queda pendiente de completar (SitioInfo.Cuit). *@
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <span>Política de privacidad</span>
+        </nav>
+        <p class="eyebrow">Tus datos</p>
+        <h1>Política de privacidad</h1>
+        <p class="plomo">
+            Qué datos recibimos cuando nos escribís por la web, para qué los usamos,
+            cuánto tiempo los guardamos y cómo podés pedir verlos, corregirlos o borrarlos.
+        </p>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor-angosto">
+        <div class="prosa revelar">
+            <h2>Responsable del tratamiento</h2>
+            <p>
+                <strong>@SitioInfo.Nombre</strong>, con domicilio en @SitioInfo.DireccionCompleta,
+                @SitioInfo.Localidad (@SitioInfo.CodigoPostal), Argentina.
+                Correo de contacto: <a href="@SitioInfo.MailA("Datos personales")">@SitioInfo.Email</a>.
+                Titular: @SitioInfo.Titular, corredor inmobiliario, CUCICBA @SitioInfo.MatriculaNumero.
+            </p>
+            @* PENDIENTE: completar SitioInfo.Cuit (y RazonSocial) con los datos
+               reales; mientras estén vacíos, la línea no se muestra. *@
+            @if (!string.IsNullOrWhiteSpace(SitioInfo.RazonSocial) || !string.IsNullOrWhiteSpace(SitioInfo.Cuit))
+            {
+                <p>
+                    @if (!string.IsNullOrWhiteSpace(SitioInfo.RazonSocial))
+                    {
+                        <text>Razón social: @SitioInfo.RazonSocial.</text>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(SitioInfo.Cuit))
+                    {
+                        <text>CUIT: @SitioInfo.Cuit.</text>
+                    }
+                </p>
+            }
+
+            <h2>Qué datos recibimos</h2>
+            <p>
+                Únicamente los que vos completás en los formularios del sitio:
+            </p>
+            <ul class="lista-chequeo" style="padding-left:0">
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Contacto y consulta por una propiedad:</strong> nombre y apellido, correo electrónico, teléfono (opcional), motivo y el texto de tu consulta. Si escribís desde la ficha de una publicación, también por cuál preguntaste.</span></li>
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Pedido de tasación:</strong> además de tus datos de contacto, la dirección, el barrio, el tipo, los ambientes y la superficie aproximada de la propiedad a tasar, y los comentarios que agregues.</span></li>
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Datos técnicos:</strong> la dirección IP desde la que se envía el formulario se usa sólo en el momento, para frenar envíos automáticos repetidos; no se guarda junto con la consulta.</span></li>
+            </ul>
+            <p>
+                El sitio no usa cookies de seguimiento ni herramientas de analítica de terceros.
+                Las únicas cookies son las del panel de administración, que sólo usa la inmobiliaria,
+                y la preferencia de tema claro u oscuro, que se guarda en tu navegador y no se envía a
+                ningún servidor.
+            </p>
+
+            <h2>Para qué los usamos</h2>
+            <p>
+                Para responder tu consulta o coordinar la tasación que pediste, y para llevar el
+                seguimiento de esa conversación desde el panel interno de la inmobiliaria. No los
+                usamos para enviarte publicidad ni los cedemos a terceros para otros fines.
+            </p>
+
+            <h2>Quiénes intervienen en el tratamiento</h2>
+            <p>
+                Tu consulta se guarda en el servidor del sitio y, además, nos llega un aviso por
+                correo electrónico. Para eso intervienen dos proveedores, en carácter de encargados
+                del tratamiento:
+            </p>
+            <ul class="lista-chequeo" style="padding-left:0">
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Oracle Cloud</strong>, que aloja el sitio y su base de datos en su centro de datos de São Paulo, Brasil.</span></li>
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Google</strong> (Gmail), proveedor del correo electrónico con el que recibimos el aviso de cada consulta.</span></li>
+            </ul>
+            <p>
+                Por el alojamiento en Brasil, los datos se transfieren fuera de la Argentina. Ambos
+                proveedores tratan la información según sus propias políticas de seguridad y sólo
+                para prestarnos el servicio.
+            </p>
+
+            <h2>Cuánto tiempo los guardamos</h2>
+            @if (Model.MesesRetencion is { } meses)
+            {
+                <p>
+                    Las consultas se conservan durante <strong>@meses meses</strong> desde que las
+                    recibimos; pasado ese plazo se borran automáticamente del servidor. Si querés
+                    que la borremos antes, pedínoslo por correo.
+                </p>
+            }
+            else
+            {
+                <p>
+                    Las consultas se conservan mientras haga falta para atenderlas. Si querés que
+                    borremos la tuya, pedínoslo por correo.
+                </p>
+            }
+
+            <h2>Tus derechos</h2>
+            <p>
+                Podés pedir en cualquier momento el acceso a los datos que tenemos sobre vos, su
+                rectificación, actualización o supresión, escribiendo a
+                <a href="@SitioInfo.MailA("Datos personales")">@SitioInfo.Email</a> desde el correo
+                con el que nos contactaste, o por carta a nuestro domicilio. Respondemos por el mismo medio.
+            </p>
+            <div class="destacado">
+                El titular de los datos personales tiene la facultad de ejercer el derecho de acceso
+                a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se
+                acredite un interés legítimo al efecto conforme lo establecido en el artículo 14,
+                inciso 3 de la Ley Nº 25.326.
+            </div>
+            <div class="destacado">
+                La AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA, Órgano de Control de la Ley Nº 25.326,
+                tiene la atribución de atender las denuncias y reclamos que se interpongan con
+                relación al incumplimiento de las normas sobre protección de datos personales.
+            </div>
+
+            <h2>Cambios en esta política</h2>
+            <p>
+                Si cambia la forma en que tratamos los datos, actualizamos esta página. La versión
+                vigente es siempre la publicada acá.
+            </p>
+        </div>
+    </div>
+</section>

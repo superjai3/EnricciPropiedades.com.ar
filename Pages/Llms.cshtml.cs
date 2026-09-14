@@ -126,6 +126,9 @@ public class LlmsModel : PageModel
         texto.AppendLine($"- [Quiénes somos]({urlBase}/Quienes_Somos) — historia desde {SitioInfo.AnioFundacion}");
         texto.AppendLine($"- [Misión]({urlBase}/Mision) y [Visión]({urlBase}/Vision)");
         texto.AppendLine($"- [Contacto]({urlBase}/Contacto) — formulario de consulta");
+        texto.AppendLine(
+            $"- [Política de privacidad]({urlBase}/Privacidad) — tratamiento de los datos personales " +
+            $"de los formularios (Ley 25.326)");
         texto.AppendLine();
 
         texto.AppendLine("## Preguntas frecuentes");

@@ -130,6 +130,9 @@ public class LlmsModel : PageModel
         texto.AppendLine(
             $"- [Política de privacidad]({urlBase}/Privacidad) — tratamiento de los datos personales " +
             $"de los formularios (Ley 25.326)");
+        texto.AppendLine(
+            $"- [Términos y condiciones de uso]({urlBase}/Condiciones) — alcance de la información " +
+            $"publicada (orientativa, no es oferta vinculante), uso de las consultas y ley aplicable");
         texto.AppendLine();
 
         texto.AppendLine("## Preguntas frecuentes");

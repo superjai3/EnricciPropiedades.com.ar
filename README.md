@@ -69,6 +69,7 @@ Pages/
   Mision / Vision       Páginas institucionales
   Contacto              Formulario de consulta
   Privacidad            Política de privacidad (Ley 25.326); enlazada desde el pie y los formularios
+  Condiciones           Términos y condiciones de uso del sitio; enlazada desde el pie
   Error                 404 y errores generales
   Sitemap               Mapa del sitio en /sitemap.xml
   Robots                robots.txt generado, con los rastreadores de IA

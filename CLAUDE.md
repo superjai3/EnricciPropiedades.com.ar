@@ -51,3 +51,9 @@ testimonio, reseña ni cifra de clientes se publica sin el consentimiento por
 escrito** de quien lo firma (un correo o documento que guarda la inmobiliaria),
 con el nombre tal como se va a mostrar. Si no hay consentimiento, no se publica,
 aunque lo pida el cliente.
+
+## UX/UI, SEO/GEO y despliegue continuo (reglas del cliente, 14/09/2026)
+
+- Todo cambio visible usa los estilos existentes de `wwwroot`, con etiquetas asociadas, foco visible, contraste correcto, textos claros y sin desbordes en móvil.
+- Ningún cambio empeora el rastreo ni la visibilidad en buscadores y motores de IA: títulos, descripciones, datos estructurados, sitemap y `llms.txt` se revisan en cada cambio.
+- **Cada mejora terminada se sube a producción en el momento**: fusionar en `main`, `dotnet build` en el PC y ejecutar `despliegue/publicar.sh`. Este repositorio no tiene despliegue automático.

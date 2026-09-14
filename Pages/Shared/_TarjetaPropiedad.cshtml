@@ -47,9 +47,14 @@
                 <small>@Model.PrecioSufijo</small>
             }
         </p>
-        @if (Model.Moneda == "USD" && Cotizacion.APesos(Model.Precio) is { } enPesos)
+        @* El equivalente en pesos lleva siempre su fuente y su fecha: un
+           número sin origen no le sirve a nadie para decidir. *@
+        @if (Model.Moneda == "USD" && Cotizacion.Actual is { } tipoDeCambio && Cotizacion.APesos(Model.Precio) is { } enPesos)
         {
-            <p class="prop__precio-pesos">≈ $ @enPesos.ToString("N0")</p>
+            <p class="prop__precio-pesos">
+                ≈ $ @enPesos.ToString("N0")
+                <small>@Cotizacion.Fuente al @tipoDeCambio.FechaTexto</small>
+            </p>
         }
 
         <h3 class="prop__titulo">

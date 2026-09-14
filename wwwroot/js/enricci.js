@@ -539,7 +539,7 @@
                 pie.style.display = 'block';
                 pie.style.fontSize = '.76rem';
                 pie.style.opacity = '.85';
-                pie.textContent = 'Según ' + fuente + ' · valor orientativo';
+                pie.textContent = fuente + ' · valor orientativo';
                 enPesos.appendChild(pie);
             }
         };

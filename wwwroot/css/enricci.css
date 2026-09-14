@@ -889,6 +889,15 @@ select.control {
     color: var(--texto-suave);
     letter-spacing: -.01em;
 }
+/* Fuente y fecha de la cotización: en su propia línea y más chica, para que
+   el importe siga leyéndose primero. */
+.prop__precio-pesos small {
+    display: block;
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    margin-top: .1rem;
+}
 .prop__titulo { font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; margin: 0; line-height: 1.25; }
 /* El enlace del título se estira por encima de toda la tarjeta: en el teléfono
    se toca en cualquier parte y no sólo sobre dos renglones de texto. El foco

@@ -78,7 +78,8 @@ sudo install -m 640 -o root -g enricci /tmp/enricci.env.ejemplo /etc/enricci/enr
 sudo nano /etc/enricci/enricci.env
 ```
 
-Completar la casilla y la contraseña de aplicación de Gmail. **Dejar
+Completar `Admin__Email` (el correo con el que se entra al panel; sin él no se
+crea el usuario), la casilla y la contraseña de aplicación de Gmail. **Dejar
 `Sitio__Dominio` vacío hasta que el dominio resuelva de verdad**, y `AllowedHosts`
 comentado hasta que el sitio esté andando por el dominio.
 
@@ -201,14 +202,18 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ### La contraseña del panel
 
 Si la base es nueva, en el primer arranque se genera una contraseña al azar que
-se escribe **una sola vez** en el registro:
+queda en un archivo con permisos 600 en la carpeta de datos (no en el registro,
+que se copia y se comparte):
 
 ```bash
-sudo journalctl -u enricci | grep -i "contraseña inicial"
+sudo cat /var/lib/enricci/clave-inicial.txt
 ```
 
-Hay que anotarla en ese momento. Si se pierde: borrar la fila de la tabla
-`Usuarios` y reiniciar el servicio, que crea una nueva.
+El registro sólo dice dónde quedó (`sudo journalctl -u enricci | grep -i
+"contraseña inicial"`). **El archivo se borra solo en el primer ingreso correcto
+al panel**; si por algún motivo siguiera ahí, borrarlo a mano. Si se pierde la
+contraseña: borrar la fila de la tabla `Usuarios` y reiniciar el servicio, que
+crea una nueva.
 
 ---
 

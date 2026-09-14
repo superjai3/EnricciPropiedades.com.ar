@@ -20,8 +20,13 @@ public class OpcionesCotizacion
     /// <summary>Cada cuánto se vuelve a consultar. El BNA actualiza una vez por día hábil.</summary>
     public int MinutosEntreConsultas { get; set; } = 60;
 
-    /// <summary>Cómo se nombra la fuente en el sitio, al pie del importe convertido.</summary>
-    public string Fuente { get; set; } = "Banco Nación";
+    /// <summary>
+    /// Cómo se nombra la fuente en el sitio, al pie del importe convertido. Dice
+    /// de dónde sale el dato de verdad —el tipo de cambio oficial del BNA,
+    /// consultado a través de dolarapi.com— para no atribuirle al banco una
+    /// publicación que no hace él.
+    /// </summary>
+    public string Fuente { get; set; } = "Cotización oficial BNA vía dolarapi.com";
 
     /// <summary>
     /// Qué punta se usa para convertir. "venta" es la que paga quien compra

@@ -15,6 +15,24 @@ public static class SitioInfo
     public const string Bajada = "Inmobiliaria en CABA desde 1932";
     public const string AnioFundacion = "1932";
 
+    /// <summary>
+    /// Años de trayectoria, calculados a partir de <see cref="AnioFundacion"/>
+    /// para que no haya que corregir un número a mano cada enero. Null si el
+    /// año no está cargado o no es un año válido: en ese caso el sitio no
+    /// muestra la cifra, antes que mostrar una inventada.
+    /// </summary>
+    public static int? AniosDeTrayectoria =>
+        int.TryParse(AnioFundacion, out var anio) && anio > 0 && anio <= DateTime.Now.Year
+            ? DateTime.Now.Year - anio
+            : null;
+
+    /// <summary>
+    /// PENDIENTE: confirmar con Horacio. La línea de tiempo de "Quiénes somos"
+    /// (1958, 1984, 2006…) y la mención a "tres generaciones" no vienen de la
+    /// inmobiliaria: quedan escritas pero no se muestran hasta que lo confirme.
+    /// </summary>
+    public static readonly bool HitosConfirmados = false;
+
     public const string Direccion = "Solís 642";
     public const string Unidad = "Piso 1º D";
     public const string Localidad = "Monserrat, Ciudad Autónoma de Buenos Aires";
@@ -51,6 +69,26 @@ public static class SitioInfo
 
     public const string HoraApertura = "11:00";
     public const string HoraCierre = "18:30";
+
+    // --- Identificación del oferente (Res. 424/2020 de la Secretaría de Comercio) ---
+    // PENDIENTE: completar con los datos fiscales reales. Vacíos, el pie no los
+    // muestra; nunca se inventan.
+
+    /// <summary>Razón social o nombre del titular tal como figura en AFIP. Vacío hasta confirmarlo.</summary>
+    public const string RazonSocial = "";
+
+    /// <summary>CUIT del oferente (formato 20-12345678-9). Vacío hasta confirmarlo.</summary>
+    public const string Cuit = "";
+
+    /// <summary>Condición frente al IVA (por ejemplo "Responsable Inscripto" o "Monotributista"). Vacío hasta confirmarlo.</summary>
+    public const string CondicionIva = "";
+
+    /// <summary>
+    /// Formulario de reclamos de Defensa de las y los Consumidores. El enlace
+    /// en el pie es obligatorio para quien ofrece bienes o servicios por internet.
+    /// </summary>
+    public const string DefensaConsumidorUrl =
+        "https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario";
 
     public const string Titular = "Raúl Horacio Enricci";
     public const string MatriculaNumero = "2377";

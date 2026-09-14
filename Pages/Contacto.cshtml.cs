@@ -77,7 +77,7 @@ public class ContactoModel : PageModel
         "Quiero poner en alquiler",
         "Necesito una tasación",
         "Administración y cobranza",
-        "Asesoría legal",
+        "Acompañamiento legal",
         "Otra consulta"
     };
 
@@ -148,9 +148,9 @@ public class ContactoModel : PageModel
             PropiedadTitulo = ficha?.Titulo
         });
 
-        _log.LogInformation(
-            "Consulta web {Id} recibida de {Nombre} ({Email}, {Telefono}). Motivo: {Motivo}",
-            registro.Id, Datos.Nombre, Datos.Email, Datos.Telefono ?? "sin teléfono", Datos.Motivo);
+        // Al registro sólo va el Id: el nombre, el correo y el teléfono son datos
+        // personales y no tienen por qué quedar en el log del sistema.
+        _log.LogInformation("Consulta web {Id} recibida. Motivo: {Motivo}", registro.Id, Datos.Motivo);
 
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
         MensajeMail = $"{SitioInfo.MailA($"Consulta web: {Datos.Motivo}")}&body={Uri.EscapeDataString(resumen)}";

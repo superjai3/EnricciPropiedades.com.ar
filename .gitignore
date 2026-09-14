@@ -52,3 +52,6 @@ Desktop.ini
 
 # Respaldos automáticos (base + fotos). Viven en el servidor, no en el repositorio.
 respaldos/
+
+# Contraseña inicial del panel, generada en el primer arranque (ver README).
+clave-inicial.txt

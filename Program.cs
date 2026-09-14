@@ -84,6 +84,10 @@ builder.Services.AddSingleton<CotizacionService>();
 builder.Services.Configure<OpcionesEscritura>(builder.Configuration.GetSection(OpcionesEscritura.Seccion));
 builder.Services.AddHostedService<CotizacionProgramada>();
 
+// Plazo de conservación de las consultas: pasado, se borran solas (ver
+// RespaldoProgramado, que corre la purga junto con el respaldo diario).
+builder.Services.Configure<OpcionesConsultas>(builder.Configuration.GetSection(OpcionesConsultas.Seccion));
+
 builder.Services.Configure<OpcionesRespaldo>(builder.Configuration.GetSection(OpcionesRespaldo.Seccion));
 builder.Services.AddSingleton<RespaldoService>();
 builder.Services.AddHostedService<RespaldoProgramado>();

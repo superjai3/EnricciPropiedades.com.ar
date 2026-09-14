@@ -39,6 +39,7 @@ Models/
   Consulta.cs           Consulta recibida por los formularios; incluye la hora local
   OpcionesSitio.cs      Dominio del sitio, para las URL absolutas
   OpcionesRespaldo.cs   Configuración del respaldo automático
+  OpcionesConsultas.cs  Plazo de conservación de las consultas (se purgan solas)
   ArteFachada.cs        Portada SVG generada para publicaciones sin fotografía
   OpcionesCorreo.cs     Configuración del envío de correo
 Data/
@@ -53,7 +54,7 @@ Services/
   DatosEstructurados.cs Bloques de schema.org para buscadores y asistentes
   FotosService.cs       Reduce a WEBP, genera miniatura y borra las fotos del panel
   RespaldoService.cs    Copia la base y las fotos en un .zip, con rotación
-  RespaldoProgramado.cs Dispara el respaldo una vez por día
+  RespaldoProgramado.cs Dispara el respaldo y la purga de consultas una vez por día
   RutaBaseDeDatos.cs    Resuelve dónde está el archivo .db
   CorreoService.cs      Envío por SMTP de las consultas de los formularios
 Pages/
@@ -63,10 +64,11 @@ Pages/
   Servicios             Panorama de servicios + preguntas frecuentes
   Tasacion              Formulario de pedido de tasación
   Cobranza              Administración y cobranza de alquileres
-  Asesoria_Legal        Servicios legales asociados
+  Asesoria_Legal        Acompañamiento legal: derivación a estudio jurídico y escribanía
   Quienes_Somos         Historia, línea de tiempo y valores
   Mision / Vision       Páginas institucionales
   Contacto              Formulario de consulta
+  Privacidad            Política de privacidad (Ley 25.326); enlazada desde el pie y los formularios
   Error                 404 y errores generales
   Sitemap               Mapa del sitio en /sitemap.xml
   Robots                robots.txt generado, con los rastreadores de IA
@@ -103,21 +105,28 @@ llegan por el sitio y se manejan los **respaldos**.
 
 ### El usuario del panel
 
-En el primer arranque se crea un único usuario a partir de la sección `Admin` de
-`appsettings.json`:
+En el primer arranque se crea un único usuario a partir de la sección `Admin`
+de la configuración. **El correo no va en `appsettings.json`**, que está en el
+repositorio: se define por fuera, en el servidor con `/etc/enricci/enricci.env`
+(ver `despliegue/enricci.env.ejemplo`) y en desarrollo con user-secrets:
 
-```json
-"Admin": {
-  "Nombre": "Horacio Enricci",
-  "Email": "horacioenricci@gmail.com",
-  "ClaveInicial": ""
-}
+```bash
+dotnet user-secrets set "Admin:Email" "correo@ejemplo.com"
+dotnet user-secrets set "Admin:Nombre" "Nombre Apellido"
+# o bien, en el servidor:
+export Admin__Email="correo@ejemplo.com"
 ```
 
+Sin `Admin:Email` no se crea ningún usuario y el log lo avisa al arrancar. Si
+falta el nombre, se deduce del correo.
+
 Con `ClaveInicial` vacía —que es lo recomendado— **se genera una contraseña al
-azar y se escribe una sola vez en el log de arranque**. Hay que anotarla en ese
-momento: no se vuelve a mostrar y en la base sólo queda su hash. Al primer
-ingreso el panel obliga a cambiarla.
+azar y se escribe en el archivo `clave-inicial.txt`**, en la misma carpeta que
+la base de datos (`/var/lib/enricci` en el servidor; la carpeta de la
+aplicación en desarrollo), con permisos 600. Nunca va al log: un log se copia y
+se comparte. El archivo **se borra solo en el primer ingreso correcto** al
+panel; en la base sólo queda el hash. Al primer ingreso el panel obliga a
+cambiarla.
 
 Si se prefiere fijar la contraseña inicial, conviene hacerlo por fuera del
 repositorio:
@@ -290,6 +299,22 @@ o mal configurado.
 La barra del panel lleva el número de consultas sin atender, para que no haga
 falta entrar a mirar.
 
+**Las consultas no se guardan para siempre.** Llevan datos personales (nombre,
+correo, teléfono y, en las tasaciones, la dirección de la propiedad), así que
+pasado el plazo de conservación se borran solas, todos los días a la misma hora
+que corre el respaldo —y después de él, para que lo borrado quede en la copia de
+ese día—. El plazo es el que declara la Política de privacidad (`/Privacidad`),
+sección `Consultas` de `appsettings.json`:
+
+```json
+"Consultas": {
+  "MesesRetencion": 24
+}
+```
+
+Con `0` no se purga nada. En el log del sistema nunca se escriben el nombre, el
+correo ni el teléfono de quien consulta: sólo el `Id` de la consulta.
+
 ## Envío de correo
 
 El aviso de las consultas se configura en la sección `Correo` de
@@ -417,7 +442,7 @@ con lo que se ve deja de confiar en el resto.
 | Ficha | `RealEstateListing` + `BreadcrumbList` |
 | Barrio | `CollectionPage` con `ItemList` + `BreadcrumbList` |
 | Servicios | `FAQPage` |
-| Tasación, Cobranza, Asesoría legal | `Service` |
+| Tasación, Cobranza, Acompañamiento legal | `Service` |
 
 La inmobiliaria lleva un `@id` fijo (`{dominio}/#inmobiliaria`) al que apuntan
 las demás entidades. Sin eso, cada página declara *otra* empresa con el mismo

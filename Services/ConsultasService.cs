@@ -103,6 +103,24 @@ public class ConsultasService
         return true;
     }
 
+    /// <summary>
+    /// Borra las consultas más viejas que el plazo de conservación. Devuelve
+    /// cuántas se fueron. Con un plazo de cero o menos no toca nada.
+    /// </summary>
+    public async Task<int> PurgarAntiguasAsync(int mesesRetencion, CancellationToken cancelacion = default)
+    {
+        if (mesesRetencion <= 0)
+        {
+            return 0;
+        }
+
+        var limite = DateTime.UtcNow.AddMonths(-mesesRetencion);
+
+        return await _bd.Consultas
+            .Where(c => c.Fecha < limite)
+            .ExecuteDeleteAsync(cancelacion);
+    }
+
     public async Task<bool> EliminarAsync(int id)
     {
         var consulta = await PorIdAsync(id);

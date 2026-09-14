@@ -57,6 +57,25 @@ public class Propiedad
     [NotMapped]
     public string Region => BarriosDeBuenosAires.RegionDe(Barrio);
 
+    /// <summary>"CABA" o "GBA", para el título de la ficha y otros lugares cortos.</summary>
+    [NotMapped]
+    public string RegionCorta => BarriosDeBuenosAires.RegionCortaDe(Barrio);
+
+    /// <summary>True si la propiedad está en la Ciudad Autónoma de Buenos Aires.</summary>
+    [NotMapped]
+    public bool EstaEnLaCiudad => BarriosDeBuenosAires.EsDeLaCiudad(Barrio);
+
+    /// <summary>
+    /// Alquiler de vivienda dentro de la Ciudad: es el caso en que la Ley 5859
+    /// de CABA pone los honorarios de la inmobiliaria a cargo del propietario.
+    /// El alquiler temporario y los locales u oficinas quedan afuera.
+    /// </summary>
+    [NotMapped]
+    public bool EsAlquilerDeViviendaEnCaba =>
+        Operacion == Operacion.Alquiler &&
+        (Tipo is TipoPropiedad.Departamento or TipoPropiedad.Casa or TipoPropiedad.PH) &&
+        EstaEnLaCiudad;
+
     /// <summary>Siempre Argentina: el sitio publica en la Ciudad y el Gran Buenos Aires.</summary>
     [NotMapped]
     public string Pais => BarriosDeBuenosAires.Pais;
@@ -159,10 +178,14 @@ public class Propiedad
     public bool EstaPublicada => Estado != EstadoPublicacion.Vendida;
 
     /// <summary>
-    /// "A estrenar" cuando no tiene años cargados, que es lo que diría un aviso
-    /// de verdad. "0 años" no lo escribe nadie.
+    /// True sólo si la antigüedad está cargada. Un 0 significa "no figura" —así
+    /// entró el catálogo importado—, no "a estrenar": decir que una propiedad
+    /// es a estrenar sin saberlo es afirmar algo falso en el aviso.
     /// </summary>
-    public string AntiguedadTexto => Antiguedad <= 0 ? "A estrenar" : $"{Antiguedad} años";
+    public bool TieneAntiguedad => Antiguedad > 0;
+
+    /// <summary>"45 años", o "Sin dato" cuando no está cargada.</summary>
+    public string AntiguedadTexto => TieneAntiguedad ? $"{Antiguedad} años" : "Sin dato";
 
     /// <summary>
     /// Resumen para la descripción que ven los buscadores, armado sólo con los

@@ -13,9 +13,10 @@ public class AsesoriaLegalModel : PageModel
 
     public string DatosEstructuradosJson => DatosEstructurados.Servicio(
         _sitio.UrlBase(Request),
-        "Asesoría legal inmobiliaria",
-        "Contratos, boletos de compraventa, sucesiones, regularización de títulos y desalojos, " +
-        "con estudio jurídico y escribanía de confianza en la Ciudad de Buenos Aires.",
+        "Acompañamiento legal en operaciones inmobiliarias",
+        "Acompañamiento y derivación a estudio jurídico y escribanía de confianza para contratos, " +
+        "boletos de compraventa, sucesiones y regularización de títulos en la Ciudad de Buenos Aires. " +
+        "El asesoramiento legal y notarial lo presta el profesional habilitado.",
         _sitio.UrlBase(Request) + Request.Path);
 
     public void OnGet()

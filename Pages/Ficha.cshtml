@@ -5,9 +5,12 @@
 @inject Enricci_Propiedades.Services.FotosService Fotos
 @{
     var p = Model.Ficha;
-    ViewData["Title"] = $"{p.Titulo} · {p.Barrio}";
+    // La región sale de la publicación (CABA o GBA), no de un texto fijo: es lo
+    // que busca la gente ("departamento en Monserrat, CABA") y lo que se declara
+    // en los datos estructurados.
+    ViewData["Title"] = $"{p.Titulo} · {p.Barrio}, {p.RegionCorta}";
     var resumen = p.ResumenParaBuscadores;
-    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}."
+    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.UbicacionTexto}."
         + (resumen.Length > 0 ? $" {resumen}." : "")
         + $" {p.PrecioTexto}.";
     var mensajeWsp = $"Hola, me interesa la propiedad de {p.Direccion} ({p.Barrio}) publicada en la web. ¿Podemos coordinar una visita?";
@@ -49,7 +52,7 @@
         <h1 style="font-size:var(--t-3xl)">@p.Titulo</h1>
         <p class="plomo mb-0">
             <svg aria-hidden="true" style="width:18px;height:18px;vertical-align:-3px"><use href="#i-pin" /></svg>
-            @p.Direccion · @p.Barrio, Ciudad Autónoma de Buenos Aires
+            @p.Direccion · @p.UbicacionTexto
         </p>
     </div>
 </section>
@@ -168,10 +171,15 @@
                             <dd>@p.Banios</dd>
                         </div>
                     }
-                    <div class="dato">
-                        <dt>Antigüedad</dt>
-                        <dd>@p.AntiguedadTexto</dd>
-                    </div>
+                    @* Sin antigüedad cargada no se muestra el dato: antes un 0
+                       salía como "A estrenar", que no era cierto. *@
+                    @if (p.TieneAntiguedad)
+                    {
+                        <div class="dato">
+                            <dt>Antigüedad</dt>
+                            <dd>@p.AntiguedadTexto</dd>
+                        </div>
+                    }
                 </div>
 
                 <div class="prosa mt-7 revelar">
@@ -194,10 +202,8 @@
 
                     <h3>Ubicación</h3>
                     <p>
-                        La propiedad está en @p.Direccion, barrio de @p.Barrio. Es una zona con
-                        transporte público a pocas cuadras, comercios de cercanía y acceso rápido
-                        al centro. Coordinamos la visita en el horario que te quede cómodo,
-                        incluidos sábados por la mañana.
+                        La propiedad está en @p.Direccion, @p.UbicacionTexto.
+                        Escribinos y coordinamos la visita en un horario que te quede cómodo.
                     </p>
                 </div>
 
@@ -282,7 +288,9 @@
                             </div>
 
                             <p class="texto-suave mt-5 mb-0" style="font-size:.82rem">
-                                Usamos tus datos únicamente para responder esta consulta. No los compartimos con terceros.
+                                Usamos tus datos solo para responder tu consulta; se guardan en nuestro servidor y nos avisan por correo.
+                                No los cedemos a terceros para otros fines.
+                                <a asp-page="/Privacidad">Ver Política de privacidad</a>.
                             </p>
                         </form>
                     }
@@ -308,7 +316,7 @@
                             <p class="texto-suave mb-0" style="font-size:.9rem">
                                 ≈ $ @importe.ToString("N0")
                                 <span style="display:block;font-size:.76rem;opacity:.85">
-                                    Según @Cotizacion.Fuente al @tipoDeCambio.FechaTexto · valor orientativo
+                                    @Cotizacion.Fuente al @tipoDeCambio.FechaTexto · valor orientativo
                                 </span>
                             </p>
                         }
@@ -318,6 +326,15 @@
                     {
                         <p class="texto-suave mb-0" style="font-size:.85rem">
                             Expensas aproximadas: $ @p.Expensas.ToString("N0")
+                        </p>
+                    }
+                    @* BORRADOR: confirmar con asesoría. En CABA, en el alquiler de
+                       vivienda los honorarios de la inmobiliaria los paga el
+                       propietario (Ley 5859). Sólo se muestra en ese caso. *@
+                    @if (p.EsAlquilerDeViviendaEnCaba)
+                    {
+                        <p class="texto-suave mb-0" style="font-size:.85rem">
+                            Honorarios a cargo del propietario (Ley 5859 CABA).
                         </p>
                     }
                 </div>

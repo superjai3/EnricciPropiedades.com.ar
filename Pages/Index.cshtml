@@ -2,7 +2,7 @@
 @model IndexModel
 @{
     ViewData["Title"] = null;
-    ViewData["Descripcion"] = "R. H. Enricci Propiedades: inmobiliaria en Monserrat, CABA, desde 1932. Venta y alquiler de departamentos, casas, PH, locales y cocheras. Tasaciones sin cargo, administración de alquileres y asesoría legal.";
+    ViewData["Descripcion"] = $"R. H. Enricci Propiedades: inmobiliaria en Monserrat, CABA, desde {SitioInfo.AnioFundacion}. Venta y alquiler de departamentos, casas, PH, locales y cocheras. Tasaciones sin cargo, administración de alquileres y acompañamiento legal con escribanía de confianza.";
 }
 
 <section class="hero">
@@ -10,9 +10,18 @@
     <div class="contenedor">
         <div class="hero__grid">
             <div>
+                @* PENDIENTE: confirmar con Horacio lo de "tres generaciones"
+                   (SitioInfo.HitosConfirmados). Mientras tanto, sólo el año. *@
                 <p class="hero__sello">
                     <b>@SitioInfo.AnioFundacion</b>
-                    Tres generaciones operando en el sur porteño
+                    @if (SitioInfo.HitosConfirmados)
+                    {
+                        <text>Tres generaciones operando en el sur porteño</text>
+                    }
+                    else
+                    {
+                        <text>Oficina de barrio en el sur porteño</text>
+                    }
                 </p>
                 <h1 class="hero__titulo">
                     <span class="linea"><span>La inmobiliaria</span></span>
@@ -37,6 +46,7 @@
 
             <div class="collage" aria-hidden="false">
                 <div class="collage__pieza collage__pieza--a">
+                    @* PENDIENTE: reemplazar por foto propia (origen: Street View / cartel ajeno) *@
                     <img src="~/imagenes/Av Entre Rios 500/Frente.webp"
                          srcset="/imagenes/Av%20Entre%20Rios%20500/Frente-600.webp 600w, /imagenes/Av%20Entre%20Rios%20500/Frente.webp 1200w"
                          sizes="(max-width: 960px) 60vw, 480px"
@@ -50,10 +60,19 @@
                          alt="Edificio en Cochabamba 1700, Constitución" width="1200" height="900" loading="lazy" decoding="async" />
                 </div>
                 <div class="collage__pieza collage__pieza--d">
-                    <span class="n"><span data-contador="93" data-sufijo="">0</span> años</span>
-                    <span class="l">Operando en CABA</span>
+                    @if (SitioInfo.AniosDeTrayectoria is { } aniosCollage)
+                    {
+                        <span class="n"><span data-contador="@aniosCollage" data-sufijo="">0</span> años</span>
+                        <span class="l">Operando en CABA</span>
+                    }
+                    else
+                    {
+                        <span class="n">CABA</span>
+                        <span class="l">Oficina de barrio</span>
+                    }
                 </div>
                 <div class="collage__pieza collage__pieza--c">
+                    @* PENDIENTE: reemplazar por foto propia (origen: Street View / cartel ajeno) *@
                     <img src="~/imagenes/Solis 700/Frente.webp"
                          srcset="/imagenes/Solis%20700/Frente-600.webp 600w, /imagenes/Solis%20700/Frente.webp 1200w"
                          sizes="(max-width: 960px) 60vw, 480px"
@@ -151,7 +170,7 @@
                 <h2 class="titulo-seccion">Propiedades <em>destacadas</em></h2>
                 <p class="plomo mb-0">
                     Publicaciones con documentación revisada, precio conversado con el propietario
-                    y visitas coordinadas en el día.
+                    y visitas que normalmente coordinamos en el día.
                 </p>
             </div>
             <a class="btn btn--fantasma" asp-page="/Propiedades">
@@ -193,7 +212,7 @@
                 <h3>Tasación sin cargo</h3>
                 <p class="texto-suave">
                     Visitamos la propiedad, la comparamos con operaciones reales cerradas en la zona
-                    y entregamos un informe escrito en 48 horas. Sin compromiso de exclusividad.
+                    y te entregamos un informe escrito, normalmente en 48 horas. Sin compromiso de exclusividad.
                 </p>
                 <a class="enlace-flecha" asp-page="/Tasacion">
                     Pedir tasación
@@ -206,8 +225,8 @@
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-llave" /></svg></div>
                 <h3>Venta y alquiler</h3>
                 <p class="texto-suave">
-                    Publicación con fotos profesionales, filtro de interesados, visitas acompañadas
-                    y negociación cara a cara hasta la reserva.
+                    Publicación con fotos, filtro de interesados, visitas acompañadas
+                    y negociación cara a cara. Nuestro objetivo es llegar a la reserva con las dos partes conformes.
                 </p>
                 <a class="enlace-flecha" asp-page="/Propiedades">
                     Ver catálogo
@@ -231,9 +250,10 @@
             <div class="bento__celda revelar revelar-3">
                 <span class="bento__num">04</span>
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-balanza" /></svg></div>
-                <h3>Asesoría legal</h3>
+                <h3>Acompañamiento legal</h3>
                 <p class="texto-suave">
-                    Contratos, boletos, sucesiones y regularización de títulos con escribanía de confianza.
+                    Contratos, boletos, sucesiones y títulos: te acompañamos y te derivamos a un
+                    estudio jurídico y una escribanía de confianza.
                 </p>
                 <a class="enlace-flecha" asp-page="/Asesoria_Legal">
                     Consultar
@@ -246,8 +266,8 @@
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-escudo" /></svg></div>
                 <h3>Garantías y seguros de caución</h3>
                 <p class="texto-suave">
-                    Te ayudamos a resolver la garantía del alquiler con compañías habilitadas,
-                    y al propietario a cubrirse ante la falta de pago.
+                    Te orientamos con compañías de seguros de caución habilitadas para resolver
+                    la garantía del alquiler; la póliza y su asesoramiento son de la compañía.
                 </p>
                 <a class="enlace-flecha" asp-page="/Servicios">
                     Ver todos los servicios
@@ -276,21 +296,20 @@
             </div>
 
             <div class="metricas revelar revelar-2">
-                <div class="metrica">
-                    <p class="metrica__n"><span data-contador="93">0</span></p>
-                    <p class="metrica__l">años ininterrumpidos operando en la Ciudad de Buenos Aires</p>
-                </div>
-                <div class="metrica">
-                    <p class="metrica__n"><span data-contador="1400" data-sufijo="+">0</span></p>
-                    <p class="metrica__l">operaciones de compraventa y alquiler concretadas</p>
-                </div>
+                @if (SitioInfo.AniosDeTrayectoria is { } anios)
+                {
+                    <div class="metrica">
+                        <p class="metrica__n"><span data-contador="@anios">0</span></p>
+                        <p class="metrica__l">años operando en la Ciudad de Buenos Aires</p>
+                    </div>
+                }
                 <div class="metrica">
                     <p class="metrica__n"><span data-contador="8">0</span></p>
                     <p class="metrica__l">barrios del sur porteño que conocemos calle por calle</p>
                 </div>
                 <div class="metrica">
                     <p class="metrica__n"><span data-contador="48" data-sufijo=" h">0</span></p>
-                    <p class="metrica__l">para entregar el informe de tasación por escrito</p>
+                    <p class="metrica__l">es lo que normalmente tardamos en entregar el informe de tasación por escrito</p>
                 </div>
             </div>
         </div>
@@ -312,7 +331,7 @@
             </div>
             <div class="paso">
                 <h3>Tasamos y publicamos</h3>
-                <p>Informe de valor por escrito, fotos, plano y publicación en los portales líderes.</p>
+                <p>Informe de valor por escrito, fotos y publicación en los principales portales.</p>
             </div>
             <div class="paso">
                 <h3>Filtramos y mostramos</h3>
@@ -354,52 +373,6 @@
     </div>
 </section>
 
-<section class="seccion">
-    <div class="contenedor">
-        <div class="cabecera-seccion revelar">
-            <div>
-                <p class="eyebrow">Clientes</p>
-                <h2 class="titulo-seccion">Lo que dicen quienes ya <em>firmaron</em></h2>
-            </div>
-        </div>
-        <div class="testimonios revelar">
-            <figure class="testimonio">
-                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
-                <blockquote>
-                    “Vendimos el departamento de mi mamá después de la sucesión. Nos explicaron cada
-                    paso, consiguieron comprador en dos meses y no tuvimos que ocuparnos de nada.”
-                </blockquote>
-                <figcaption>
-                    <span class="avatar">MG</span>
-                    <span><strong>Marcela G.</strong><br /><span class="texto-suave">Venta en Monserrat</span></span>
-                </figcaption>
-            </figure>
-            <figure class="testimonio">
-                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
-                <blockquote>
-                    “Alquilo mi local por Enricci hace once años. Nunca tuve un mes sin cobrar
-                    y siempre me avisaron antes de cada actualización.”
-                </blockquote>
-                <figcaption>
-                    <span class="avatar">RD</span>
-                    <span><strong>Rubén D.</strong><br /><span class="texto-suave">Administración en San Cristóbal</span></span>
-                </figcaption>
-            </figure>
-            <figure class="testimonio">
-                <p class="estrellas" aria-label="5 de 5 estrellas">★★★★★</p>
-                <blockquote>
-                    “Era mi primera compra y estaba perdida. Me acompañaron hasta la escritura
-                    y me señalaron cosas del edificio que yo no había visto.”
-                </blockquote>
-                <figcaption>
-                    <span class="avatar">FL</span>
-                    <span><strong>Florencia L.</strong><br /><span class="texto-suave">Compra en Constitución</span></span>
-                </figcaption>
-            </figure>
-        </div>
-    </div>
-</section>
-
 <section class="seccion--compacta">
     <div class="contenedor">
         <div class="franja-cta revelar">
@@ -407,7 +380,7 @@
             <h2>¿Cuánto vale hoy tu propiedad?</h2>
             <p class="plomo" style="color:inherit;opacity:.8">
                 Te decimos el número real, con los comparables a la vista, aunque no nos des la venta.
-                Respondemos en 48 horas hábiles.
+                Normalmente respondemos dentro de las 48 horas hábiles.
             </p>
             <div class="acciones mt-5">
                 <a class="btn btn--claro btn--lg" asp-page="/Tasacion">

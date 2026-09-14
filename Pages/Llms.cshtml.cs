@@ -45,8 +45,8 @@ public class LlmsModel : PageModel
         texto.AppendLine(
             $"> Inmobiliaria en la Ciudad Autónoma de Buenos Aires, Argentina, en actividad " +
             $"desde {SitioInfo.AnioFundacion}. Compraventa y alquiler de propiedades, tasaciones, " +
-            $"administración y cobranza de alquileres y asesoría legal inmobiliaria, con foco en " +
-            $"el sur porteño.");
+            $"administración y cobranza de alquileres y acompañamiento legal con derivación a " +
+            $"estudio jurídico y escribanía, con foco en el sur porteño.");
         texto.AppendLine();
 
         texto.AppendLine("## Datos de la empresa");
@@ -85,8 +85,9 @@ public class LlmsModel : PageModel
             $"- **Administración y cobranza de alquileres** — cobranza mensual, actualización " +
             $"por índice, control de expensas e impuestos: {urlBase}/Cobranza");
         texto.AppendLine(
-            $"- **Asesoría legal inmobiliaria** — contratos, boletos de compraventa, sucesiones, " +
-            $"regularización de títulos y desalojos: {urlBase}/Asesoria_Legal");
+            $"- **Acompañamiento legal** — orientación y derivación a estudio jurídico y escribanía " +
+            $"de confianza para contratos, boletos de compraventa, sucesiones y regularización de " +
+            $"títulos; el asesoramiento lo presta el profesional habilitado: {urlBase}/Asesoria_Legal");
         texto.AppendLine();
 
         texto.AppendLine("## Catálogo");
@@ -122,10 +123,13 @@ public class LlmsModel : PageModel
         texto.AppendLine($"- [Servicios]({urlBase}/Servicios) — servicios y preguntas frecuentes");
         texto.AppendLine($"- [Tasación]({urlBase}/Tasacion) — pedido de tasación");
         texto.AppendLine($"- [Cobranza]({urlBase}/Cobranza) — administración de alquileres");
-        texto.AppendLine($"- [Asesoría legal]({urlBase}/Asesoria_Legal) — servicios legales");
+        texto.AppendLine($"- [Acompañamiento legal]({urlBase}/Asesoria_Legal) — derivación a estudio jurídico y escribanía");
         texto.AppendLine($"- [Quiénes somos]({urlBase}/Quienes_Somos) — historia desde {SitioInfo.AnioFundacion}");
         texto.AppendLine($"- [Misión]({urlBase}/Mision) y [Visión]({urlBase}/Vision)");
         texto.AppendLine($"- [Contacto]({urlBase}/Contacto) — formulario de consulta");
+        texto.AppendLine(
+            $"- [Política de privacidad]({urlBase}/Privacidad) — tratamiento de los datos personales " +
+            $"de los formularios (Ley 25.326)");
         texto.AppendLine();
 
         texto.AppendLine("## Preguntas frecuentes");

@@ -25,6 +25,13 @@ public class ServiciosModel : PageModel
          "gastos de escrituración y certificaciones. Nunca vas a encontrarte con un costo " +
          "que no te hayamos anticipado."),
 
+        // BORRADOR: confirmar con asesoría la redacción y la referencia normativa.
+        ("¿Quién paga los honorarios en un alquiler de vivienda?",
+         "En la Ciudad de Buenos Aires, en los alquileres de vivienda los honorarios de la " +
+         "inmobiliaria están a cargo del propietario (Ley 5859 CABA): el inquilino no paga " +
+         "comisión. En locales, oficinas y alquileres temporarios el esquema es distinto y " +
+         "se informa por escrito antes de firmar."),
+
         ("¿La tasación tiene costo?",
          "No. La visita y el informe de valor son sin cargo y no te obligan a darnos la venta " +
          "ni a firmar exclusividad. Si necesitás una tasación formal para una sucesión o un " +
@@ -41,9 +48,10 @@ public class ServiciosModel : PageModel
          "te lo decimos de entrada."),
 
         ("¿Cuánto tarda una venta?",
-         "Con el precio bien puesto y los papeles en orden, la mayoría de las operaciones de " +
-         "la zona se cierran entre 60 y 120 días. El informe de tasación incluye una " +
-         "estimación realista para tu caso puntual.")
+         "Depende del precio, de la documentación y del momento del mercado, así que no " +
+         "podemos garantizar un plazo. Nuestra experiencia en la zona es que, con el precio " +
+         "bien puesto y los papeles en orden, una venta normalmente se concreta en pocos " +
+         "meses. El informe de tasación incluye una estimación orientativa para tu caso.")
     };
 
     public string DatosEstructuradosJson { get; private set; } = "";

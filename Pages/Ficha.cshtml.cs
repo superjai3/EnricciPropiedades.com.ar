@@ -178,9 +178,9 @@ public class FichaModel : PageModel
             PropiedadTitulo = Ficha.Titulo
         });
 
-        _log.LogInformation(
-            "Consulta {Id} desde la ficha {Propiedad} de {Nombre} ({Email}, {Telefono})",
-            registro.Id, Ficha.Slug, Datos.Nombre, Datos.Email, Datos.Telefono ?? "sin teléfono");
+        // Al registro sólo va el Id: los datos personales de quien consulta
+        // quedan en la base, no en el log del sistema.
+        _log.LogInformation("Consulta {Id} recibida desde la ficha {Propiedad}.", registro.Id, Ficha.Slug);
 
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
 

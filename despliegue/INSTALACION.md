@@ -161,7 +161,11 @@ SERVIDOR=ubuntu@LA-IP LLAVE=~/.ssh/enricci.key bash despliegue/publicar.sh --pri
 máquina. **Se usa una sola vez**: en los despliegues siguientes hay que correrlo
 sin esa opción, o pisaría lo que se cargó desde el panel.
 
-De ahí en más, publicar un cambio es:
+De ahí en más, publicar un cambio es **fusionarlo en `main` y hacer push**:
+GitHub Actions compila y despliega solo (ver [Despliegue automático (GitHub
+Actions)](#despliegue-automático-github-actions), más abajo). Para hacerlo a
+mano desde el PC —si GitHub está caído o hay que desplegar algo que no está en
+`main`— sigue estando:
 
 ```bash
 bash despliegue/publicar.sh
@@ -169,7 +173,9 @@ bash despliegue/publicar.sh
 
 El script compila, sube, reemplaza la aplicación, reinicia y **comprueba que el
 sitio responda**. Si no responde, deja el registro a la vista y explica cómo
-volver a la versión anterior, que quedó guardada.
+volver a la versión anterior, que quedó guardada. Lo que corre en el servidor
+está en `despliegue/instalar-en-servidor.sh`, que es el mismo archivo que usa
+el despliegue automático: por los dos caminos pasa exactamente lo mismo.
 
 ### Desde PowerShell
 
@@ -214,6 +220,147 @@ El registro sólo dice dónde quedó (`sudo journalctl -u enricci | grep -i
 al panel**; si por algún motivo siguiera ahí, borrarlo a mano. Si se pierde la
 contraseña: borrar la fila de la tabla `Usuarios` y reiniciar el servicio, que
 crea una nueva.
+
+---
+
+## Despliegue automático (GitHub Actions)
+
+Cada push a `main` compila el proyecto y lo despliega en el servidor sin tocar
+el PC. Lo hace el workflow `.github/workflows/deploy.yml`, que se llama
+**«Desplegar a Oracle»** y replica paso a paso a `publicar.sh`: compila en
+Release, arma el paquete sin las fotos ni `appsettings.Development.json`, lo
+sube por SSH a `/tmp` del servidor y corre `despliegue/instalar-en-servidor.sh`
+—el mismo script que usa `publicar.sh`—, que reemplaza `/var/www/enricci`,
+enlaza la carpeta de fotos, deja todo como `enricci:enricci`, reinicia el
+servicio y comprueba que `http://127.0.0.1:5000/` conteste 200.
+
+Lo nuevo respecto de publicar a mano: **si el proyecto no compila, el
+despliegue se corta antes de tocar el servidor**, y el sitio queda con la
+versión anterior. Y como nunca dos despliegues corren a la vez, dos push
+seguidos se hacen uno detrás del otro.
+
+La base de datos, las fotos y los respaldos viven en `/var/lib/enricci` y el
+workflow no los toca, igual que `publicar.sh`. En el servidor no hay que
+instalar ni cambiar nada: sólo autorizar una llave SSH más.
+
+Para que funcione hacen falta **una llave SSH exclusiva para GitHub** y **tres
+secrets** en el repositorio. Hasta que estén, el workflow falla en el paso
+«Comprobar que estén los secrets» con un mensaje que lo dice: es lo esperado, no
+hay nada roto.
+
+### Paso 0: la IP tiene que ser fija
+
+El workflow se conecta a la IP (o al dominio) que se guarde en el secret
+`ORACLE_HOST`. Si la IP de la instancia es la efímera y Oracle la cambia, el
+despliegue deja de llegar al servidor. Antes de seguir, reservarla como se
+explica en [Fijar la dirección IP](#fijar-la-dirección-ip). Si se cambia igual
+algún día, alcanza con actualizar el secret.
+
+### Paso 1: generar una llave SSH sólo para GitHub
+
+Se usa una llave nueva, distinta de `enricci.key`: si algún día hay que
+revocarle el acceso a GitHub, se borra esta y la del PC sigue andando. Sin
+frase de paso (`-N ""`), porque en GitHub no hay nadie para escribirla.
+
+En PowerShell, en el PC de Jaime (Windows trae `ssh-keygen`):
+
+```powershell
+ssh-keygen -t ed25519 -N '""' -C "github-actions-enricci" -f "$env:USERPROFILE\.ssh\enricci-github"
+```
+
+En Git Bash o Linux:
+
+```bash
+ssh-keygen -t ed25519 -N "" -C "github-actions-enricci" -f ~/.ssh/enricci-github
+```
+
+Quedan dos archivos en `~/.ssh`:
+
+| Archivo | Qué es | Adónde va |
+| --- | --- | --- |
+| `enricci-github` | la llave **privada** | al secret `ORACLE_SSH_KEY` en GitHub, y a ningún otro lado |
+| `enricci-github.pub` | la llave **pública** | al servidor, en `authorized_keys` del usuario `ubuntu` |
+
+### Paso 2: autorizar la llave pública en el servidor
+
+Hay que agregar el contenido de `enricci-github.pub` (una sola línea que empieza
+con `ssh-ed25519`) al final de `~/.ssh/authorized_keys` del usuario con el que
+se despliega, que es `ubuntu` —el mismo que usa `publicar.sh`—. Entrando con la
+llave de siempre:
+
+```powershell
+Get-Content "$env:USERPROFILE\.ssh\enricci-github.pub" | ssh -i "$env:USERPROFILE\.ssh\enricci.key" ubuntu@LA-IP "cat >> ~/.ssh/authorized_keys"
+```
+
+```bash
+cat ~/.ssh/enricci-github.pub | ssh -i ~/.ssh/enricci.key ubuntu@LA-IP "cat >> ~/.ssh/authorized_keys"
+```
+
+Para comprobar que quedó bien, entrar con la llave nueva. Tiene que abrir sin
+pedir contraseña:
+
+```powershell
+ssh -i "$env:USERPROFILE\.ssh\enricci-github" ubuntu@LA-IP "echo funciona"
+```
+
+Nada más en el servidor: `ubuntu` ya tiene `sudo` sin contraseña —así lo trae
+la imagen de Oracle y así lo usa `publicar.sh`— y el workflow no necesita otra
+cosa.
+
+### Paso 3: crear los tres secrets en GitHub
+
+En el repositorio, en GitHub: **Settings → Secrets and variables → Actions →
+New repository secret**. Se crean tres, uno por vez. El nombre va **exacto**,
+en mayúsculas:
+
+| Name | Secret (el valor) |
+| --- | --- |
+| `ORACLE_SSH_KEY` | La llave **privada entera**: todo el contenido de `enricci-github`, desde la línea `-----BEGIN OPENSSH PRIVATE KEY-----` hasta `-----END OPENSSH PRIVATE KEY-----` inclusive, con los saltos de línea tal como están. |
+| `ORACLE_HOST` | La IP fija del servidor (por ejemplo `168.138.128.137`) o el dominio, sin `http://` ni barra final. |
+| `ORACLE_USER` | `ubuntu` |
+
+Para copiar la llave privada sin equivocarse:
+
+```powershell
+Get-Content "$env:USERPROFILE\.ssh\enricci-github" | Set-Clipboard
+```
+
+y pegar en el campo del secret. Una vez guardado, GitHub no lo vuelve a
+mostrar; si hay dudas de que quedó bien, se vuelve a pegar encima («Update»).
+
+### Paso 4: probarlo
+
+Ir a la pestaña **Actions** del repositorio, entrar en **Desplegar a Oracle**,
+**Run workflow** sobre `main`. Se puede seguir paso a paso; si algo falla, el
+paso en rojo dice por qué. También se dispara solo con cada push a `main`.
+
+Desde ahí, la rutina de trabajo es: desarrollar en una rama, fusionar en
+`main`, hacer push y **mirar que el run termine en verde**. Si termina en
+rojo, el servidor sigue con la versión anterior; el motivo está en el registro
+del run.
+
+### Plan B: publicar desde el PC
+
+`publicar.sh` (y `publicar.ps1`) siguen funcionando igual que siempre y corren
+exactamente el mismo `instalar-en-servidor.sh`. Sirven si GitHub está caído,
+si hay que desplegar algo que todavía no está en `main`, o si el workflow falla
+por algo de GitHub y hay apuro.
+
+### Si el despliegue falla
+
+- **«Faltan los secrets»**: falta crear alguno de los tres del paso 3, o el
+  nombre no está exacto.
+- **`ssh-keyscan` no pudo llegar / `Connection timed out`**: la IP del secret
+  no es la del servidor (¿cambió la efímera?) o el puerto 22 está cerrado en el
+  cortafuegos de Oracle.
+- **`Permission denied (publickey)`**: la llave pública no quedó en
+  `authorized_keys` de `ubuntu`, o en `ORACLE_SSH_KEY` se pegó la pública en vez
+  de la privada, o se pegó incompleta.
+- **Falla en «Compilar en Release»**: el código no compila; nada llegó al
+  servidor. Se arregla y se vuelve a hacer push.
+- **Falla en «Desplegar en el servidor»**: el servicio no arrancó o el sitio no
+  contestó. El registro del run muestra las últimas líneas del `journalctl` y
+  el comando para volver atrás, igual que `publicar.sh`.
 
 ---
 

@@ -25,7 +25,6 @@ public class ServiciosModel : PageModel
          "gastos de escrituración y certificaciones. Nunca vas a encontrarte con un costo " +
          "que no te hayamos anticipado."),
 
-        // BORRADOR: confirmar con asesoría la redacción y la referencia normativa.
         ("¿Quién paga los honorarios en un alquiler de vivienda?",
          "En la Ciudad de Buenos Aires, en los alquileres de vivienda los honorarios de la " +
          "inmobiliaria están a cargo del propietario (Ley 5859 CABA): el inquilino no paga " +

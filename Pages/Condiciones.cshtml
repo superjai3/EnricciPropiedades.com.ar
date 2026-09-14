@@ -1,0 +1,151 @@
+@page
+@model CondicionesModel
+@{
+    ViewData["Title"] = "Términos y condiciones de uso";
+    ViewData["Descripcion"] = $"Condiciones de uso del sitio de {SitioInfo.Nombre}, inmobiliaria en Monserrat (CABA): alcance de la información publicada, uso de las consultas, propiedad intelectual, Defensa del Consumidor y ley aplicable.";
+}
+
+<section class="encabezado-pagina">
+    <div class="contenedor">
+        <nav class="migas" aria-label="Ruta de navegación">
+            <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
+            <span>Términos y condiciones</span>
+        </nav>
+        <p class="eyebrow">Uso del sitio</p>
+        <h1>Términos y condiciones de uso</h1>
+        <p class="plomo">
+            Qué es este sitio, qué alcance tiene la información que publicamos, qué hacemos con tus
+            consultas y qué ley rige todo esto. Está escrito para que se entienda sin abogado.
+        </p>
+    </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+    <div class="contenedor-angosto">
+        <div class="prosa revelar">
+            <h2>Quiénes somos</h2>
+            <p>
+                Este sitio es de <strong>@SitioInfo.Nombre</strong>, con domicilio en
+                @SitioInfo.DireccionCompleta, @SitioInfo.Localidad (@SitioInfo.CodigoPostal), Argentina.
+                Titular: @SitioInfo.Titular, corredor inmobiliario, CUCICBA @SitioInfo.MatriculaNumero.
+                Correo de contacto: <a href="@SitioInfo.MailA("Consulta por el sitio")">@SitioInfo.Email</a>.
+            </p>
+            @if (!string.IsNullOrWhiteSpace(SitioInfo.RazonSocial) || !string.IsNullOrWhiteSpace(SitioInfo.Cuit))
+            {
+                <p>
+                    @if (!string.IsNullOrWhiteSpace(SitioInfo.RazonSocial))
+                    {
+                        <text>Razón social: @SitioInfo.RazonSocial.</text>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(SitioInfo.Cuit))
+                    {
+                        <text>CUIT: @SitioInfo.Cuit.</text>
+                    }
+                </p>
+            }
+            <p>
+                Al navegar el sitio o enviarnos una consulta aceptás estas condiciones. Si no estás
+                de acuerdo con alguna, te pedimos que no lo uses y nos escribas para que la revisemos.
+            </p>
+
+            <h2>Para qué sirve este sitio</h2>
+            <p>
+                El sitio tiene dos fines: <strong>informar</strong> sobre las propiedades que la
+                inmobiliaria tiene en venta o en alquiler y sobre los servicios que ofrece, y ser un
+                <strong>canal de consulta</strong> para que nos escribas, pidas una tasación o
+                coordines una visita.
+            </p>
+            <p>
+                Nada de lo publicado acá es una <strong>oferta vinculante</strong> ni reemplaza una
+                operación inmobiliaria. Las ventas, los alquileres, las reservas y cualquier otra
+                operación se formalizan por escrito y por separado, con la intervención de
+                @SitioInfo.Titular, corredor inmobiliario matriculado (CUCICBA @SitioInfo.MatriculaNumero),
+                y con la documentación que corresponda en cada caso. Una consulta enviada desde el
+                sitio no genera reserva, prioridad ni compromiso de ninguna de las partes.
+            </p>
+
+            <h2>La información publicada</h2>
+            <p>
+                Cargamos las publicaciones con la mayor veracidad posible y con datos que nos
+                aportan los propietarios. Aun así, puede haber errores u omisiones, o datos que
+                cambiaron después de publicarse. En particular:
+            </p>
+            <ul class="lista-chequeo" style="padding-left:0">
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Precios y expensas</strong> son orientativos y pueden cambiar sin aviso. El valor definitivo de una operación es el que se acuerda por escrito. Los importes en pesos calculados a partir de una cotización del dólar son una referencia del día y no un precio.</span></li>
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Superficies, ambientes y antigüedad</strong> son aproximados y están sujetos a confirmación con el título y los planos de la propiedad.</span></li>
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Fotos y descripciones</strong> muestran la propiedad al momento de tomarlas; el estado real se verifica en la visita.</span></li>
+                <li><svg aria-hidden="true"><use href="#i-check" /></svg><span><strong>Disponibilidad:</strong> una propiedad puede haberse vendido, alquilado o retirado del mercado antes de que actualicemos el sitio.</span></li>
+            </ul>
+            <p>
+                Si notás un dato equivocado, avisanos y lo corregimos. Antes de tomar cualquier
+                decisión, confirmá con nosotros la información que te importe.
+            </p>
+
+            <h2>Tus consultas</h2>
+            <p>
+                Los datos que dejás en los formularios de contacto, de tasación o en la ficha de
+                una propiedad los usamos <strong>únicamente para responderte</strong> y hacer el
+                seguimiento de esa conversación. No los usamos para enviarte publicidad ni los
+                cedemos a terceros. Cómo los tratamos, cuánto tiempo los guardamos y cómo pedir que
+                se corrijan o se borren está explicado en la
+                <a asp-page="/Privacidad">Política de privacidad</a>.
+            </p>
+            <p>
+                Te pedimos que las consultas sean de buena fe y con datos ciertos. Nos reservamos
+                el derecho de no responder envíos automáticos, repetidos o ajenos al fin del sitio.
+            </p>
+
+            <h2>Propiedad intelectual</h2>
+            <p>
+                Los textos, las fotografías, el logotipo y el diseño del sitio son de
+                @SitioInfo.Nombre o se usan con autorización de sus titulares. Podés compartir el
+                enlace de una publicación con quien quieras, pero no reproducir, copiar ni publicar
+                las fotos o los textos en otros sitios, portales o redes sin nuestro permiso por
+                escrito. Las marcas y nombres de terceros que se mencionen pertenecen a sus dueños.
+            </p>
+
+            <h2>Enlaces a otros sitios</h2>
+            <p>
+                Algunas páginas enlazan a sitios de terceros (mapas, redes sociales, organismos
+                públicos). No somos responsables de su contenido ni de sus políticas; los
+                incluimos porque te pueden ser útiles.
+            </p>
+
+            <h2>Responsabilidad</h2>
+            <p>
+                Hacemos lo posible para que el sitio funcione bien y esté al día, pero no
+                garantizamos que esté disponible en todo momento ni libre de errores. No
+                respondemos por decisiones tomadas sólo en base a la información publicada sin
+                haberla confirmado con nosotros, ni por daños derivados de interrupciones del
+                servicio o de fallas ajenas a la inmobiliaria.
+            </p>
+
+            <h2>Defensa del consumidor</h2>
+            <p>
+                Si tenés un reclamo como consumidor, podés presentarlo ante la Dirección Nacional
+                de Defensa del Consumidor. Primero nos gustaría poder resolverlo directamente:
+                escribinos a <a href="@SitioInfo.MailA("Reclamo")">@SitioInfo.Email</a>.
+            </p>
+            <div class="destacado">
+                <a href="@SitioInfo.DefensaConsumidorUrl" target="_blank" rel="noopener">
+                    Defensa de las y los consumidores. Para reclamos ingrese aquí
+                </a>
+            </div>
+
+            <h2>Ley aplicable y jurisdicción</h2>
+            <p>
+                Estas condiciones se rigen por las leyes de la República Argentina. Para cualquier
+                controversia derivada del uso del sitio serán competentes los tribunales ordinarios
+                de la Ciudad Autónoma de Buenos Aires, sin perjuicio de los derechos que la Ley
+                24.240 de Defensa del Consumidor reconoce al consumidor, incluida la competencia de
+                los tribunales de su domicilio.
+            </p>
+
+            <h2>Cambios en estas condiciones</h2>
+            <p>
+                Podemos actualizar estas condiciones cuando cambie el sitio o la normativa. La
+                versión vigente es siempre la publicada acá.
+            </p>
+        </div>
+    </div>
+</section>

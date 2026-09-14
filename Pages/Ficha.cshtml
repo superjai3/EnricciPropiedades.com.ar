@@ -168,10 +168,15 @@
                             <dd>@p.Banios</dd>
                         </div>
                     }
-                    <div class="dato">
-                        <dt>Antigüedad</dt>
-                        <dd>@p.AntiguedadTexto</dd>
-                    </div>
+                    @* Sin antigüedad cargada no se muestra el dato: antes un 0
+                       salía como "A estrenar", que no era cierto. *@
+                    @if (p.TieneAntiguedad)
+                    {
+                        <div class="dato">
+                            <dt>Antigüedad</dt>
+                            <dd>@p.AntiguedadTexto</dd>
+                        </div>
+                    }
                 </div>
 
                 <div class="prosa mt-7 revelar">

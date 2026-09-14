@@ -65,6 +65,17 @@ public class Propiedad
     [NotMapped]
     public bool EstaEnLaCiudad => BarriosDeBuenosAires.EsDeLaCiudad(Barrio);
 
+    /// <summary>
+    /// Alquiler de vivienda dentro de la Ciudad: es el caso en que la Ley 5859
+    /// de CABA pone los honorarios de la inmobiliaria a cargo del propietario.
+    /// El alquiler temporario y los locales u oficinas quedan afuera.
+    /// </summary>
+    [NotMapped]
+    public bool EsAlquilerDeViviendaEnCaba =>
+        Operacion == Operacion.Alquiler &&
+        (Tipo is TipoPropiedad.Departamento or TipoPropiedad.Casa or TipoPropiedad.PH) &&
+        EstaEnLaCiudad;
+
     /// <summary>Siempre Argentina: el sitio publica en la Ciudad y el Gran Buenos Aires.</summary>
     [NotMapped]
     public string Pais => BarriosDeBuenosAires.Pais;

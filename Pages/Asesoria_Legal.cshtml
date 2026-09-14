@@ -1,8 +1,8 @@
 @page
 @model AsesoriaLegalModel
 @{
-    ViewData["Title"] = "Asesoría legal inmobiliaria";
-    ViewData["Descripcion"] = "Contratos, boletos de compraventa, sucesiones, regularización de títulos y desalojos, con estudio jurídico y escribanía de confianza en CABA.";
+    ViewData["Title"] = "Acompañamiento legal en operaciones inmobiliarias";
+    ViewData["Descripcion"] = "Inmobiliaria en CABA: te acompañamos y te derivamos a un estudio jurídico y una escribanía de confianza para contratos, boletos, sucesiones y títulos. El asesoramiento lo presta el profesional habilitado.";
 }
 
 @section Head {
@@ -16,14 +16,16 @@
         <nav class="migas" aria-label="Ruta de navegación">
             <a asp-page="/Index">Inicio</a> <span aria-hidden="true">/</span>
             <a asp-page="/Servicios">Servicios</a> <span aria-hidden="true">/</span>
-            <span>Asesoría legal</span>
+            <span>Acompañamiento legal</span>
         </nav>
         <p class="eyebrow">Papeles en orden</p>
         <h1>La operación se cae por los papeles,<br />casi nunca por el precio</h1>
         <p class="plomo">
             Un título con una observación, una sucesión sin terminar o un contrato mal redactado
-            pueden frenar una venta durante meses. Revisamos todo antes de publicar, no después
-            de que aparezca el comprador.
+            pueden frenar una venta durante meses. Como inmobiliaria, revisamos la documentación
+            antes de publicar y, cuando hace falta un abogado o un escribano, te acompañamos y te
+            derivamos a un estudio jurídico y a una escribanía de confianza. El asesoramiento legal
+            y notarial lo presta siempre el profesional habilitado.
         </p>
         <div class="acciones mt-5">
             <a class="btn btn--lg" asp-page="/Contacto">
@@ -41,18 +43,20 @@
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-documento" /></svg></div>
                 <h3>Contratos y boletos</h3>
                 <p class="texto-suave">
-                    Redacción y revisión de contratos de locación de vivienda y comercial,
-                    boletos de compraventa, reservas y cesiones. Cláusulas ajustadas a la
-                    normativa vigente y explicadas en castellano, no en jerga.
+                    Preparamos las reservas y los contratos de locación de vivienda y comercial
+                    propios de la intermediación, y coordinamos con el estudio jurídico la
+                    redacción o revisión de boletos de compraventa y cesiones. Te explicamos
+                    cada cláusula en castellano, no en jerga.
                 </p>
             </div>
             <div class="bento__celda bento__celda--ancha revelar revelar-1">
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-balanza" /></svg></div>
                 <h3>Sucesiones</h3>
                 <p class="texto-suave">
-                    Acompañamos a las familias que heredaron una propiedad: qué hace falta para
-                    poder venderla, en qué orden, cuánto demora cada instancia y cómo se reparte
-                    el producido entre los herederos.
+                    Acompañamos a las familias que heredaron una propiedad: te orientamos sobre
+                    qué hace falta para poder venderla y en qué orden, y te derivamos al estudio
+                    jurídico que lleva el trámite, que es quien puede asesorarte sobre plazos y
+                    reparto entre herederos.
                 </p>
             </div>
             <div class="bento__celda bento__celda--ancha revelar revelar-2">
@@ -60,24 +64,26 @@
                 <h3>Regularización de títulos</h3>
                 <p class="texto-suave">
                     Planos sin registrar, ampliaciones no declaradas, hipotecas canceladas pero
-                    no levantadas, usucapión. Ordenamos el expediente y estimamos plazos.
+                    no levantadas. Detectamos el problema al revisar los papeles y te ponemos en
+                    contacto con la escribanía o el estudio que lo resuelve.
                 </p>
             </div>
             <div class="bento__celda bento__celda--ancha revelar revelar-3">
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-llave" /></svg></div>
-                <h3>Desalojos y conflictos</h3>
+                <h3>Conflictos con inquilinos</h3>
                 <p class="texto-suave">
-                    Intimaciones, acuerdos de desocupación y, cuando no hay otro camino,
-                    la vía judicial con el estudio jurídico que nos acompaña.
+                    En los alquileres que administramos intentamos primero el acuerdo. Si no
+                    hay otro camino, te derivamos al estudio jurídico que nos acompaña, que es
+                    quien lleva las intimaciones y la vía judicial.
                 </p>
             </div>
             <div class="bento__celda bento__celda--destacada bento__celda--full revelar revelar-4">
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-check" /></svg></div>
                 <h3>Escrituración</h3>
                 <p class="texto-suave">
-                    Coordinamos con la escribanía interviniente: informes de dominio e
-                    inhibición, certificados, cálculo de sellos y gastos, y acompañamiento
-                    el día de la firma.
+                    Coordinamos con la escribanía interviniente —informes de dominio e
+                    inhibición, certificados, sellos y gastos— y te acompañamos el día de la
+                    firma. La escritura y su asesoramiento son siempre del escribano.
                 </p>
                 <a class="enlace-flecha" asp-page="/Contacto">
                     Hablar con nosotros
@@ -120,8 +126,9 @@
             <p class="eyebrow">Primera consulta orientativa</p>
             <h2>Contanos qué te trabó la operación</h2>
             <p class="plomo" style="color:inherit;opacity:.8">
-                Te decimos si es un trámite simple, cuánto suele demorar y qué profesional
-                necesitás. Si no es nuestro terreno, te derivamos.
+                Te orientamos sobre qué profesional necesitás y te ponemos en contacto con el
+                estudio jurídico o la escribanía de confianza. No reemplazamos el asesoramiento
+                de un abogado o un escribano: lo acercamos.
             </p>
             <div class="acciones mt-5">
                 <a class="btn btn--claro btn--lg" asp-page="/Contacto">Consultar</a>

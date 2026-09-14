@@ -2,7 +2,7 @@
 @model IndexModel
 @{
     ViewData["Title"] = null;
-    ViewData["Descripcion"] = "R. H. Enricci Propiedades: inmobiliaria en Monserrat, CABA, desde 1932. Venta y alquiler de departamentos, casas, PH, locales y cocheras. Tasaciones sin cargo, administración de alquileres y asesoría legal.";
+    ViewData["Descripcion"] = $"R. H. Enricci Propiedades: inmobiliaria en Monserrat, CABA, desde {SitioInfo.AnioFundacion}. Venta y alquiler de departamentos, casas, PH, locales y cocheras. Tasaciones sin cargo, administración de alquileres y acompañamiento legal con escribanía de confianza.";
 }
 
 <section class="hero">
@@ -250,9 +250,10 @@
             <div class="bento__celda revelar revelar-3">
                 <span class="bento__num">04</span>
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-balanza" /></svg></div>
-                <h3>Asesoría legal</h3>
+                <h3>Acompañamiento legal</h3>
                 <p class="texto-suave">
-                    Contratos, boletos, sucesiones y regularización de títulos con escribanía de confianza.
+                    Contratos, boletos, sucesiones y títulos: te acompañamos y te derivamos a un
+                    estudio jurídico y una escribanía de confianza.
                 </p>
                 <a class="enlace-flecha" asp-page="/Asesoria_Legal">
                     Consultar
@@ -265,8 +266,8 @@
                 <div class="icono-caja"><svg aria-hidden="true"><use href="#i-escudo" /></svg></div>
                 <h3>Garantías y seguros de caución</h3>
                 <p class="texto-suave">
-                    Te ayudamos a resolver la garantía del alquiler con compañías habilitadas,
-                    y al propietario a cubrirse ante la falta de pago.
+                    Te orientamos con compañías de seguros de caución habilitadas para resolver
+                    la garantía del alquiler; la póliza y su asesoramiento son de la compañía.
                 </p>
                 <a class="enlace-flecha" asp-page="/Servicios">
                     Ver todos los servicios

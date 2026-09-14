@@ -17,7 +17,7 @@
     var urlImagen = urlBase + (imagenSocial ?? "/imagenes/compartir.jpg");
     var tipoOg = ViewData["OgTipo"] as string ?? "website";
     var descripcion = ViewData["Descripcion"] as string
-        ?? "Inmobiliaria en la Ciudad de Buenos Aires desde 1932. Venta y alquiler de propiedades, tasaciones, administración de cobranzas y asesoría legal en Monserrat, Constitución, San Cristóbal y alrededores.";
+        ?? $"Inmobiliaria en la Ciudad de Buenos Aires desde {SitioInfo.AnioFundacion}. Venta y alquiler de propiedades, tasaciones, administración de cobranzas y acompañamiento legal en Monserrat, Constitución, San Cristóbal y alrededores.";
 }
 <!DOCTYPE html>
 <html lang="es-AR">
@@ -134,7 +134,7 @@
                         <ul class="submenu">
                             <li><a asp-page="/Tasacion">Tasación<small>Valor real de mercado en 48 h</small></a></li>
                             <li><a asp-page="/Cobranza">Administración y cobranza<small>Alquileres cobrados a término</small></a></li>
-                            <li><a asp-page="/Asesoria_Legal">Asesoría legal<small>Escrituras, contratos y sucesiones</small></a></li>
+                            <li><a asp-page="/Asesoria_Legal">Acompañamiento legal<small>Con estudio jurídico y escribanía</small></a></li>
                         </ul>
                     </li>
                     <li class="menu__item">
@@ -220,7 +220,7 @@
                             <a asp-page="/Servicios">Todos los servicios</a>
                             <a asp-page="/Tasacion">Tasación</a>
                             <a asp-page="/Cobranza">Administración y cobranza</a>
-                            <a asp-page="/Asesoria_Legal">Asesoría legal</a>
+                            <a asp-page="/Asesoria_Legal">Acompañamiento legal</a>
                         </div>
                     </div>
                 </li>
@@ -308,7 +308,7 @@
                     <ul>
                         <li><a asp-page="/Tasacion">Tasación</a></li>
                         <li><a asp-page="/Cobranza">Administración y cobranza</a></li>
-                        <li><a asp-page="/Asesoria_Legal">Asesoría legal</a></li>
+                        <li><a asp-page="/Asesoria_Legal">Acompañamiento legal</a></li>
                         <li><a asp-page="/Servicios">Todos los servicios</a></li>
                         <li><a asp-page="/Quienes_Somos">Quiénes somos</a></li>
                     </ul>

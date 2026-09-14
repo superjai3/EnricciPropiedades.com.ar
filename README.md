@@ -64,7 +64,7 @@ Pages/
   Servicios             Panorama de servicios + preguntas frecuentes
   Tasacion              Formulario de pedido de tasación
   Cobranza              Administración y cobranza de alquileres
-  Asesoria_Legal        Servicios legales asociados
+  Asesoria_Legal        Acompañamiento legal: derivación a estudio jurídico y escribanía
   Quienes_Somos         Historia, línea de tiempo y valores
   Mision / Vision       Páginas institucionales
   Contacto              Formulario de consulta
@@ -435,7 +435,7 @@ con lo que se ve deja de confiar en el resto.
 | Ficha | `RealEstateListing` + `BreadcrumbList` |
 | Barrio | `CollectionPage` con `ItemList` + `BreadcrumbList` |
 | Servicios | `FAQPage` |
-| Tasación, Cobranza, Asesoría legal | `Service` |
+| Tasación, Cobranza, Acompañamiento legal | `Service` |
 
 La inmobiliaria lleva un `@id` fijo (`{dominio}/#inmobiliaria`) al que apuntan
 las demás entidades. Sin eso, cada página declara *otra* empresa con el mismo

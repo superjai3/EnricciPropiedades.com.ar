@@ -77,7 +77,7 @@ public class ContactoModel : PageModel
         "Quiero poner en alquiler",
         "Necesito una tasación",
         "Administración y cobranza",
-        "Asesoría legal",
+        "Acompañamiento legal",
         "Otra consulta"
     };
 

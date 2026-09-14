@@ -128,7 +128,7 @@ public static class DatosEstructurados
                 "Alquiler de propiedades",
                 "Tasación de inmuebles",
                 "Administración y cobranza de alquileres",
-                "Asesoría legal inmobiliaria"
+                "Acompañamiento legal en operaciones inmobiliarias"
             }
         };
 

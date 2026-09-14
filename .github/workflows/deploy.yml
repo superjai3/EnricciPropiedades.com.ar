@@ -1,0 +1,156 @@
+# Despliegue automático a la máquina de Oracle Cloud.
+#
+# Hace, en GitHub, exactamente lo que hace despliegue/publicar.sh desde el PC
+# de Jaime: compila en Release, arma el paquete sin las fotos ni la
+# configuración de desarrollo, lo sube por SSH y corre en el servidor
+# despliegue/instalar-en-servidor.sh —el MISMO script que usa publicar.sh—, que
+# reemplaza la aplicación en /var/www/enricci, reinicia el servicio y comprueba
+# que responda. La base, las fotos y los respaldos viven en /var/lib/enricci y
+# no se tocan.
+#
+# Lo que hoy no existe y esto agrega: si el proyecto no compila, el despliegue
+# no continúa y el sitio queda con la versión anterior.
+#
+# Necesita tres secrets en el repositorio (Settings → Secrets and variables →
+# Actions): ORACLE_SSH_KEY, ORACLE_HOST y ORACLE_USER. Cómo crearlos, paso a
+# paso, en despliegue/INSTALACION.md, sección «Despliegue automático».
+# publicar.sh sigue sirviendo como plan B desde el PC.
+
+name: Desplegar a Oracle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Un despliegue a la vez. Si llegan dos push seguidos, el segundo espera a que
+# termine el primero en vez de pisarlo a mitad de camino; no se cancela ninguno
+# porque cancelar un despliegue con el servicio parado deja el sitio caído.
+concurrency:
+  group: despliegue-oracle
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PROYECTO: Enricci Propiedades.csproj
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+jobs:
+  desplegar:
+    name: Compilar y desplegar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # Misma versión mayor que el TargetFramework del .csproj (net8.0).
+          dotnet-version: 8.0.x
+
+      - name: Restaurar dependencias
+        run: dotnet restore "$PROYECTO"
+
+      # Si esto falla, el job se corta acá y nada llega al servidor.
+      - name: Compilar en Release
+        run: dotnet build "$PROYECTO" -c Release --no-restore
+
+      - name: Publicar
+        run: dotnet publish "$PROYECTO" -c Release --no-restore -o publish
+
+      # Mismas exclusiones que publicar.sh. Las fotos del catálogo viven en el
+      # servidor: si viajaran en el paquete, cada despliegue pisaría las que
+      # Horacio subió desde el panel. appsettings.Development.json no tiene nada
+      # que hacer en producción. El resto (base .db, .env, clave-inicial.txt,
+      # respaldos) está en .gitignore y nunca llega al runner, pero se borra
+      # igual por si algún día alguien lo versiona por error.
+      - name: Armar el paquete
+        run: |
+          set -euo pipefail
+          rm -rf publish/wwwroot/imagenes/propiedades
+          rm -f  publish/appsettings.Development.json
+          rm -f  publish/*.db publish/*.db-shm publish/*.db-wal
+          rm -f  publish/*.env publish/clave-inicial.txt
+          rm -rf publish/respaldos
+          tar -czf enricci-despliegue.tar.gz -C publish .
+          echo "Paquete: $(du -h enricci-despliegue.tar.gz | cut -f1)"
+
+      - name: Comprobar que estén los secrets
+        env:
+          ORACLE_SSH_KEY: ${{ secrets.ORACLE_SSH_KEY }}
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+        run: |
+          faltan=""
+          [ -n "$ORACLE_SSH_KEY" ] || faltan="$faltan ORACLE_SSH_KEY"
+          [ -n "$ORACLE_HOST" ]    || faltan="$faltan ORACLE_HOST"
+          if [ -n "$faltan" ]; then
+            echo "::error::Faltan los secrets:$faltan. Cómo crearlos: despliegue/INSTALACION.md, sección «Despliegue automático (GitHub Actions)»."
+            exit 1
+          fi
+
+      # La llave privada se escribe con permisos 600, que es lo que exige ssh, y
+      # el servidor se agrega a known_hosts con ssh-keyscan para no tener que
+      # desactivar la comprobación del host.
+      - name: Preparar la conexión SSH
+        env:
+          ORACLE_SSH_KEY: ${{ secrets.ORACLE_SSH_KEY }}
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$ORACLE_SSH_KEY" > ~/.ssh/enricci-github.key
+          chmod 600 ~/.ssh/enricci-github.key
+          ssh-keyscan -H "$ORACLE_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          [ -s ~/.ssh/known_hosts ] || { echo "::error::ssh-keyscan no pudo llegar a $ORACLE_HOST (¿IP cambiada? ¿puerto 22 cerrado?)"; exit 1; }
+
+      # Igual que publicar.sh: el paquete va a /tmp del servidor y de ahí lo
+      # toma instalar-en-servidor.sh. rsync está instalado en el servidor
+      # (preparar-servidor.sh), pero para un único .tar.gz scp es suficiente y
+      # es lo que usa publicar.sh.
+      - name: Subir el paquete
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER || 'ubuntu' }}
+        run: |
+          set -euo pipefail
+          scp -i ~/.ssh/enricci-github.key -q \
+            enricci-despliegue.tar.gz \
+            "$ORACLE_USER@$ORACLE_HOST:/tmp/enricci-despliegue.tar.gz"
+
+      # Parar el servicio, guardar la versión anterior, desempaquetar, enlazar
+      # la carpeta de fotos, chown enricci:enricci, arrancar y comprobar con
+      # curl que http://127.0.0.1:5000/ responda 200. Es el mismo script que
+      # corre publicar.sh; si el sitio no responde, el script sale con error y
+      # muestra el registro del servicio y cómo volver atrás.
+      - name: Desplegar en el servidor
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER || 'ubuntu' }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/enricci-github.key "$ORACLE_USER@$ORACLE_HOST" \
+            "primera_vez=false bash -s" < despliegue/instalar-en-servidor.sh
+
+      # Repetida a propósito como paso aparte, para que en la lista de pasos del
+      # run se vea de un vistazo que el sitio quedó respondiendo.
+      - name: Comprobar que el sitio responda
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER || 'ubuntu' }}
+        run: |
+          set -euo pipefail
+          codigo=$(ssh -i ~/.ssh/enricci-github.key "$ORACLE_USER@$ORACLE_HOST" \
+            "curl -fsS -o /dev/null -w '%{http_code}' http://127.0.0.1:5000/")
+          echo "http://127.0.0.1:5000/ contestó $codigo"
+          [ "$codigo" = "200" ]
+
+      - name: Borrar la llave del runner
+        if: always()
+        run: rm -f ~/.ssh/enricci-github.key

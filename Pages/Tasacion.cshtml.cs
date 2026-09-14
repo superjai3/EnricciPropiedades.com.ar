@@ -167,9 +167,9 @@ public class TasacionModel : PageModel
             Detalle = detalle
         });
 
-        _log.LogInformation(
-            "Pedido de tasación {Id} de {Nombre} para {Direccion}, {Barrio}",
-            registro.Id, Datos.Nombre, Datos.Direccion, Datos.Barrio);
+        // Al registro sólo va el Id: ni el nombre ni la dirección de la
+        // propiedad, que identifican a la persona, tienen que quedar en el log.
+        _log.LogInformation("Pedido de tasación {Id} recibido ({Barrio}).", registro.Id, Datos.Barrio);
 
         MensajeWhatsapp = SitioInfo.Whatsapp(resumen);
 

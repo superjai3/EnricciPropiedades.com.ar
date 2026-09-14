@@ -39,6 +39,7 @@ Models/
   Consulta.cs           Consulta recibida por los formularios; incluye la hora local
   OpcionesSitio.cs      Dominio del sitio, para las URL absolutas
   OpcionesRespaldo.cs   Configuración del respaldo automático
+  OpcionesConsultas.cs  Plazo de conservación de las consultas (se purgan solas)
   ArteFachada.cs        Portada SVG generada para publicaciones sin fotografía
   OpcionesCorreo.cs     Configuración del envío de correo
 Data/
@@ -53,7 +54,7 @@ Services/
   DatosEstructurados.cs Bloques de schema.org para buscadores y asistentes
   FotosService.cs       Reduce a WEBP, genera miniatura y borra las fotos del panel
   RespaldoService.cs    Copia la base y las fotos en un .zip, con rotación
-  RespaldoProgramado.cs Dispara el respaldo una vez por día
+  RespaldoProgramado.cs Dispara el respaldo y la purga de consultas una vez por día
   RutaBaseDeDatos.cs    Resuelve dónde está el archivo .db
   CorreoService.cs      Envío por SMTP de las consultas de los formularios
 Pages/
@@ -289,6 +290,22 @@ o mal configurado.
 
 La barra del panel lleva el número de consultas sin atender, para que no haga
 falta entrar a mirar.
+
+**Las consultas no se guardan para siempre.** Llevan datos personales (nombre,
+correo, teléfono y, en las tasaciones, la dirección de la propiedad), así que
+pasado el plazo de conservación se borran solas, todos los días a la misma hora
+que corre el respaldo —y después de él, para que lo borrado quede en la copia de
+ese día—. El plazo es el que declara la Política de privacidad (`/Privacidad`),
+sección `Consultas` de `appsettings.json`:
+
+```json
+"Consultas": {
+  "MesesRetencion": 24
+}
+```
+
+Con `0` no se purga nada. En el log del sistema nunca se escriben el nombre, el
+correo ni el teléfono de quien consulta: sólo el `Id` de la consulta.
 
 ## Envío de correo
 

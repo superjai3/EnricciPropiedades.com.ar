@@ -5,9 +5,12 @@
 @inject Enricci_Propiedades.Services.FotosService Fotos
 @{
     var p = Model.Ficha;
-    ViewData["Title"] = $"{p.Titulo} · {p.Barrio}";
+    // La región sale de la publicación (CABA o GBA), no de un texto fijo: es lo
+    // que busca la gente ("departamento en Monserrat, CABA") y lo que se declara
+    // en los datos estructurados.
+    ViewData["Title"] = $"{p.Titulo} · {p.Barrio}, {p.RegionCorta}";
     var resumen = p.ResumenParaBuscadores;
-    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.Barrio}."
+    ViewData["Descripcion"] = $"{p.TipoTexto} en {p.OperacionTexto.ToLowerInvariant()} en {p.Direccion}, {p.UbicacionTexto}."
         + (resumen.Length > 0 ? $" {resumen}." : "")
         + $" {p.PrecioTexto}.";
     var mensajeWsp = $"Hola, me interesa la propiedad de {p.Direccion} ({p.Barrio}) publicada en la web. ¿Podemos coordinar una visita?";
@@ -49,7 +52,7 @@
         <h1 style="font-size:var(--t-3xl)">@p.Titulo</h1>
         <p class="plomo mb-0">
             <svg aria-hidden="true" style="width:18px;height:18px;vertical-align:-3px"><use href="#i-pin" /></svg>
-            @p.Direccion · @p.Barrio, Ciudad Autónoma de Buenos Aires
+            @p.Direccion · @p.UbicacionTexto
         </p>
     </div>
 </section>
@@ -199,10 +202,8 @@
 
                     <h3>Ubicación</h3>
                     <p>
-                        La propiedad está en @p.Direccion, barrio de @p.Barrio. Es una zona con
-                        transporte público a pocas cuadras, comercios de cercanía y acceso rápido
-                        al centro. Coordinamos la visita en el horario que te quede cómodo,
-                        incluidos sábados por la mañana.
+                        La propiedad está en @p.Direccion, @p.UbicacionTexto.
+                        Escribinos y coordinamos la visita en un horario que te quede cómodo.
                     </p>
                 </div>
 

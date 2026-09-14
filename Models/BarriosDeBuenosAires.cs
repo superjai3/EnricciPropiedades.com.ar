@@ -17,6 +17,9 @@ public record Zona(string Nombre, Jurisdiccion Jurisdiccion, string Grupo)
     public string Region => Jurisdiccion == Jurisdiccion.Ciudad
         ? "Ciudad Autónoma de Buenos Aires"
         : "Provincia de Buenos Aires";
+
+    /// <summary>La misma región, corta, para títulos y migas: "CABA" o "GBA".</summary>
+    public string RegionCorta => Jurisdiccion == Jurisdiccion.Ciudad ? "CABA" : "GBA";
 }
 
 /// <summary>
@@ -105,4 +108,12 @@ public static class BarriosDeBuenosAires
     /// </summary>
     public static string RegionDe(string? barrio) =>
         Buscar(barrio)?.Region ?? "Ciudad Autónoma de Buenos Aires";
+
+    /// <summary>"CABA" o "GBA", con el mismo supuesto que <see cref="RegionDe"/>.</summary>
+    public static string RegionCortaDe(string? barrio) =>
+        Buscar(barrio)?.RegionCorta ?? "CABA";
+
+    /// <summary>True si el barrio está en la Ciudad (o no está en la lista, que se asume Ciudad).</summary>
+    public static bool EsDeLaCiudad(string? barrio) =>
+        Buscar(barrio) is not { Jurisdiccion: Jurisdiccion.GranBuenosAires };
 }

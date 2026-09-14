@@ -57,6 +57,14 @@ public class Propiedad
     [NotMapped]
     public string Region => BarriosDeBuenosAires.RegionDe(Barrio);
 
+    /// <summary>"CABA" o "GBA", para el título de la ficha y otros lugares cortos.</summary>
+    [NotMapped]
+    public string RegionCorta => BarriosDeBuenosAires.RegionCortaDe(Barrio);
+
+    /// <summary>True si la propiedad está en la Ciudad Autónoma de Buenos Aires.</summary>
+    [NotMapped]
+    public bool EstaEnLaCiudad => BarriosDeBuenosAires.EsDeLaCiudad(Barrio);
+
     /// <summary>Siempre Argentina: el sitio publica en la Ciudad y el Gran Buenos Aires.</summary>
     [NotMapped]
     public string Pais => BarriosDeBuenosAires.Pais;

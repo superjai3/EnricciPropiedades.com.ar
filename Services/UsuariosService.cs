@@ -11,11 +11,17 @@ public class UsuariosService
 {
     private readonly EnricciContexto _bd;
     private readonly ILogger<UsuariosService> _log;
+    private readonly string _rutaClaveInicial;
 
-    public UsuariosService(EnricciContexto bd, ILogger<UsuariosService> log)
+    public UsuariosService(
+        EnricciContexto bd,
+        IConfiguration configuracion,
+        IWebHostEnvironment entorno,
+        ILogger<UsuariosService> log)
     {
         _bd = bd;
         _log = log;
+        _rutaClaveInicial = ClaveInicial.Ruta(configuracion, entorno.ContentRootPath);
     }
 
     public Task<List<Usuario>> TodosAsync() =>
@@ -87,6 +93,11 @@ public class UsuariosService
         await _bd.SaveChangesAsync();
 
         _log.LogInformation("Ingreso al panel de {Email}.", usuario.Email);
+
+        // Con el primer ingreso correcto, la contraseña inicial ya cumplió: el
+        // archivo donde se dejó no tiene por qué seguir en el disco.
+        BorrarClaveInicial();
+
         return usuario;
     }
 
@@ -129,4 +140,21 @@ public class UsuariosService
     }
 
     public Task<bool> HayAlgunoAsync() => _bd.Usuarios.AnyAsync();
+
+    private void BorrarClaveInicial()
+    {
+        try
+        {
+            if (ClaveInicial.Borrar(_rutaClaveInicial))
+            {
+                _log.LogInformation("Se borró el archivo de la contraseña inicial ({Ruta}).", _rutaClaveInicial);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Que no se pueda borrar no puede impedir el ingreso; queda anotado
+            // para borrarlo a mano.
+            _log.LogWarning(ex, "No se pudo borrar {Ruta}; conviene borrarlo a mano.", _rutaClaveInicial);
+        }
+    }
 }

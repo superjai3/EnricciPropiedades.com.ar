@@ -117,9 +117,12 @@ En el primer arranque se crea un único usuario a partir de la sección `Admin` 
 ```
 
 Con `ClaveInicial` vacía —que es lo recomendado— **se genera una contraseña al
-azar y se escribe una sola vez en el log de arranque**. Hay que anotarla en ese
-momento: no se vuelve a mostrar y en la base sólo queda su hash. Al primer
-ingreso el panel obliga a cambiarla.
+azar y se escribe en el archivo `clave-inicial.txt`**, en la misma carpeta que
+la base de datos (`/var/lib/enricci` en el servidor; la carpeta de la
+aplicación en desarrollo), con permisos 600. Nunca va al log: un log se copia y
+se comparte. El archivo **se borra solo en el primer ingreso correcto** al
+panel; en la base sólo queda el hash. Al primer ingreso el panel obliga a
+cambiarla.
 
 Si se prefiere fijar la contraseña inicial, conviene hacerlo por fuera del
 repositorio:

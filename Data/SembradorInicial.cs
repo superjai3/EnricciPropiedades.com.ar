@@ -48,8 +48,10 @@ public static class SembradorInicial
     /// <summary>
     /// Crea el usuario del panel si la tabla está vacía. La contraseña sale de
     /// la configuración (sección "Admin"); si no está definida se genera una al
-    /// azar y se escribe una única vez en el log, con la obligación de cambiarla
-    /// en el primer ingreso. Así el repositorio nunca contiene una clave.
+    /// azar y se escribe en el archivo clave-inicial.txt de la carpeta de datos
+    /// (permisos 600, ver <see cref="ClaveInicial"/>), nunca en el log, con la
+    /// obligación de cambiarla en el primer ingreso. Así el repositorio nunca
+    /// contiene una clave.
     /// </summary>
     private static async Task CrearAdministradorAsync(
         IServiceProvider servicios, EnricciContexto bd, ILogger log)
@@ -73,10 +75,12 @@ public static class SembradorInicial
 
         if (generada)
         {
+            var ruta = GuardarClaveInicial(servicios, email, clave);
+
             log.LogWarning(
-                "Usuario del panel creado: {Email} · contraseña inicial: {Clave} — " +
-                "anotala ahora, no se vuelve a mostrar. Hay que cambiarla al ingresar.",
-                email, clave);
+                "Usuario del panel creado: {Email}. La contraseña inicial quedó en {Ruta}; " +
+                "el archivo se borra solo en el primer ingreso correcto. Hay que cambiarla al ingresar.",
+                email, ruta);
         }
         else
         {
@@ -120,11 +124,28 @@ public static class SembradorInicial
             var clave = GenerarClave();
             await usuarios.CrearAsync(NombreDesdeEmail(email), email, clave, debeCambiarClave: true);
 
+            var ruta = GuardarClaveInicial(servicios, email, clave);
+
             log.LogWarning(
-                "Administrador adicional creado: {Email} · contraseña inicial: {Clave} — " +
-                "anotala ahora, no se vuelve a mostrar. Hay que cambiarla al ingresar.",
-                email, clave);
+                "Administrador adicional creado: {Email}. La contraseña inicial quedó en {Ruta}; " +
+                "el archivo se borra solo en el primer ingreso correcto. Hay que cambiarla al ingresar.",
+                email, ruta);
         }
+    }
+
+    /// <summary>
+    /// Deja la contraseña generada en clave-inicial.txt, junto a la base, y
+    /// devuelve la ruta para decir en el log dónde buscarla (la ruta, no la clave).
+    /// </summary>
+    private static string GuardarClaveInicial(IServiceProvider servicios, string email, string clave)
+    {
+        var configuracion = servicios.GetRequiredService<IConfiguration>();
+        var entorno = servicios.GetRequiredService<IWebHostEnvironment>();
+        var ruta = ClaveInicial.Ruta(configuracion, entorno.ContentRootPath);
+
+        ClaveInicial.Escribir(ruta, email, clave);
+
+        return ruta;
     }
 
     /// <summary>
